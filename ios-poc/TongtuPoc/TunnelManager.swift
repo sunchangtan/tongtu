@@ -7,6 +7,7 @@ import Combine
 final class TunnelManager: ObservableObject {
     @Published var status: NEVPNStatus = .invalid
     @Published var memoryText: String = "—"
+    @Published var startResult: String = "—"
     @Published var lastError: String?
 
     private var manager: NETunnelProviderManager?
@@ -79,6 +80,7 @@ final class TunnelManager: ObservableObject {
         memoryTimer?.invalidate()
         memoryTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
             Task { @MainActor in
+                self.startResult = SharedStore.lastStartResult.isEmpty ? "—" : SharedStore.lastStartResult
                 let age = Date().timeIntervalSince1970 - SharedStore.memoryStatsAt
                 guard age <= 10, let data = SharedStore.memoryStatsJSON.data(using: .utf8),
                       let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],

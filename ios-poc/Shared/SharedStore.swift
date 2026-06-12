@@ -26,4 +26,10 @@ enum SharedStore {
         get { defaults?.double(forKey: "memoryStatsAt") ?? 0 }
         set { defaults?.set(newValue, forKey: "memoryStatsAt") }
     }
+
+    // 扩展写入、主 App 读取：内核启动结果诊断（绕开真机日志通道，直接在 UI 呈现）
+    static var lastStartResult: String {
+        get { defaults?.string(forKey: "lastStartResult") ?? "" }
+        set { defaults?.set(newValue, forKey: "lastStartResult") }
+    }
 }

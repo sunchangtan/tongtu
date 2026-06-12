@@ -21,6 +21,10 @@ struct ContentView: View {
                 Text("隧道状态：\(tunnel.statusDescription)")
                 Text("扩展内存：\(tunnel.memoryText)")
                     .font(.system(.body, design: .monospaced))
+                Text("内核启动：\(tunnel.startResult)")
+                    .font(.caption)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
             }
 
             HStack(spacing: 16) {

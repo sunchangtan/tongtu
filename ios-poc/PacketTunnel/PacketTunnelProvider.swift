@@ -43,8 +43,9 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         let tunFD = (packetFlow.value(forKeyPath: "socket.fileDescriptor") as? Int32) ?? -1
 
         // 4. 覆写项：本地控制器 + 内存参数 + home-dir + tun-fd（D2/D3/D4）
+        //    用固定回环端口（不能用端口 0：Start 的就绪轮询无法连接未确定的端口）
         var overrides: [String: Any] = [
-            "external-controller": "127.0.0.1:0",   // 端口 0 = 系统分配，PoC 仅本地控制
+            "external-controller": "127.0.0.1:9090",
             "secret": UUID().uuidString,
             "home-dir": container.path,
             "gomemlimit-mib": 30,
@@ -61,10 +62,13 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         var startErr: NSError?
         let ok = MihomocoreStart(SharedStore.configYAML, overridesJSON, &startErr)
         if !ok {
+            let msg = startErr?.localizedDescription ?? "内核启动失败"
+            SharedStore.lastStartResult = "❌ 启动失败: \(msg)"
             completionHandler(startErr ?? NSError(domain: "Tongtu", code: -2,
-                userInfo: [NSLocalizedDescriptionKey: "内核启动失败"]))
+                userInfo: [NSLocalizedDescriptionKey: msg]))
             return
         }
+        SharedStore.lastStartResult = "✅ 内核已启动 tunFD=\(tunFD) 状态=\(MihomocoreState())"
         startMemoryReporting()
         completionHandler(nil)
     }

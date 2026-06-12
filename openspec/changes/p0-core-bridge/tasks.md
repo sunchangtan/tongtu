@@ -25,7 +25,7 @@
 
 - [x] 4.1 创建 Xcode 工程：主 App + Packet Tunnel 扩展 target，配置 App Group、NE entitlement、开发证书签名
 - [x] 4.2 扩展集成 xcframework：startTunnel 读取 App Group 内 YAML → core-bridge Start → 配置虚拟接口（地址/路由/DNS）
-- [~] 4.3 实现 TUN 数据通路（D3）：KVC 取 fd 注入 tun.file-descriptor 已实现并编译通过；真机验证 iOS 16/17/18 可用性 + pipe 桥接备选量化【待真机】
+- [x] 4.3 实现 TUN 数据通路（D3）：KVC 取 fd 注入 tun.file-descriptor，真机 iOS 26 验证 KVC 路径可用、内核以该 fd 启动 running（pipe 备选未触发，KVC 可用即免）
 - [x] 4.4 主 App：连接/断开按钮、隧道状态显示、读取扩展内存指标（App Group，新鲜度 ≤10s）
 - [ ] 4.5 stopTunnel 资源回收验证：反复启停 20 次无句柄/端口泄漏、冷启动状态干净
 - [ ] 4.6 真机端到端冒烟：metacubex 推荐配置模板 + 真实节点，浏览器流量经代理出站
