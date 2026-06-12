@@ -139,6 +139,7 @@ flmihomo/
 - **OpenSpec** 主导规格管理：每阶段一个 change（proposal → specs → design → tasks → apply → archive），`openspec/specs/` 为系统能力的当前事实。
 - **Superpowers** 主导执行纪律：brainstorming（已完成）→ writing-plans/tasks → TDD 实施 → verification-before-completion → code review。
 - 全程中文交流与注释；每个任务完成更新进度文档（CLAUDE.md v6.0 流程）。
+- **文档语言约定**：OpenSpec/Superpowers 生成的全部文档（proposal/design/specs/tasks/报告）一律使用中文。唯一例外是 OpenSpec CLI 的硬解析关键字必须保留英文：specs 增量文件的 `## ADDED/MODIFIED/REMOVED/RENAMED Requirements`、`### Requirement:`、`#### Scenario:` 标头，以及每条需求正文须含字面量 `SHALL`/`MUST`（写法：中文规范词后括注，如「必须（MUST）」「应当（SHALL）」）；tasks.md 的 `- [ ] X.Y` 复选框格式同为解析约定。
 
 ## 13. 文档版本记录
 
