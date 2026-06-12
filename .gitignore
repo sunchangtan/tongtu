@@ -1,0 +1,17 @@
+# 本地用户配置
+.claude/settings.local.json
+
+# 构建产物
+build/
+*.xcframework
+core-bridge/.gomobile-cache/
+
+# macOS
+.DS_Store
+
+# Go
+core-bridge/vendor/
+
+# Xcode
+xcuserdata/
+DerivedData/
