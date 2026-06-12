@@ -38,18 +38,25 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
 
-        // 3. 覆写项：本地控制器 + 内存参数 + home-dir（D2/D4）
-        let overrides: [String: Any] = [
+        // 3. 取 TUN fd（D3）：packetFlow 无公开 fd API，社区验证的 KVC 路径 socket.fileDescriptor。
+        //    取不到则回退（PoC 阶段仅记录，真机验证 iOS 16/17/18 可用性见任务 4.3）。
+        let tunFD = (packetFlow.value(forKeyPath: "socket.fileDescriptor") as? Int32) ?? -1
+
+        // 4. 覆写项：本地控制器 + 内存参数 + home-dir + tun-fd（D2/D3/D4）
+        var overrides: [String: Any] = [
             "external-controller": "127.0.0.1:0",   // 端口 0 = 系统分配，PoC 仅本地控制
             "secret": UUID().uuidString,
             "home-dir": container.path,
             "gomemlimit-mib": 30,
             "gogc": 30,
         ]
+        if tunFD > 0 {
+            overrides["tun-fd"] = Int(tunFD)
+        }
         let overridesJSON = (try? JSONSerialization.data(withJSONObject: overrides))
             .flatMap { String(data: $0, encoding: .utf8) } ?? ""
 
-        // 4. 启动内核（粗粒度 JSON 协议；gomobile 导出名以 Go 包名 Mihomocore 为前缀，
+        // 5. 启动内核（粗粒度 JSON 协议；gomobile 导出名以 Go 包名 Mihomocore 为前缀，
         //    BOOL + NSError** 约定，未桥接为 throws，按 ObjC 指针形式调用）
         var startErr: NSError?
         let ok = MihomocoreStart(SharedStore.configYAML, overridesJSON, &startErr)

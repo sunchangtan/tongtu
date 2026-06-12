@@ -25,14 +25,14 @@
 
 - [x] 4.1 创建 Xcode 工程：主 App + Packet Tunnel 扩展 target，配置 App Group、NE entitlement、开发证书签名
 - [x] 4.2 扩展集成 xcframework：startTunnel 读取 App Group 内 YAML → core-bridge Start → 配置虚拟接口（地址/路由/DNS）
-- [ ] 4.3 实现 TUN 数据通路（D3）：先走 packetFlow KVC 取 fd 路径，真机验证 iOS 16/17/18 可用性；实现 pipe 桥接备选并量化两者吞吐/内存差异
+- [~] 4.3 实现 TUN 数据通路（D3）：KVC 取 fd 注入 tun.file-descriptor 已实现并编译通过；真机验证 iOS 16/17/18 可用性 + pipe 桥接备选量化【待真机】
 - [x] 4.4 主 App：连接/断开按钮、隧道状态显示、读取扩展内存指标（App Group，新鲜度 ≤10s）
 - [ ] 4.5 stopTunnel 资源回收验证：反复启停 20 次无句柄/端口泄漏、冷启动状态干净
 - [ ] 4.6 真机端到端冒烟：metacubex 推荐配置模板 + 真实节点，浏览器流量经代理出站
 
 ## 5. 内存压测与 go/no-go 报告
 
-- [ ] 5.1 制作脱敏压测 fixture（D6）：≥50 节点 + metacubex 推荐规则集 YAML 入库 `core-bridge/testdata/`
+- [x] 5.1 制作脱敏压测 fixture（D6）：≥50 节点 + metacubex 推荐规则集 YAML 入库 `core-bridge/testdata/`
 - [ ] 5.2 真机压测：30 分钟持续浏览级流量，采集常驻/峰值/冷启动瞬时峰值（Instruments + 扩展自报指标交叉验证）
 - [ ] 5.3 GOMEMLIMIT 档位扫描（25/30/35MiB）确定默认值（design 开放问题 3）
 - [ ] 5.4 撰写 `docs/reports/p0-ios-memory.md`：数据、缓解手段记录、go/no-go 结论；若 no-go 按 spec 触发 P1 重审 change

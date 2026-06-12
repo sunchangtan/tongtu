@@ -35,6 +35,7 @@ type coreOverrides struct {
 	HomeDir            string `json:"home-dir"`            // 内核工作目录（iOS 须指向 App Group 容器）
 	GoMemLimitMiB      int64  `json:"gomemlimit-mib"`      // GOMEMLIMIT，单位 MiB，0 取默认值
 	GoGC               int    `json:"gogc"`                // GOGC 百分比，0 取默认值
+	TunFD              int    `json:"tun-fd"`              // 外部 TUN 文件描述符（iOS NE 从 packetFlow 取得），>0 时启用 TUN（D3）
 }
 
 var (
@@ -159,15 +160,32 @@ func applyMemoryProtection(ov coreOverrides) {
 	debug.SetGCPercent(gogc)
 }
 
-// applyConfig 解析 YAML 并应用到内核（Start 与 Reload 共用）
-func applyConfig(configYAML string, ov coreOverrides) error {
+// buildRawConfig 解析 YAML 并应用覆写项中影响配置结构的部分（TUN fd、geodata 守卫）。
+// 抽出为独立函数以便单测（applyConfig 调用它后再做控制器覆写与下发）。
+func buildRawConfig(configYAML string, ov coreOverrides) (*config.RawConfig, error) {
 	rawCfg, err := config.UnmarshalRawConfig([]byte(configYAML))
 	if err != nil {
-		return err // yaml 解析错误自带行号定位
+		return nil, err // yaml 解析错误自带行号定位
 	}
 	// 防护守卫：上游 DefaultRawConfig 已默认 memconservative，此处兜底防止空值（D4）
 	if rawCfg.GeodataLoader == "" {
 		rawCfg.GeodataLoader = "memconservative"
+	}
+	// TUN fd 注入（D3）：iOS NE 内由系统接管路由，内核仅用传入 fd 收发包，不自行 auto-route
+	if ov.TunFD > 0 {
+		rawCfg.Tun.Enable = true
+		rawCfg.Tun.FileDescriptor = ov.TunFD
+		rawCfg.Tun.AutoRoute = false
+		rawCfg.Tun.AutoDetectInterface = false
+	}
+	return rawCfg, nil
+}
+
+// applyConfig 解析 YAML 并应用到内核（Start 与 Reload 共用）
+func applyConfig(configYAML string, ov coreOverrides) error {
+	rawCfg, err := buildRawConfig(configYAML, ov)
+	if err != nil {
+		return err
 	}
 	cfg, err := config.ParseRawConfig(rawCfg)
 	if err != nil {

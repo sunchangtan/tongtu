@@ -1,0 +1,94 @@
+# 通途 P0 内存压测 fixture（脱敏，任务 5.1 / D6）
+# 60 个占位节点 + metacubex 推荐规则集结构，仅供内存压测，节点地址为文档地址不可用
+mixed-port: 7890
+mode: rule
+log-level: warning
+geodata-mode: true
+geodata-loader: memconservative
+
+# DNS：metacubex 推荐 fake-ip 结构
+dns:
+  enable: true
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  nameserver: [223.5.5.5, 119.29.29.29]
+  fallback: [8.8.8.8, 1.1.1.1]
+
+proxies:
+  - {name: node-01, type: ss, server: 203.0.113.2, port: 20001, cipher: aes-128-gcm, password: placeholder-01}
+  - {name: node-02, type: ss, server: 203.0.113.3, port: 20002, cipher: aes-128-gcm, password: placeholder-02}
+  - {name: node-03, type: ss, server: 203.0.113.4, port: 20003, cipher: aes-128-gcm, password: placeholder-03}
+  - {name: node-04, type: ss, server: 203.0.113.5, port: 20004, cipher: aes-128-gcm, password: placeholder-04}
+  - {name: node-05, type: ss, server: 203.0.113.6, port: 20005, cipher: aes-128-gcm, password: placeholder-05}
+  - {name: node-06, type: ss, server: 203.0.113.7, port: 20006, cipher: aes-128-gcm, password: placeholder-06}
+  - {name: node-07, type: ss, server: 203.0.113.8, port: 20007, cipher: aes-128-gcm, password: placeholder-07}
+  - {name: node-08, type: ss, server: 203.0.113.9, port: 20008, cipher: aes-128-gcm, password: placeholder-08}
+  - {name: node-09, type: ss, server: 203.0.113.10, port: 20009, cipher: aes-128-gcm, password: placeholder-09}
+  - {name: node-10, type: ss, server: 203.0.113.11, port: 20010, cipher: aes-128-gcm, password: placeholder-10}
+  - {name: node-11, type: ss, server: 203.0.113.12, port: 20011, cipher: aes-128-gcm, password: placeholder-11}
+  - {name: node-12, type: ss, server: 203.0.113.13, port: 20012, cipher: aes-128-gcm, password: placeholder-12}
+  - {name: node-13, type: ss, server: 203.0.113.14, port: 20013, cipher: aes-128-gcm, password: placeholder-13}
+  - {name: node-14, type: ss, server: 203.0.113.15, port: 20014, cipher: aes-128-gcm, password: placeholder-14}
+  - {name: node-15, type: ss, server: 203.0.113.16, port: 20015, cipher: aes-128-gcm, password: placeholder-15}
+  - {name: node-16, type: ss, server: 203.0.113.17, port: 20016, cipher: aes-128-gcm, password: placeholder-16}
+  - {name: node-17, type: ss, server: 203.0.113.18, port: 20017, cipher: aes-128-gcm, password: placeholder-17}
+  - {name: node-18, type: ss, server: 203.0.113.19, port: 20018, cipher: aes-128-gcm, password: placeholder-18}
+  - {name: node-19, type: ss, server: 203.0.113.20, port: 20019, cipher: aes-128-gcm, password: placeholder-19}
+  - {name: node-20, type: ss, server: 203.0.113.21, port: 20020, cipher: aes-128-gcm, password: placeholder-20}
+  - {name: node-21, type: ss, server: 203.0.113.22, port: 20021, cipher: aes-128-gcm, password: placeholder-21}
+  - {name: node-22, type: ss, server: 203.0.113.23, port: 20022, cipher: aes-128-gcm, password: placeholder-22}
+  - {name: node-23, type: ss, server: 203.0.113.24, port: 20023, cipher: aes-128-gcm, password: placeholder-23}
+  - {name: node-24, type: ss, server: 203.0.113.25, port: 20024, cipher: aes-128-gcm, password: placeholder-24}
+  - {name: node-25, type: ss, server: 203.0.113.26, port: 20025, cipher: aes-128-gcm, password: placeholder-25}
+  - {name: node-26, type: ss, server: 203.0.113.27, port: 20026, cipher: aes-128-gcm, password: placeholder-26}
+  - {name: node-27, type: ss, server: 203.0.113.28, port: 20027, cipher: aes-128-gcm, password: placeholder-27}
+  - {name: node-28, type: ss, server: 203.0.113.29, port: 20028, cipher: aes-128-gcm, password: placeholder-28}
+  - {name: node-29, type: ss, server: 203.0.113.30, port: 20029, cipher: aes-128-gcm, password: placeholder-29}
+  - {name: node-30, type: ss, server: 203.0.113.31, port: 20030, cipher: aes-128-gcm, password: placeholder-30}
+  - {name: node-31, type: ss, server: 203.0.113.32, port: 20031, cipher: aes-128-gcm, password: placeholder-31}
+  - {name: node-32, type: ss, server: 203.0.113.33, port: 20032, cipher: aes-128-gcm, password: placeholder-32}
+  - {name: node-33, type: ss, server: 203.0.113.34, port: 20033, cipher: aes-128-gcm, password: placeholder-33}
+  - {name: node-34, type: ss, server: 203.0.113.35, port: 20034, cipher: aes-128-gcm, password: placeholder-34}
+  - {name: node-35, type: ss, server: 203.0.113.36, port: 20035, cipher: aes-128-gcm, password: placeholder-35}
+  - {name: node-36, type: ss, server: 203.0.113.37, port: 20036, cipher: aes-128-gcm, password: placeholder-36}
+  - {name: node-37, type: ss, server: 203.0.113.38, port: 20037, cipher: aes-128-gcm, password: placeholder-37}
+  - {name: node-38, type: ss, server: 203.0.113.39, port: 20038, cipher: aes-128-gcm, password: placeholder-38}
+  - {name: node-39, type: ss, server: 203.0.113.40, port: 20039, cipher: aes-128-gcm, password: placeholder-39}
+  - {name: node-40, type: ss, server: 203.0.113.41, port: 20040, cipher: aes-128-gcm, password: placeholder-40}
+  - {name: node-41, type: ss, server: 203.0.113.42, port: 20041, cipher: aes-128-gcm, password: placeholder-41}
+  - {name: node-42, type: ss, server: 203.0.113.43, port: 20042, cipher: aes-128-gcm, password: placeholder-42}
+  - {name: node-43, type: ss, server: 203.0.113.44, port: 20043, cipher: aes-128-gcm, password: placeholder-43}
+  - {name: node-44, type: ss, server: 203.0.113.45, port: 20044, cipher: aes-128-gcm, password: placeholder-44}
+  - {name: node-45, type: ss, server: 203.0.113.46, port: 20045, cipher: aes-128-gcm, password: placeholder-45}
+  - {name: node-46, type: ss, server: 203.0.113.47, port: 20046, cipher: aes-128-gcm, password: placeholder-46}
+  - {name: node-47, type: ss, server: 203.0.113.48, port: 20047, cipher: aes-128-gcm, password: placeholder-47}
+  - {name: node-48, type: ss, server: 203.0.113.49, port: 20048, cipher: aes-128-gcm, password: placeholder-48}
+  - {name: node-49, type: ss, server: 203.0.113.50, port: 20049, cipher: aes-128-gcm, password: placeholder-49}
+  - {name: node-50, type: ss, server: 203.0.113.51, port: 20050, cipher: aes-128-gcm, password: placeholder-50}
+  - {name: node-51, type: ss, server: 203.0.113.52, port: 20051, cipher: aes-128-gcm, password: placeholder-51}
+  - {name: node-52, type: ss, server: 203.0.113.53, port: 20052, cipher: aes-128-gcm, password: placeholder-52}
+  - {name: node-53, type: ss, server: 203.0.113.54, port: 20053, cipher: aes-128-gcm, password: placeholder-53}
+  - {name: node-54, type: ss, server: 203.0.113.55, port: 20054, cipher: aes-128-gcm, password: placeholder-54}
+  - {name: node-55, type: ss, server: 203.0.113.56, port: 20055, cipher: aes-128-gcm, password: placeholder-55}
+  - {name: node-56, type: ss, server: 203.0.113.57, port: 20056, cipher: aes-128-gcm, password: placeholder-56}
+  - {name: node-57, type: ss, server: 203.0.113.58, port: 20057, cipher: aes-128-gcm, password: placeholder-57}
+  - {name: node-58, type: ss, server: 203.0.113.59, port: 20058, cipher: aes-128-gcm, password: placeholder-58}
+  - {name: node-59, type: ss, server: 203.0.113.60, port: 20059, cipher: aes-128-gcm, password: placeholder-59}
+  - {name: node-60, type: ss, server: 203.0.113.61, port: 20060, cipher: aes-128-gcm, password: placeholder-60}
+
+proxy-groups:
+  - {name: PROXY, type: select, proxies: [AUTO, node-01, node-02, node-03, node-04, node-05, node-06, node-07, node-08, node-09, node-10, node-11, node-12, node-13, node-14, node-15, node-16, node-17, node-18, node-19, node-20, node-21, node-22, node-23, node-24, node-25, node-26, node-27, node-28, node-29, node-30, node-31, node-32, node-33, node-34, node-35, node-36, node-37, node-38, node-39, node-40, node-41, node-42, node-43, node-44, node-45, node-46, node-47, node-48, node-49, node-50, node-51, node-52, node-53, node-54, node-55, node-56, node-57, node-58, node-59, node-60]}
+  - {name: AUTO, type: url-test, url: 'http://www.gstatic.com/generate_204', interval: 300, proxies: [node-01, node-02, node-03, node-04, node-05, node-06, node-07, node-08, node-09, node-10, node-11, node-12, node-13, node-14, node-15, node-16, node-17, node-18, node-19, node-20, node-21, node-22, node-23, node-24, node-25, node-26, node-27, node-28, node-29, node-30, node-31, node-32, node-33, node-34, node-35, node-36, node-37, node-38, node-39, node-40, node-41, node-42, node-43, node-44, node-45, node-46, node-47, node-48, node-49, node-50, node-51, node-52, node-53, node-54, node-55, node-56, node-57, node-58, node-59, node-60]}
+
+# 规则集：metacubex 推荐 .mrs 二进制规则集（geosite/geoip）
+rule-providers:
+  geosite-cn: {type: http, behavior: domain, format: mrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/cn.mrs', path: ./rules/geosite-cn.mrs, interval: 86400}
+  geosite-geolocation-!cn: {type: http, behavior: domain, format: mrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geosite/geolocation-!cn.mrs', path: ./rules/geosite-not-cn.mrs, interval: 86400}
+  geoip-cn: {type: http, behavior: ipcidr, format: mrs, url: 'https://github.com/MetaCubeX/meta-rules-dat/raw/meta/geo/geoip/cn.mrs', path: ./rules/geoip-cn.mrs, interval: 86400}
+
+rules:
+  - RULE-SET,geosite-cn,DIRECT
+  - RULE-SET,geoip-cn,DIRECT
+  - RULE-SET,geosite-geolocation-!cn,PROXY
+  - MATCH,PROXY
