@@ -1,6 +1,9 @@
 # 本地用户配置
 .claude/settings.local.json
 
+# 项目规范文件需要入库（覆盖全局 gitignore 的忽略规则）
+!CLAUDE.md
+
 # 构建产物
 build/
 *.xcframework

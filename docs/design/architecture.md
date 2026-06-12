@@ -1,6 +1,6 @@
 # 通途（Tongtu）总体架构设计文档
 
-- 版本：v1.1
+- 版本：v1.2
 - 日期：2026-06-12
 - 状态：已确认（方案经用户评审通过）
 - 项目名称：通途（Tongtu）——「一桥飞架南北，天堑变通途」；国际化名用拼音 Tongtu（已验证代理/VPN 领域无撞名，2026-06-12）
@@ -140,6 +140,7 @@ tongtu/
 - **Superpowers** 主导执行纪律：brainstorming（已完成）→ writing-plans/tasks → TDD 实施 → verification-before-completion → code review。
 - 全程中文交流与注释；每个任务完成更新进度文档（CLAUDE.md v6.0 流程）。
 - **文档语言约定**：OpenSpec/Superpowers 生成的全部文档（proposal/design/specs/tasks/报告）一律使用中文。唯一例外是 OpenSpec CLI 的硬解析关键字必须保留英文：specs 增量文件的 `## ADDED/MODIFIED/REMOVED/RENAMED Requirements`、`### Requirement:`、`#### Scenario:` 标头，以及每条需求正文须含字面量 `SHALL`/`MUST`（写法：中文规范词后括注，如「必须（MUST）」「应当（SHALL）」）；tasks.md 的 `- [ ] X.Y` 复选框格式同为解析约定。
+- **规范的强制载体**：以上全部约定固化于仓库根目录 `CLAUDE.md`（Claude Code 每次会话自动加载，对所有未来会话与协作者生效）；本文档的迭代维护协议（更新时机、三处同步动作、用户确认门槛）亦定义于该文件。
 
 ## 13. 文档版本记录
 
@@ -147,3 +148,4 @@ tongtu/
 |------|------|------|
 | v1.0 | 2026-06-12 | 初版：完整架构方案（经用户评审确认，含「官方仓库内核」补充决策） |
 | v1.1 | 2026-06-12 | 新增文档语言约定（§12）；项目定名「通途（Tongtu）」并全文统一 |
+| v1.2 | 2026-06-12 | 规范固化：新建项目级 CLAUDE.md 作为强制载体，§12 增加引用与本文档维护协议 |
