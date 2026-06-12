@@ -2,7 +2,7 @@
 
 ## 为什么
 
-FlMihomo 全项目最大的技术风险是 iOS Network Extension 的 50 MiB 内存上限（Apple 官方确认，超限即被 jetsam 杀进程）——mihomo Go 内核能否在该限额内稳定运行决定了 iOS/iPadOS 平台（用户指定的最高优先级平台）是否可行。P0 在投入任何 UI 开发之前，先构建内核桥接层并用最小 Demo 端到端验证内存可行性，避免方向性返工。
+通途（Tongtu）全项目最大的技术风险是 iOS Network Extension 的 50 MiB 内存上限（Apple 官方确认，超限即被 jetsam 杀进程）——mihomo Go 内核能否在该限额内稳定运行决定了 iOS/iPadOS 平台（用户指定的最高优先级平台）是否可行。P0 在投入任何 UI 开发之前，先构建内核桥接层并用最小 Demo 端到端验证内存可行性，避免方向性返工。
 
 ## 变更内容
 
