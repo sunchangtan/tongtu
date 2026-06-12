@@ -4,8 +4,8 @@
 
 - [x] 1.1 确认 mihomo 最新官方 release tag 及其上游 CI 的 Go 版本，固化到 `core-bridge/README.md` 与 `.go-version`
 - [x] 1.2 创建 `core-bridge/` Go 模块：`go.mod` 依赖官方 `github.com/metacubex/mihomo`（锁定 release tag）
-- [ ] 1.3 安装并验证 gomobile 工具链（`gomobile init`），记录版本到 README
-- [ ] 1.4 编写依赖来源校验脚本 `scripts/check-upstream.sh`（检测 go.mod 无 fork replace），并配置为 CI/pre-commit 步骤
+- [x] 1.3 安装并验证 gomobile 工具链（`gomobile init`），记录版本到 README
+- [x] 1.4 编写依赖来源校验脚本 `scripts/check-upstream.sh`（检测 go.mod 无 fork replace），并配置为 CI/pre-commit 步骤
 
 ## 2. core-bridge 生命周期接口（TDD：Go 测试先行）
 
@@ -17,8 +17,8 @@
 
 ## 3. xcframework 构建管线
 
-- [ ] 3.1 编写 `scripts/build-xcframework.sh`：gomobile bind 产出 iOS/iOS Sim/macOS 切片的 `MihomoCore.xcframework`
-- [ ] 3.2 验证产物：`dwarfdump --uuid` 检查 LC_UUID、记录二进制体积（design 开放问题 2）
+- [x] 3.1 编写 `scripts/build-xcframework.sh`：gomobile bind 产出 iOS/iOS Sim/macOS 切片的 `MihomoCore.xcframework`
+- [x] 3.2 验证产物：切片架构与静态库格式校验（LC_UUID 转移至 4.x 链接产物校验，实施中修正）、记录二进制体积（design 开放问题 2）
 - [ ] 3.3 干净检出复现实验：临时目录 clone 后按 README 一键构建成功
 
 ## 4. iOS 最小验证 App（ios-poc）

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# pre-commit：内核依赖来源校验（项目红线，任务 1.4）
+exec scripts/check-upstream.sh

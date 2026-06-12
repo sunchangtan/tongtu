@@ -9,7 +9,7 @@
 |------|------|---------|
 | mihomo | `v1.19.27`（官方最新 release tag，2026-06-06 发布） | github.com/MetaCubeX/mihomo releases/latest |
 | Go | `1.26.0` | mihomo 上游 CI（.github/workflows/build.yml 的 go-version）|
-| gomobile | 见 `go.mod` tool 依赖（任务 1.3 固化） | — |
+| gomobile | `golang.org/x/mobile v0.0.0-20260611195102`（go.mod tool 指令固化，`go tool gomobile` 调用） | 任务 1.3 |
 
 - 本模块 `go.mod` 通过 `toolchain go1.26.0` 指令保证编译工具链与上游 CI 一致，
   本机低版本 Go 会自动下载所需工具链（GOTOOLCHAIN=auto，Go 1.21+ 默认行为）。

@@ -43,8 +43,8 @@ core-bridge应当在内核启动前应用内存防护参数：设置 `GOMEMLIMIT
 - **则** Go 运行时的 GOMEMLIMIT 为默认值（约 30MiB），内存占用查询接口返回当前 heap/总占用数据
 
 ### Requirement: xcframework 构建管线
-项目应当提供一键构建脚本，将 core-bridge 编译为包含 iOS（arm64）、iOS Simulator（arm64）、macOS（arm64/x86_64）切片的 `MihomoCore.xcframework`；构建必须（MUST）可在干净检出后复现，产物主可执行段必须携带 LC_UUID。
+项目应当（SHALL）提供一键构建脚本，将 core-bridge 编译为包含 iOS（arm64）、iOS Simulator（arm64/x86_64）、macOS（arm64/x86_64）切片的 `MihomoCore.xcframework`（静态库形态）；构建必须（MUST）可在干净检出后复现。LC_UUID 由最终链接生成，其校验在链接产物（ios-poc 扩展可执行文件）上执行——静态库归档本身不含 LC_UUID（实施中核实修正，2026-06-12）。
 
 #### Scenario: 干净环境一键构建
 - **当** 在干净检出的仓库上运行构建脚本（已安装脚本声明的 Go/gomobile/Xcode 版本）
-- **则** 产出包含上述切片的 xcframework，且 `dwarfdump --uuid` 能读取到各切片的 UUID
+- **则** 产出包含上述切片的 xcframework，`lipo -archs` 确认各切片架构完整且为静态库归档格式
