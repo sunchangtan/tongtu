@@ -2,18 +2,18 @@
 
 ## 1. 工具链与工程骨架
 
-- [ ] 1.1 确认 mihomo 最新官方 release tag 及其上游 CI 的 Go 版本，固化到 `core-bridge/README.md` 与 `.go-version`
-- [ ] 1.2 创建 `core-bridge/` Go 模块：`go.mod` 依赖官方 `github.com/metacubex/mihomo`（锁定 release tag）
+- [x] 1.1 确认 mihomo 最新官方 release tag 及其上游 CI 的 Go 版本，固化到 `core-bridge/README.md` 与 `.go-version`
+- [x] 1.2 创建 `core-bridge/` Go 模块：`go.mod` 依赖官方 `github.com/metacubex/mihomo`（锁定 release tag）
 - [ ] 1.3 安装并验证 gomobile 工具链（`gomobile init`），记录版本到 README
 - [ ] 1.4 编写依赖来源校验脚本 `scripts/check-upstream.sh`（检测 go.mod 无 fork replace），并配置为 CI/pre-commit 步骤
 
 ## 2. core-bridge 生命周期接口（TDD：Go 测试先行）
 
-- [ ] 2.1 定义绑定接口（D2 粗粒度 JSON 协议）：`Start/Stop/Reload/State/MemoryStats`，先写接口契约测试（含非法 YAML 报错定位、停止后资源回收断言）
-- [ ] 2.2 实现 Start/Stop：嵌入 mihomo hub 启动流程，支持 external-controller 地址与 secret 覆写注入
-- [ ] 2.3 实现 Reload 与 State：热重载不中断、状态机（stopped/starting/running/error）
-- [ ] 2.4 实现内存防护（D4）：GOMEMLIMIT/GOGC 默认值与覆写、`geodata-loader: memconservative` 默认注入、FreeOSMemory 定时器、MemoryStats 上报
-- [ ] 2.5 macOS 本机以 `go test` 跑通全部契约测试（内核真实启动、回环 API 鉴权验证）
+- [x] 2.1 定义绑定接口（D2 粗粒度 JSON 协议）：`Start/Stop/Reload/State/MemoryStats`，先写接口契约测试（含非法 YAML 报错定位、停止后资源回收断言）
+- [x] 2.2 实现 Start/Stop：嵌入 mihomo hub 启动流程，支持 external-controller 地址与 secret 覆写注入
+- [x] 2.3 实现 Reload 与 State：热重载不中断、状态机（stopped/starting/running/error）
+- [x] 2.4 实现内存防护（D4）：GOMEMLIMIT/GOGC 默认值与覆写、`geodata-loader: memconservative` 默认注入、FreeOSMemory 定时器、MemoryStats 上报
+- [x] 2.5 macOS 本机以 `go test` 跑通全部契约测试（内核真实启动、回环 API 鉴权验证）
 
 ## 3. xcframework 构建管线
 
