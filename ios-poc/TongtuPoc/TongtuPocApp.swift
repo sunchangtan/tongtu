@@ -35,6 +35,13 @@ struct ContentView: View {
             }
         }
         .padding()
-        .onAppear { tunnel.load() }
+        .onAppear {
+            tunnel.load()
+            // 调试自动连接：仅当启动环境含 TONGTU_AUTOCONNECT 时触发（默认行为不变），
+            // 用于模拟器/CI 无人值守验证隧道建立链路。
+            if ProcessInfo.processInfo.environment["TONGTU_AUTOCONNECT"] == "1" {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { tunnel.connect() }
+            }
+        }
     }
 }

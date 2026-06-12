@@ -21,3 +21,4 @@ DerivedData/
 
 # Xcode 工程（由 xcodegen 从 project.yml 生成）
 ios-poc/*.xcodeproj
+ios-poc/DerivedData/
