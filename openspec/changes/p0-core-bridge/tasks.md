@@ -19,7 +19,7 @@
 
 - [x] 3.1 编写 `scripts/build-xcframework.sh`：gomobile bind 产出 iOS/iOS Sim/macOS 切片的 `MihomoCore.xcframework`
 - [x] 3.2 验证产物：切片架构与静态库格式校验（LC_UUID 转移至 4.x 链接产物校验，实施中修正）、记录二进制体积（design 开放问题 2）
-- [ ] 3.3 干净检出复现实验：临时目录 clone 后按 README 一键构建成功
+- [x] 3.3 干净检出复现实验：临时目录 clone 后按 README 一键构建成功
 
 ## 4. iOS 最小验证 App（ios-poc）
 
