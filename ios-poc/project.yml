@@ -1,0 +1,52 @@
+# ios-poc：P0 最小验证工程（xcodegen 描述文件，任务 4.1）
+# 生成：cd ios-poc && xcodegen generate
+name: TongtuPoc
+options:
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    DEVELOPMENT_TEAM: RSKBV78K2Y   # Shanghai Dingqi Technical Service Co., Ltd.
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_VERSION: "5.9"
+
+targets:
+  TongtuPoc:
+    type: application
+    platform: iOS
+    sources: [TongtuPoc, Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dingqi.tongtu.poc
+        CODE_SIGN_ENTITLEMENTS: TongtuPoc/TongtuPoc.entitlements
+        TARGETED_DEVICE_FAMILY: "1,2"   # iPhone + iPad
+    info:
+      path: TongtuPoc/Info.plist
+      properties:
+        UILaunchScreen: {}
+        CFBundleDisplayName: 通途PoC
+    dependencies:
+      - target: PacketTunnel
+        embed: true
+
+  PacketTunnel:
+    type: app-extension
+    platform: iOS
+    sources: [PacketTunnel, Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.dingqi.tongtu.poc.packet-tunnel
+        CODE_SIGN_ENTITLEMENTS: PacketTunnel/PacketTunnel.entitlements
+    info:
+      path: PacketTunnel/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.networkextension.packet-tunnel
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).PacketTunnelProvider
+    dependencies:
+      # mihomo 内核静态库（scripts/build-xcframework.sh 产物）
+      - framework: ../build/MihomoCore.xcframework
+        embed: false
+      # Go net 包在 Darwin 上的 DNS 解析依赖（_res_9_* 符号来自 libresolv）
+      - sdk: libresolv.tbd
