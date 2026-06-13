@@ -1,4 +1,4 @@
-import NetworkExtension
+@preconcurrency import NetworkExtension
 import Foundation
 import Combine
 
@@ -27,13 +27,11 @@ final class TunnelManager: ObservableObject {
     """
 
     func load() {
-        NETunnelProviderManager.loadAllFromPreferences { [weak self] managers, _ in
-            Task { @MainActor in
-                guard let self = self else { return }
-                self.manager = managers?.first ?? self.makeManager()
-                self.status = self.manager?.connection.status ?? .invalid
-                self.observeStatus()
-            }
+        Task { @MainActor in
+            let managers = try? await NETunnelProviderManager.loadAllFromPreferences()
+            self.manager = managers?.first ?? self.makeManager()
+            self.status = self.manager?.connection.status ?? .invalid
+            self.observeStatus()
         }
     }
 
@@ -50,19 +48,16 @@ final class TunnelManager: ObservableObject {
     func connect() {
         SharedStore.configYAML = demoConfig
         guard let manager = manager else { return }
-        manager.isEnabled = true
-        manager.saveToPreferences { [weak self] error in
-            if let error = error {
-                Task { @MainActor in self?.lastError = "保存配置失败: \(error.localizedDescription)" }
-                return
-            }
-            manager.loadFromPreferences { _ in
-                do {
-                    try manager.connection.startVPNTunnel()
-                    Task { @MainActor in self?.startMemoryPolling() }
-                } catch {
-                    Task { @MainActor in self?.lastError = "启动隧道失败: \(error.localizedDescription)" }
-                }
+        Task { @MainActor in
+            manager.isEnabled = true
+            do {
+                // 全程在 @MainActor 上 await，避免回调闭包捕获 non-Sendable 的 manager/self
+                try await manager.saveToPreferences()
+                try await manager.loadFromPreferences()
+                try manager.connection.startVPNTunnel()
+                startMemoryPolling()
+            } catch {
+                lastError = "连接失败: \(error.localizedDescription)"
             }
         }
     }
