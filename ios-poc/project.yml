@@ -45,6 +45,17 @@ targets:
       properties:
         UILaunchScreen: {}
         CFBundleDisplayName: 通途PoC
+        # iPad/Designed-for-iPad 必须支持全部方向，否则报
+        # "All interface orientations must be supported unless the app requires full screen"
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
     dependencies:
       - target: PacketTunnel
         embed: true
