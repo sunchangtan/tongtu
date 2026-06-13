@@ -2,7 +2,12 @@
 // 对应 specs/apple-packet-tunnel 的「TUN 数据通路」需求。
 package mihomocore
 
-import "testing"
+import (
+	"testing"
+
+	mihomoConst "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/component/dialer"
+)
 
 // 场景：注入 tun-fd —— 生成的配置启用 TUN 并使用传入的 fd（iOS NE 内 packetFlow 取到的 fd）
 func TestTunFDInjection(t *testing.T) {
@@ -21,6 +26,23 @@ func TestTunFDInjection(t *testing.T) {
 	if rawCfg.Tun.AutoRoute {
 		t.Error("注入外部 fd 时不应启用 auto-route（路由由 NE 接管）")
 	}
+	// 问题 9：auto-detect-interface 在 NE 沙盒误判蜂窝，必须关闭
+	if rawCfg.Tun.AutoDetectInterface {
+		t.Error("注入外部 fd 时不应启用 auto-detect-interface（沙盒探测误判蜂窝）")
+	}
+	// 问题 7：iOS 沙盒不允许 system 栈 bind tun 地址，必须强制 gvisor 用户态栈
+	if rawCfg.Tun.Stack != mihomoConst.TunGvisor {
+		t.Errorf("注入外部 fd 时 TUN 栈应强制为 gvisor，实际为 %v", rawCfg.Tun.Stack)
+	}
+}
+
+// 问题 9：UpdateDefaultInterface 设置内核出站绑定的接口名
+func TestUpdateDefaultInterface(t *testing.T) {
+	UpdateDefaultInterface("en0")
+	if got := dialer.DefaultInterface.Load(); got != "en0" {
+		t.Errorf("出站默认接口应为 en0，实际为 %q", got)
+	}
+	UpdateDefaultInterface("") // 复位避免污染其他测试
 }
 
 // 场景：未注入 tun-fd —— 保持配置原样（不强制开启 TUN）

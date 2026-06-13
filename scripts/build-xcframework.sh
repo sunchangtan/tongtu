@@ -10,9 +10,12 @@ OUT_DIR=../build
 mkdir -p "$OUT_DIR"
 
 echo "▶ gomobile bind（iOS 最低 15.0，剥离符号表与调试信息以控制体积）"
+# -tags with_gvisor：iOS NE 必须用 gvisor 用户态栈（system 栈无法 bind tun 地址），
+#   不带此 tag 内核报 "gvisor not included in this build"（问题 8，官方 Makefile 同法）
 go tool gomobile bind \
     -target=ios,iossimulator,macos \
     -iosversion=15.0 \
+    -tags with_gvisor \
     -trimpath \
     -ldflags="-s -w" \
     -o "$OUT_DIR/MihomoCore.xcframework" \

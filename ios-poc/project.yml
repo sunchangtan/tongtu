@@ -11,6 +11,14 @@ settings:
     CODE_SIGN_STYLE: Automatic
     SWIFT_VERSION: "5.9"
 
+schemes:
+  TongtuPoc:
+    build:
+      targets:
+        TongtuPoc: all
+    run:
+      config: Debug
+
 targets:
   TongtuPoc:
     type: application

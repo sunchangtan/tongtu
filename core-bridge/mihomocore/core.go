@@ -16,6 +16,7 @@ import (
 
 	"github.com/metacubex/mihomo/config"
 	mihomoConst "github.com/metacubex/mihomo/constant"
+	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/hub"
 	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/hub/route"
@@ -120,6 +121,13 @@ func State() string {
 	return state
 }
 
+// UpdateDefaultInterface 设置内核出站连接绑定的网络接口名（问题 9）。
+// 宿主用 NWPathMonitor 监听网络变化、WiFi 优先取真实接口名后调用，
+// 替代在 NE 沙盒里会误判蜂窝的 auto-detect-interface。
+func UpdateDefaultInterface(name string) {
+	dialer.DefaultInterface.Store(name)
+}
+
 // MemoryStats 返回 Go 运行时内存占用 JSON（单位字节）。
 func MemoryStats() string {
 	var ms runtime.MemStats
@@ -171,10 +179,14 @@ func buildRawConfig(configYAML string, ov coreOverrides) (*config.RawConfig, err
 	if rawCfg.GeodataLoader == "" {
 		rawCfg.GeodataLoader = "memconservative"
 	}
-	// TUN fd 注入（D3）：iOS NE 内由系统接管路由，内核仅用传入 fd 收发包，不自行 auto-route
+	// TUN fd 注入（D3）：iOS NE 内由系统接管路由，内核仅用传入 fd 收发包。
+	// 实战修复（demo 经验）：
+	//   - 问题 7：iOS 沙盒不允许 system 栈 bind tun 地址，强制 gvisor 用户态栈（须配 -tags with_gvisor 构建）
+	//   - 问题 9：auto-detect-interface 在沙盒用 socket 探测总命中蜂窝，关闭它，出站接口由 UpdateDefaultInterface 注入
 	if ov.TunFD > 0 {
 		rawCfg.Tun.Enable = true
 		rawCfg.Tun.FileDescriptor = ov.TunFD
+		rawCfg.Tun.Stack = mihomoConst.TunGvisor
 		rawCfg.Tun.AutoRoute = false
 		rawCfg.Tun.AutoDetectInterface = false
 	}

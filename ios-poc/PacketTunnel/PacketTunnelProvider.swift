@@ -7,6 +7,7 @@ import Foundation
 class PacketTunnelProvider: NEPacketTunnelProvider {
 
     private var memoryTimer: Timer?
+    private let interfaceMonitor = InterfaceMonitor()
 
     override func startTunnel(options: [String: NSObject]?, completionHandler: @escaping (Error?) -> Void) {
         // 1. 配置隧道虚拟接口（IPv4 + DNS，路由全量接管）
@@ -38,26 +39,33 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             return
         }
 
-        // 3. 取 TUN fd（D3）：packetFlow 无公开 fd API，社区验证的 KVC 路径 socket.fileDescriptor。
-        //    取不到则回退（PoC 阶段仅记录，真机验证 iOS 16/17/18 可用性见任务 4.3）。
-        let tunFD = (packetFlow.value(forKeyPath: "socket.fileDescriptor") as? Int32) ?? -1
+        // 3. 取 TUN fd（D3，问题 6）：iOS 26 上 KVC socket.fileDescriptor 返回 nil，
+        //    改用扫描 fd 找 utun 控制 socket。取不到则无法承载流量，直接失败（不再静默回退）。
+        let tunFD = TunFD.find()
+        guard tunFD > 0 else {
+            SharedStore.lastStartResult = "❌ 未找到 utun fd（扫描失败）"
+            completionHandler(NSError(domain: "Tongtu", code: -3,
+                userInfo: [NSLocalizedDescriptionKey: "无法获取 tun 文件描述符"]))
+            return
+        }
 
         // 4. 覆写项：本地控制器 + 内存参数 + home-dir + tun-fd（D2/D3/D4）
         //    用固定回环端口（不能用端口 0：Start 的就绪轮询无法连接未确定的端口）
-        var overrides: [String: Any] = [
+        let overrides: [String: Any] = [
             "external-controller": "127.0.0.1:9090",
             "secret": UUID().uuidString,
             "home-dir": container.path,
             "gomemlimit-mib": 30,
             "gogc": 30,
+            "tun-fd": Int(tunFD),
         ]
-        if tunFD > 0 {
-            overrides["tun-fd"] = Int(tunFD)
-        }
         let overridesJSON = (try? JSONSerialization.data(withJSONObject: overrides))
             .flatMap { String(data: $0, encoding: .utf8) } ?? ""
 
-        // 5. 启动内核（粗粒度 JSON 协议；gomobile 导出名以 Go 包名 Mihomocore 为前缀，
+        // 5. 启动出站接口监听（问题 9）：在内核启动前先注入一次当前接口，再持续随网络变化更新
+        interfaceMonitor.start()
+
+        // 6. 启动内核（粗粒度 JSON 协议；gomobile 导出名以 Go 包名 Mihomocore 为前缀，
         //    BOOL + NSError** 约定，未桥接为 throws，按 ObjC 指针形式调用）
         var startErr: NSError?
         let ok = MihomocoreStart(SharedStore.configYAML, overridesJSON, &startErr)
@@ -76,6 +84,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         memoryTimer?.invalidate()
         memoryTimer = nil
+        interfaceMonitor.stop()
         var stopErr: NSError?
         MihomocoreStop(&stopErr)   // 资源回收：监听端口、TUN 栈
         completionHandler()

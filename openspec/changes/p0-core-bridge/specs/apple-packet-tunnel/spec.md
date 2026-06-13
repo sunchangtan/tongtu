@@ -14,11 +14,25 @@ Packet Tunnel Provider 扩展应当（SHALL）在 `startTunnel` 时加载主 App
 - **则** 扩展以可识别的错误结束 startTunnel，主 App 能读取到错误描述（含定位信息）
 
 ### Requirement: TUN 数据通路
-扩展应当（SHALL）将 NEPacketTunnelProvider 的虚拟接口与 mihomo 的 TUN 栈对接，使设备真实流量经内核规则分流转发。
+扩展应当（SHALL）将 NEPacketTunnelProvider 的虚拟接口与 mihomo 的 TUN 栈对接，使设备真实流量经内核规则分流转发。受 iOS 沙盒约束，须满足以下实战修复（来自 demo 经验，2026-06-12）：
+- **TUN fd 获取**：私有 KVC `socket.fileDescriptor` 在 iOS 26 返回 nil，必须（MUST）改用扫描进程 fd、以 `getsockopt(SYSPROTO_CONTROL, UTUN_OPT_IFNAME)` 命中 `utun*` 控制 socket 的方式获取 fd（sing-box 同法）。
+- **TUN 栈**：iOS 沙盒不允许 `system` 栈 bind tun 地址（`bind: can't assign requested address`），注入外部 fd 时必须（MUST）强制 `gvisor` 用户态栈；xcframework 构建必须（MUST）带 `-tags with_gvisor`，否则报 `gvisor not included in this build`。
+- **出站接口**：`auto-detect-interface` 在 NE 沙盒用 socket 探测总命中蜂窝（`pdp_ip0`），必须（MUST）关闭它，由宿主用 `NWPathMonitor` 取真实接口（WiFi 优先）经 `UpdateDefaultInterface` 喂给内核。
 
-#### Scenario: 流量经隧道代理
+#### Scenario: 直连配置下流量经隧道出站
+- **当** 隧道处于 connected 状态且使用直连（DIRECT）配置
+- **则** 扫描得到 utun fd（非 nil）、内核以 gvisor 栈启动、出站绑定 WiFi 接口，设备可正常打开网页
+
+#### Scenario: 代理配置下流量经代理出站
 - **当** 隧道处于 connected 状态且配置包含可用代理节点
-- **则** 设备发起的 DNS 查询与 TCP/UDP 连接经内核处理，规则命中代理的流量经代理节点出站
+- **则** 规则命中代理的流量经代理节点出站
+
+### Requirement: 出站默认接口注入
+core-bridge 应当（SHALL）导出 `UpdateDefaultInterface` 接口，宿主可随网络变化更新内核出站绑定的网络接口名；注入外部 tun fd 时内核的 `auto-detect-interface` 必须（MUST）关闭。
+
+#### Scenario: 更新出站接口
+- **当** 宿主以 WiFi 接口名调用 UpdateDefaultInterface
+- **则** 内核后续出站连接绑定该接口（而非误判的蜂窝接口）
 
 ### Requirement: 内存指标上报
 扩展应当（SHALL）周期性采集自身内存占用（当前值与峰值），通过 App Group 共享存储暴露给主 App 读取。

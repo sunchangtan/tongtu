@@ -14,10 +14,16 @@ final class TunnelManager: ObservableObject {
     private var statusObserver: AnyCancellable?
     private var memoryTimer: Timer?
 
-    /// 最小验证配置：只起内核与控制器，不接真实节点（P0 关注内核常驻内存）
+    /// 直连验证配置：全部流量走 DIRECT，不需订阅节点即可验证 TUN 数据通路
+    /// （问题 7/9 修复后应能正常打开网页）。压测时换成含真实节点的配置。
     private let demoConfig = """
     log-level: warning
-    mode: rule
+    mode: direct
+    dns:
+      enable: true
+      enhanced-mode: fake-ip
+      fake-ip-range: 198.18.0.1/16
+      nameserver: [223.5.5.5, 119.29.29.29]
     """
 
     func load() {
