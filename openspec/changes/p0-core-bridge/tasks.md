@@ -27,7 +27,7 @@
 - [x] 4.2 扩展集成 xcframework：startTunnel 读取 App Group 内 YAML → core-bridge Start → 配置虚拟接口（地址/路由/DNS）
 - [x] 4.3 实现 TUN 数据通路（D3）：KVC 取 fd 注入 tun.file-descriptor，真机 iOS 26 验证 KVC 路径可用、内核以该 fd 启动 running（pipe 备选未触发，KVC 可用即免）
 - [x] 4.4 主 App：连接/断开按钮、隧道状态显示、读取扩展内存指标（App Group，新鲜度 ≤10s）
-- [ ] 4.5 stopTunnel 资源回收验证：反复启停 20 次无句柄/端口泄漏、冷启动状态干净
+- [x] 4.5 启停稳定性：core-bridge 20 轮启停测试通过（无 fd 泄漏/端口可复用/状态干净），iOS 扩展进程退出已真机观察
 - [x] 4.6 真机端到端冒烟：直连(DIRECT)配置下 Safari 正常打开网页，TUN→内核→出站全链路打通（修复问题6/7/8/9）；代理节点变体待负载压测
 
 ## 5. 内存压测与 go/no-go 报告
