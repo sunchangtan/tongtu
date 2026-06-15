@@ -1,0 +1,29 @@
+# 通途 P0 · 任务 4.6 加密出站验证：Mac 端局域网 ss 入站节点
+# ─────────────────────────────────────────────────────────────
+# 作用：在与 iPhone 同一局域网的 Mac 上起一个 shadowsocks 入站，供 iPhone
+#       压测配置（core-bridge/testdata/stress-config.yaml 的 lan-node）连接，
+#       验证「iPhone 流量 → ss 加密隧道 → Mac 解密 → 直连出网」整条加密出站路径。
+#
+# 启动（任选其一拿到 mihomo 二进制；ss 协议稳定，版本无需与内核锁定版严格一致）：
+#   brew install mihomo && mihomo -f docs/runbooks/mac-lan-node.yaml
+#   或从 https://github.com/MetaCubeX/mihomo/releases 下载对应平台二进制后 ./mihomo -f <本文件>
+#
+# iPhone 侧对接：
+#   1. Mac 上 `ipconfig getifaddr en0` 取本机局域网 IP（Wi-Fi 一般是 en0）；
+#   2. 把 stress-config.yaml 的 lan-node.server 改为该 IP，cipher/password 与下方一致；
+#   3. 把 stress-config.yaml 的 PROXY 组首项从 DIRECT 改为 lan-node，重新构建 PoC。
+#
+# 防火墙：确保 Mac「系统设置 → 网络 → 防火墙」放行 8388（或验证期间临时关闭防火墙）。
+
+mode: direct          # 全局直连出站：入站流量解密后直接出网，验证的是加密隧道本身而非二级代理
+log-level: info
+ipv6: false
+
+listeners:
+  - name: ss-lan-in
+    type: shadowsocks
+    listen: 0.0.0.0     # 监听全部网卡，供局域网内 iPhone 接入
+    port: 8388
+    cipher: aes-128-gcm # 必须与 iPhone lan-node 的 cipher 一致
+    password: tongtu-lan-test
+    udp: true           # 放行 UDP，覆盖 QUIC / DNS 等 UDP 流量

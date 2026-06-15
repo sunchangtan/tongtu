@@ -1,5 +1,9 @@
 # 通途 P0 内存压测 fixture（脱敏，任务 5.1 / D6）
-# 60 个占位节点 + metacubex 推荐规则集结构，仅供内存压测，节点地址为文档地址不可用
+# 60 个占位节点 + metacubex 推荐规则集结构，撑起「配置规模」内存压力（节点对象 + url-test 健康检查）。
+# 出站策略由 PROXY 组首项决定，无需真实订阅即可跑满负载内存压测：
+#   - 任务 5.2/5.3（内存基线 / GOMEMLIMIT 档位扫描）：PROXY 首项 = DIRECT，流量直连出站，60 节点仅驻留内存；
+#   - 任务 4.6（加密出站冒烟）：把下方 lan-node 填为你局域网 Mac 的 ss 入站，并将 PROXY 首项改为 lan-node。
+# 占位 node-01..60 为文档地址（203.0.113.x）不可达，仅用于内存占用，请勿期待其连通。
 mixed-port: 7890
 mode: rule
 log-level: warning
@@ -76,9 +80,14 @@ proxies:
   - {name: node-58, type: ss, server: 203.0.113.59, port: 20058, cipher: aes-128-gcm, password: placeholder-58}
   - {name: node-59, type: ss, server: 203.0.113.60, port: 20059, cipher: aes-128-gcm, password: placeholder-59}
   - {name: node-60, type: ss, server: 203.0.113.61, port: 20060, cipher: aes-128-gcm, password: placeholder-60}
+  # 局域网自建出站节点（任务 4.6）：把 server 改为你 Mac 的局域网 IP，cipher/password 与
+  # docs/runbooks/mac-lan-node.yaml 保持一致。5.2/5.3 内存压测不走它（PROXY 首项为 DIRECT），仅驻留内存。
+  - {name: lan-node, type: ss, server: 192.168.1.100, port: 8388, cipher: aes-128-gcm, password: tongtu-lan-test}
 
 proxy-groups:
-  - {name: PROXY, type: select, proxies: [AUTO, node-01, node-02, node-03, node-04, node-05, node-06, node-07, node-08, node-09, node-10, node-11, node-12, node-13, node-14, node-15, node-16, node-17, node-18, node-19, node-20, node-21, node-22, node-23, node-24, node-25, node-26, node-27, node-28, node-29, node-30, node-31, node-32, node-33, node-34, node-35, node-36, node-37, node-38, node-39, node-40, node-41, node-42, node-43, node-44, node-45, node-46, node-47, node-48, node-49, node-50, node-51, node-52, node-53, node-54, node-55, node-56, node-57, node-58, node-59, node-60]}
+  # 首项即默认出站：5.2/5.3 用 DIRECT 跑内存基线；4.6 把首项手动改成 lan-node 验证加密出站。
+  # AUTO + 60 占位节点始终保留在组内，确保 url-test 健康检查与节点对象的内存开销不变。
+  - {name: PROXY, type: select, proxies: [DIRECT, lan-node, AUTO, node-01, node-02, node-03, node-04, node-05, node-06, node-07, node-08, node-09, node-10, node-11, node-12, node-13, node-14, node-15, node-16, node-17, node-18, node-19, node-20, node-21, node-22, node-23, node-24, node-25, node-26, node-27, node-28, node-29, node-30, node-31, node-32, node-33, node-34, node-35, node-36, node-37, node-38, node-39, node-40, node-41, node-42, node-43, node-44, node-45, node-46, node-47, node-48, node-49, node-50, node-51, node-52, node-53, node-54, node-55, node-56, node-57, node-58, node-59, node-60]}
   - {name: AUTO, type: url-test, url: 'http://www.gstatic.com/generate_204', interval: 300, proxies: [node-01, node-02, node-03, node-04, node-05, node-06, node-07, node-08, node-09, node-10, node-11, node-12, node-13, node-14, node-15, node-16, node-17, node-18, node-19, node-20, node-21, node-22, node-23, node-24, node-25, node-26, node-27, node-28, node-29, node-30, node-31, node-32, node-33, node-34, node-35, node-36, node-37, node-38, node-39, node-40, node-41, node-42, node-43, node-44, node-45, node-46, node-47, node-48, node-49, node-50, node-51, node-52, node-53, node-54, node-55, node-56, node-57, node-58, node-59, node-60]}
 
 # 规则集：metacubex 推荐 .mrs 二进制规则集（geosite/geoip）

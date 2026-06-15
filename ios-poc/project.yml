@@ -34,7 +34,13 @@ targets:
   TongtuPoc:
     type: application
     platform: iOS
-    sources: [TongtuPoc, Shared]
+    sources:
+      - TongtuPoc
+      - Shared
+      # 压测大配置打包进 App（任务 5.2/5.3/4.6）：引用 core-bridge 单一事实源，
+      # TunnelManager 在 TONGTU_STRESS=1 时从 bundle 读取它。
+      - path: ../core-bridge/testdata/stress-config.yaml
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.dingqi.tongtu.poc

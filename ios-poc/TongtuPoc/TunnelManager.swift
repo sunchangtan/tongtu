@@ -15,7 +15,8 @@ final class TunnelManager: ObservableObject {
     private var memoryTimer: Timer?
 
     /// 直连验证配置：全部流量走 DIRECT，不需订阅节点即可验证 TUN 数据通路
-    /// （问题 7/9 修复后应能正常打开网页）。压测时换成含真实节点的配置。
+    /// （问题 7/9 修复后应能正常打开网页）。设置环境变量 TONGTU_STRESS=1 时改用
+    /// 打包进 App 的 stress-config.yaml（60 节点压测配置），见 resolveConfig()。
     private let demoConfig = """
     log-level: warning
     mode: direct
@@ -36,17 +37,17 @@ final class TunnelManager: ObservableObject {
     }
 
     private func makeManager() -> NETunnelProviderManager {
-        let m = NETunnelProviderManager()
+        let newManager = NETunnelProviderManager()
         let proto = NETunnelProviderProtocol()
         proto.providerBundleIdentifier = "com.dingqi.tongtu.poc.packet-tunnel"
         proto.serverAddress = "Tongtu PoC"
-        m.protocolConfiguration = proto
-        m.localizedDescription = "通途 PoC"
-        return m
+        newManager.protocolConfiguration = proto
+        newManager.localizedDescription = "通途 PoC"
+        return newManager
     }
 
     func connect() {
-        SharedStore.configYAML = demoConfig
+        SharedStore.configYAML = resolveConfig()
         guard let manager = manager else { return }
         Task { @MainActor in
             manager.isEnabled = true
@@ -65,6 +66,18 @@ final class TunnelManager: ObservableObject {
     func disconnect() {
         manager?.connection.stopVPNTunnel()
         memoryTimer?.invalidate()
+    }
+
+    /// 解析本次连接使用的内核配置：设置环境变量 TONGTU_STRESS=1 时，加载打包进 App 的
+    /// 压测大配置 stress-config.yaml（任务 5.2/5.3/4.6）；否则用内联直连小配置，
+    /// 保持原 4.3 数据通路验证行为不变。读不到资源时安全回退到 demoConfig。
+    private func resolveConfig() -> String {
+        guard ProcessInfo.processInfo.environment["TONGTU_STRESS"] == "1",
+              let url = Bundle.main.url(forResource: "stress-config", withExtension: "yaml"),
+              let yaml = try? String(contentsOf: url, encoding: .utf8) else {
+            return demoConfig
+        }
+        return yaml
     }
 
     private func observeStatus() {
