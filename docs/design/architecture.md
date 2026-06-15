@@ -1,7 +1,7 @@
 # 通途（Tongtu）总体架构设计文档
 
-- 版本：v1.2
-- 日期：2026-06-12
+- 版本：v1.3
+- 日期：2026-06-15
 - 状态：已确认（方案经用户评审通过）
 - 项目名称：通途（Tongtu）——「一桥飞架南北，天堑变通途」；国际化名用拼音 Tongtu（已验证代理/VPN 领域无撞名，2026-06-12）
 
@@ -125,14 +125,16 @@ tongtu/
 
 ## 11. 阶段路线图（每阶段一个 OpenSpec change，独立走完整流程）
 
-| 阶段 | 内容 | 预估 |
-|------|------|------|
-| **P0** | core-bridge：mihomo xcframework 构建管线 + 最小 NE Demo 验证 iOS 内存可行性 | 2-3 周 |
-| **P1** | iOS/iPadOS MVP：Flutter 主 App + NE + 按需连接 + zashboard | 4-6 周 |
-| **P2** | macOS（App Store appex）+ UI 完善（clashmi 参照全量页面） | 3-4 周 |
-| **P3** | Windows：子进程 + 服务模式 TUN + 内核热更新 | 3-4 周 |
-| **P4** | Linux：子进程 + systemd/pkexec + 按需模拟 + 面板降级 | 2-3 周 |
-| **P5** | Android：VpnService + cgo .so | 3-4 周 |
+| 阶段 | 内容 | 发布波次 | 预估 |
+|------|------|---------|------|
+| **P0** | core-bridge：mihomo xcframework 构建管线 + 最小 NE Demo 验证 iOS 内存可行性 | — | 2-3 周（已完成） |
+| **P1** | iOS/iPadOS MVP：Flutter 主 App + NE + 按需连接 + zashboard（M1→M4 里程碑递进） | 第一波 | 4-6 周 |
+| **P2** | macOS（App Store appex）+ UI 完善（clashmi 形态参照） | 第一波 | 3-4 周 |
+| **P3** | Android：VpnService + cgo .so（CMFA 模式） | 第二波 | 3-4 周 |
+| **P4** | Windows：子进程 + 服务模式 TUN + 内核热更新 | 第三波 | 3-4 周 |
+| **P5** | Linux：子进程 + systemd/pkexec + 按需模拟 + 面板降级 | 第三波 | 2-3 周 |
+
+> 发布策略：分三波同步发布——**第一波** Apple 三端（iOS/iPad/macOS，NE+xcframework 同源，复用最高）、**第二波** Android（VpnService+cgo，独立一套）、**第三波** Windows/Linux（子进程+提权，又一套）。开发渐进、非同时；Android 因移动市场优先级，从原 P5 提前至桌面之前。
 
 ## 12. 开发流程约定
 
@@ -149,3 +151,4 @@ tongtu/
 | v1.0 | 2026-06-12 | 初版：完整架构方案（经用户评审确认，含「官方仓库内核」补充决策） |
 | v1.1 | 2026-06-12 | 新增文档语言约定（§12）；项目定名「通途（Tongtu）」并全文统一 |
 | v1.2 | 2026-06-12 | 规范固化：新建项目级 CLAUDE.md 作为强制载体，§12 增加引用与本文档维护协议 |
+| v1.3 | 2026-06-15 | §11 路线图重排：Android 自原 P5 提前至 P3（桌面之前），确立分三波发布策略（Apple 三端／Android／Win-Linux），新增「发布波次」列；P0 标记完成、P1 标注 M1→M4 里程碑递进 |
