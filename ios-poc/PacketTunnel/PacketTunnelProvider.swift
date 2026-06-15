@@ -57,7 +57,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
             "home-dir": container.path,
             "gomemlimit-mib": 30,
             "gogc": 30,
-            "tun-fd": Int(tunFD),
+            "tun-fd": Int(tunFD)
         ]
         let overridesJSON = (try? JSONSerialization.data(withJSONObject: overrides))
             .flatMap { String(data: $0, encoding: .utf8) } ?? ""
@@ -68,8 +68,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         // 6. 启动内核（粗粒度 JSON 协议；gomobile 导出名以 Go 包名 Mihomocore 为前缀，
         //    BOOL + NSError** 约定，未桥接为 throws，按 ObjC 指针形式调用）
         var startErr: NSError?
-        let ok = MihomocoreStart(SharedStore.configYAML, overridesJSON, &startErr)
-        if !ok {
+        let started = MihomocoreStart(SharedStore.configYAML, overridesJSON, &startErr)
+        if !started {
             let msg = startErr?.localizedDescription ?? "内核启动失败"
             SharedStore.lastStartResult = "❌ 启动失败: \(msg)"
             completionHandler(startErr ?? NSError(domain: "Tongtu", code: -2,
