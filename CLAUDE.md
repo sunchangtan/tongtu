@@ -22,6 +22,14 @@
 - 许可证 GPL-3.0；可参考同许可的 FlClash 代码，clashmi 仅作 UI 设计参照、不复制代码。
 - iOS NE 扩展内存红线：常驻 < 40MiB、峰值 < 50MiB（jetsam 限额），相关改动必须附真机内存数据。
 
+## 质量门禁（强制）
+
+- 红线分两条强度：**0 错误**不可妥协；**第一方代码 0 警告**，尤其新增代码不得引入新警告（棘轮）。
+- 分层：门禁只管第一方（`core-bridge/mihomocore`、`ios-poc`、P1 后的 Flutter app）；官方 mihomo 依赖、gomobile/xcodegen/`*.g.dart` 等生成物豁免——不为消上游警告而违反「不 fork」红线。
+- 手法：Swift `swiftlint --strict`（warning 即失败）；Dart analyzer 关键项升 error；Go `go vet` + golangci-lint 零问题。
+- 例外须显式：确属误报且改不动的，行级 suppress + 中文理由（同「补丁显式可见」哲学），不靠自觉。
+- 反模式禁止：不得为消警告而劣化代码（吞 error、乱标 `@available`、塞无意义类型转换）；消除动作须让代码更对，而非更哑。
+
 ## architecture.md 维护协议
 
 - **职责**：只记录「当前为真」的全局架构事实与跨阶段决策；能力级需求事实归 `openspec/specs/`，变更级细节归各 change 的 design.md，历史归 git 与 §13 版本记录。
