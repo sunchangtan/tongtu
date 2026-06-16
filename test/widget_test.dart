@@ -38,6 +38,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('订阅链接'), findsOneWidget);
+    expect(find.text('获取配置'), findsOneWidget);
     expect(find.text('连接'), findsOneWidget);
     expect(find.text('断开'), findsOneWidget);
     expect(find.textContaining('未连接'), findsOneWidget);

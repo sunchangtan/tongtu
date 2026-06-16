@@ -5,7 +5,7 @@ import '../config/subscription.dart';
 import '../core/apple_core_controller.dart';
 import '../core/core_controller.dart';
 
-/// M1 最小连接界面：导入订阅、连接/断开、隧道状态显示。
+/// M1 最小连接界面：获取配置（拉取订阅验证）、连接/断开、隧道状态显示。
 class HomePage extends StatefulWidget {
   const HomePage({super.key, CoreController? controller})
     : _injectedController = controller;
@@ -21,6 +21,8 @@ class _HomePageState extends State<HomePage> {
   final SubscriptionStore _subscriptions = SubscriptionStore();
   final TextEditingController _urlController = TextEditingController();
   CoreState _state = CoreState.stopped;
+  bool _fetching = false;
+  SubscriptionInfo? _info;
   String? _message;
 
   @override
@@ -39,6 +41,31 @@ class _HomePageState extends State<HomePage> {
     final String? url = await _subscriptions.load();
     if (url != null && mounted) {
       _urlController.text = url;
+    }
+  }
+
+  Future<void> _fetchConfig() async {
+    setState(() {
+      _fetching = true;
+      _message = null;
+      _info = null;
+    });
+    try {
+      await _subscriptions.save(_urlController.text);
+      final SubscriptionInfo info = await _subscriptions.fetch(
+        _urlController.text,
+      );
+      if (mounted) {
+        setState(() => _info = info);
+      }
+    } on Exception catch (e) {
+      if (mounted) {
+        setState(() => _message = e.toString());
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _fetching = false);
+      }
     }
   }
 
@@ -86,6 +113,22 @@ class _HomePageState extends State<HomePage> {
                 border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 12),
+            FilledButton.tonalIcon(
+              onPressed: _fetching ? null : _fetchConfig,
+              icon: _fetching
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cloud_download_outlined),
+              label: Text(_fetching ? '获取中…' : '获取配置'),
+            ),
+            if (_info != null) ...<Widget>[
+              const SizedBox(height: 12),
+              _buildInfoCard(_info!),
+            ],
             const SizedBox(height: 16),
             Text('状态：${_stateText(_state)}'),
             const SizedBox(height: 16),
@@ -116,6 +159,44 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildInfoCard(SubscriptionInfo info) {
+    final List<String> lines = <String>[];
+    final int? total = info.total;
+    if (total != null) {
+      final int used = (info.upload ?? 0) + (info.download ?? 0);
+      lines.add('流量：${_formatBytes(used)} / ${_formatBytes(total)}');
+    }
+    final int? expire = info.expire;
+    if (expire != null && expire > 0) {
+      lines.add('到期：${_formatExpire(expire)}');
+    }
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              children: <Widget>[
+                Icon(
+                  info.ok ? Icons.check_circle_outline : Icons.error_outline,
+                  color: info.ok ? Colors.green : Colors.red,
+                  size: 20,
+                ),
+                const SizedBox(width: 8),
+                Expanded(child: Text(info.message ?? (info.ok ? '订阅可达' : '获取失败'))),
+              ],
+            ),
+            for (final String line in lines) ...<Widget>[
+              const SizedBox(height: 4),
+              Text(line, style: const TextStyle(fontSize: 13)),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   static String _stateText(CoreState state) {
     switch (state) {
       case CoreState.stopped:
@@ -127,5 +208,23 @@ class _HomePageState extends State<HomePage> {
       case CoreState.error:
         return '错误';
     }
+  }
+
+  static String _formatBytes(int bytes) {
+    const List<String> units = <String>['B', 'KB', 'MB', 'GB', 'TB'];
+    double value = bytes.toDouble();
+    int unit = 0;
+    while (value >= 1024 && unit < units.length - 1) {
+      value /= 1024;
+      unit++;
+    }
+    return '${value.toStringAsFixed(unit == 0 ? 0 : 2)} ${units[unit]}';
+  }
+
+  static String _formatExpire(int unixSeconds) {
+    final DateTime date = DateTime.fromMillisecondsSinceEpoch(unixSeconds * 1000);
+    final String month = date.month.toString().padLeft(2, '0');
+    final String day = date.day.toString().padLeft(2, '0');
+    return '${date.year}-$month-$day';
   }
 }
