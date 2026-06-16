@@ -21,10 +21,10 @@
 
 ## 4. 订阅导入与运行时配置生成
 
-- [ ] 4.1 订阅链接导入与存储（M1 最小：单订阅），无效链接给可读中文错误
-- [ ] 4.2 运行时 YAML 生成：metacubex 推荐模板 + 用户 override + 订阅 proxy-providers 合并，写入 App Group
-- [ ] 4.3 external-controller 随机端口/secret 生成并注入扩展（App Group / providerConfiguration）
-- [ ] 4.4 Dart 单元测试：配置合并/订阅解析/端口与 secret 生成，覆盖 subscription-config 场景
+- [x] 4.1 订阅链接导入与存储（M1 最小：单订阅），无效链接给可读中文错误
+- [x] 4.2 运行时 YAML 生成：metacubex 推荐模板 + 订阅 proxy-providers 合并（端口/secret 经任务3 start 注入扩展写 App Group）
+- [x] 4.3 external-controller 随机端口/secret 生成（经任务3 CoreController.start 注入扩展）
+- [x] 4.4 Dart 单元测试：配置生成/订阅解析/端口与 secret 生成，覆盖 subscription-config 场景
 
 ## 5. 最小连接界面
 
