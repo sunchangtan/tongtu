@@ -17,11 +17,10 @@ class _FakeController implements CoreController {
   CoreState get state => CoreState.stopped;
 
   @override
-  Future<void> start({
-    required String configYAML,
-    required int controllerPort,
-    required String controllerSecret,
-  }) async {}
+  ControllerEndpoint? get currentEndpoint => null;
+
+  @override
+  Future<void> start({required String configYAML}) async {}
 
   @override
   Future<void> stop() async {}

@@ -1,9 +1,9 @@
 ## 1. external-controller 端口/secret 上移 CoreController（M1 衔接）
 
-- [ ] 1.1 CoreController 加 ControllerEndpoint(host/port/secret) 与 currentEndpoint；start 改为内部生成端口/secret 并持有
-- [ ] 1.2 apple_core_controller：start 内部生成端口/secret、注入扩展、暴露 currentEndpoint
-- [ ] 1.3 home_page 适配（不再自行生成端口/secret）；回归 M1 既有测试通过
-- [ ] 1.4 Dart 单测：CoreController endpoint 持有与暴露
+- [x] 1.1 CoreController 加 ControllerEndpoint(host/port/secret) 与 currentEndpoint；start 改为内部生成端口/secret 并持有
+- [x] 1.2 apple_core_controller：start 内部生成端口/secret、注入扩展、暴露 currentEndpoint
+- [x] 1.3 home_page 适配（不再自行生成端口/secret）；回归 M1 既有测试通过
+- [x] 1.4 Dart 单测：CoreController endpoint 持有与暴露
 
 ## 2. clash-api 客户端
 

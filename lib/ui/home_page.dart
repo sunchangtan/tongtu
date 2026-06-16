@@ -137,8 +137,6 @@ class _HomePageState extends State<HomePage> {
       final String url = _urlController.text.trim();
       await _controller.start(
         configYAML: RuntimeConfig.generateYAML(subscriptionUrl: url),
-        controllerPort: RuntimeConfig.generatePort(),
-        controllerSecret: RuntimeConfig.generateSecret(),
       );
       _scheduleConnectTimeout();
     } on Exception catch (e) {

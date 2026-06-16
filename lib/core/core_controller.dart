@@ -19,6 +19,25 @@ class MemorySnapshot {
   final double ageSeconds;
 }
 
+/// external-controller 端点（连接后由 CoreController 生成并持有）。
+class ControllerEndpoint {
+  const ControllerEndpoint({
+    required this.host,
+    required this.port,
+    required this.secret,
+  });
+
+  final String host;
+  final int port;
+  final String secret;
+
+  /// REST/WS 基础地址，如 http://127.0.0.1:34567 。
+  String baseUrl({bool websocket = false}) {
+    final String scheme = websocket ? 'ws' : 'http';
+    return '$scheme://$host:$port';
+  }
+}
+
 /// 统一内核控制抽象（平台无关）。
 ///
 /// UI 与上层逻辑只依赖此接口；具体平台各自实现：
@@ -30,13 +49,12 @@ abstract class CoreController {
   /// 当前状态快照。
   CoreState get state;
 
-  /// 启动内核/隧道。运行时配置（YAML）与 external-controller 端口/secret
-  /// 由 config 模块生成，经平台通道注入扩展。
-  Future<void> start({
-    required String configYAML,
-    required int controllerPort,
-    required String controllerSecret,
-  });
+  /// 当前 external-controller 端点；未连接时为 null。
+  ControllerEndpoint? get currentEndpoint;
+
+  /// 启动内核/隧道。external-controller 端口/secret 由实现内部随机生成并持有、
+  /// 经平台通道注入扩展；运行时配置 YAML 由 config 模块生成传入。
+  Future<void> start({required String configYAML});
 
   /// 停止内核/隧道并回收资源。
   Future<void> stop();

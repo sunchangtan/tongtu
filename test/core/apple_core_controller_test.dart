@@ -33,15 +33,17 @@ void main() {
       await controller.dispose();
     });
 
-    test('start/stop 经 MethodChannel 调用原生', () async {
+    test('start 内部生成端点并经 MethodChannel 调用原生', () async {
       final AppleCoreController controller = AppleCoreController();
-      await controller.start(
-        configYAML: 'mode: rule',
-        controllerPort: 12345,
-        controllerSecret: 'test-secret',
-      );
+      expect(controller.currentEndpoint, isNull);
+      await controller.start(configYAML: 'mode: rule');
       await controller.stop();
       expect(calls, <String>['start', 'stop']);
+      final ControllerEndpoint? endpoint = controller.currentEndpoint;
+      expect(endpoint, isNotNull);
+      expect(endpoint!.host, '127.0.0.1');
+      expect(endpoint.port, inInclusiveRange(20000, 59999));
+      expect(endpoint.secret, hasLength(32));
       await controller.dispose();
     });
 
