@@ -7,10 +7,10 @@
 
 ## 2. clash-api 客户端
 
-- [ ] 2.1 REST 客户端（http + Bearer secret）：proxies 查询、proxy 切换、延迟测试、connections 快照
-- [ ] 2.2 WebSocket 客户端（web_socket_channel）：traffic、logs 订阅（含基础重连）
-- [ ] 2.3 数据模型与解析：ProxyGroup/Proxy、Traffic、Connection、LogEntry
-- [ ] 2.4 Dart 单测：REST 解析与鉴权（mock http）、WS 帧解析、错误 secret 处理
+- [x] 2.1 REST 客户端（http + Bearer secret）：proxies 查询、proxy 切换、延迟测试
+- [x] 2.2 WebSocket 客户端（web_socket_channel）：traffic、logs 订阅
+- [x] 2.3 数据模型与解析：ProxyGroup、Traffic、ConnectionItem、LogEntry（fromJson）
+- [x] 2.4 Dart 单测：REST 解析与鉴权（mock http）、模型解析、错误 secret 处理
 
 ## 3. 节点管理
 
