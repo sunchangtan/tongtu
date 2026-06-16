@@ -46,6 +46,20 @@ class AppleCoreController implements CoreController {
   @override
   Future<void> stop() => _method.invokeMethod<void>('stop');
 
+  @override
+  Future<MemorySnapshot?> memorySnapshot() async {
+    final Map<dynamic, dynamic>? raw =
+        await _method.invokeMapMethod<dynamic, dynamic>('memory');
+    if (raw == null) {
+      return null;
+    }
+    return MemorySnapshot(
+      footprintBytes: (raw['footprint'] as num?)?.toInt() ?? 0,
+      goHeapBytes: (raw['goHeap'] as num?)?.toInt() ?? 0,
+      ageSeconds: (raw['age'] as num?)?.toDouble() ?? 0,
+    );
+  }
+
   void _onNativeState(dynamic event) {
     final CoreState? next = _parseState(event);
     if (next != null) {

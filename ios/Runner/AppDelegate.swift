@@ -48,6 +48,8 @@ import UIKit
     case "stop":
       tunnel.stop()
       result(nil)
+    case "memory":
+      result(tunnel.memorySnapshot())
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -111,6 +113,21 @@ final class TunnelController {
 
   func stop() {
     manager?.connection.stopVPNTunnel()
+  }
+
+  /// 读取扩展经 App Group 上报的内存指标；无数据（未运行）返回 nil。
+  /// footprint = phys_footprint（jetsam 红线判据），goHeap = 内核 Go 堆 HeapAlloc。
+  func memorySnapshot() -> [String: Any]? {
+    let footprint = SharedStore.physFootprintBytes
+    guard footprint > 0 else { return nil }
+    let age = Date().timeIntervalSince1970 - SharedStore.memoryStatsAt
+    var goHeap = 0
+    if let data = SharedStore.memoryStatsJSON.data(using: .utf8),
+       let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+       let heap = obj["heapAlloc"] as? NSNumber {
+      goHeap = heap.intValue
+    }
+    return ["footprint": footprint, "goHeap": goHeap, "age": age]
   }
 
   private func makeManager() -> NETunnelProviderManager {

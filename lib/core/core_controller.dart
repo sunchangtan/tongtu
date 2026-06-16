@@ -1,6 +1,24 @@
 /// 内核运行状态（连接生命周期）。
 enum CoreState { stopped, connecting, connected, error }
 
+/// 扩展进程内存快照。
+class MemorySnapshot {
+  const MemorySnapshot({
+    required this.footprintBytes,
+    required this.goHeapBytes,
+    required this.ageSeconds,
+  });
+
+  /// phys_footprint（字节）——iOS jetsam 50MiB 红线判据。
+  final int footprintBytes;
+
+  /// 内核 Go 运行时堆 HeapAlloc（字节）——辅助趋势。
+  final int goHeapBytes;
+
+  /// 指标采集距今秒数（新鲜度判定）。
+  final double ageSeconds;
+}
+
 /// 统一内核控制抽象（平台无关）。
 ///
 /// UI 与上层逻辑只依赖此接口；具体平台各自实现：
@@ -22,4 +40,7 @@ abstract class CoreController {
 
   /// 停止内核/隧道并回收资源。
   Future<void> stop();
+
+  /// 读取扩展进程内存快照；未运行或无数据时返回 null。
+  Future<MemorySnapshot?> memorySnapshot();
 }

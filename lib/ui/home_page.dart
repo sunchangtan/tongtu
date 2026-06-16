@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../config/runtime_config.dart';
@@ -5,7 +7,7 @@ import '../config/subscription.dart';
 import '../core/apple_core_controller.dart';
 import '../core/core_controller.dart';
 
-/// M1 最小连接界面：获取配置（拉取订阅验证）、连接/断开、隧道状态显示。
+/// M1 最小连接界面：获取配置（拉取订阅验证）、连接/断开、隧道状态与内存指标显示。
 class HomePage extends StatefulWidget {
   const HomePage({super.key, CoreController? controller})
     : _injectedController = controller;
@@ -23,6 +25,8 @@ class _HomePageState extends State<HomePage> {
   CoreState _state = CoreState.stopped;
   bool _fetching = false;
   SubscriptionInfo? _info;
+  MemorySnapshot? _memory;
+  Timer? _memoryTimer;
   String? _message;
 
   @override
@@ -30,8 +34,14 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _controller = widget._injectedController ?? AppleCoreController();
     _controller.stateStream.listen((CoreState state) {
-      if (mounted) {
-        setState(() => _state = state);
+      if (!mounted) {
+        return;
+      }
+      setState(() => _state = state);
+      if (state == CoreState.connected) {
+        _startMemoryPolling();
+      } else {
+        _stopMemoryPolling();
       }
     });
     _loadSubscription();
@@ -41,6 +51,24 @@ class _HomePageState extends State<HomePage> {
     final String? url = await _subscriptions.load();
     if (url != null && mounted) {
       _urlController.text = url;
+    }
+  }
+
+  void _startMemoryPolling() {
+    _memoryTimer?.cancel();
+    _memoryTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
+      final MemorySnapshot? snapshot = await _controller.memorySnapshot();
+      if (mounted) {
+        setState(() => _memory = snapshot);
+      }
+    });
+  }
+
+  void _stopMemoryPolling() {
+    _memoryTimer?.cancel();
+    _memoryTimer = null;
+    if (mounted) {
+      setState(() => _memory = null);
     }
   }
 
@@ -92,6 +120,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    _memoryTimer?.cancel();
     _urlController.dispose();
     super.dispose();
   }
@@ -131,6 +160,10 @@ class _HomePageState extends State<HomePage> {
             ],
             const SizedBox(height: 16),
             Text('状态：${_stateText(_state)}'),
+            if (_memory != null) ...<Widget>[
+              const SizedBox(height: 8),
+              _buildMemoryCard(_memory!),
+            ],
             const SizedBox(height: 16),
             Row(
               children: <Widget>[
@@ -191,6 +224,34 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 4),
               Text(line, style: const TextStyle(fontSize: 13)),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMemoryCard(MemorySnapshot memory) {
+    final double footprintMiB = memory.footprintBytes / 1024 / 1024;
+    final double goHeapMiB = memory.goHeapBytes / 1024 / 1024;
+    final bool warn = footprintMiB >= 40;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Footprint：${footprintMiB.toStringAsFixed(1)} MiB（红线 50 / 常驻 40）',
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: warn ? Colors.orange : null,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '内核 Go 堆：${goHeapMiB.toStringAsFixed(1)} MiB',
+              style: const TextStyle(fontSize: 13),
+            ),
           ],
         ),
       ),

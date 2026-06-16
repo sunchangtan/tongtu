@@ -59,5 +59,24 @@ void main() {
       expect(next, CoreState.connected);
       await controller.dispose();
     });
+
+    test('memorySnapshot 经 MethodChannel 解析内存快照', () async {
+      messenger.setMockMethodCallHandler(method, (MethodCall call) async {
+        if (call.method == 'memory') {
+          return <String, dynamic>{
+            'footprint': 36700160,
+            'goHeap': 8388608,
+            'age': 1.5,
+          };
+        }
+        return null;
+      });
+      final AppleCoreController controller = AppleCoreController();
+      final MemorySnapshot? snapshot = await controller.memorySnapshot();
+      expect(snapshot, isNotNull);
+      expect(snapshot!.footprintBytes, 36700160);
+      expect(snapshot.goHeapBytes, 8388608);
+      await controller.dispose();
+    });
   });
 }
