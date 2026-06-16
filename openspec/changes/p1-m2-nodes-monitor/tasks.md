@@ -34,5 +34,5 @@
 ## 6. 退出 gate 与收尾
 
 - [ ] 6.1 真机：连接后节点切换生效、延迟测试、流量/连接/日志实时（需真机）
-- [ ] 6.2 质量门禁：swiftlint --strict + dart analyze + go vet 全绿，第一方 0 警告
+- [x] 6.2 质量门禁：swiftlint --strict + dart analyze + go vet 全绿，第一方 0 警告
 - [ ] 6.3 更新进度文档与报告，openspec validate p1-m2-nodes-monitor 通过，准备 archive（与 M1 真机 gate 一并）
