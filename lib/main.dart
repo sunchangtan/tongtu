@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
+import 'ui/home_page.dart';
+
 void main() {
   runApp(const TongtuApp());
 }
 
-/// 通途应用根组件（M1 骨架占位，连接界面在后续任务实现）。
+/// 通途应用根组件。
 class TongtuApp extends StatelessWidget {
   const TongtuApp({super.key});
 
@@ -15,11 +17,7 @@ class TongtuApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
       ),
-      home: const Scaffold(
-        body: Center(
-          child: Text('通途 · M1 骨架'),
-        ),
-      ),
+      home: const HomePage(),
     );
   }
 }

@@ -1,9 +1,45 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tongtu/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tongtu/core/core_controller.dart';
+import 'package:tongtu/ui/home_page.dart';
+
+/// 测试用 CoreController 假实现（不触碰 Platform Channel）。
+class _FakeController implements CoreController {
+  final StreamController<CoreState> _ctrl = StreamController<CoreState>.broadcast();
+
+  @override
+  Stream<CoreState> get stateStream => _ctrl.stream;
+
+  @override
+  CoreState get state => CoreState.stopped;
+
+  @override
+  Future<void> start({
+    required String configYAML,
+    required int controllerPort,
+    required String controllerSecret,
+  }) async {}
+
+  @override
+  Future<void> stop() async {}
+}
 
 void main() {
-  testWidgets('应用骨架可渲染', (tester) async {
-    await tester.pumpWidget(const TongtuApp());
-    expect(find.text('通途 · M1 骨架'), findsOneWidget);
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('主界面渲染订阅输入、连接控件与状态', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    await tester.pumpWidget(
+      MaterialApp(home: HomePage(controller: _FakeController())),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('订阅链接'), findsOneWidget);
+    expect(find.text('连接'), findsOneWidget);
+    expect(find.text('断开'), findsOneWidget);
+    expect(find.textContaining('未连接'), findsOneWidget);
   });
 }
