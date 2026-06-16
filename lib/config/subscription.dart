@@ -66,7 +66,10 @@ class SubscriptionStore {
           )
           .timeout(const Duration(seconds: 15));
       if (resp.statusCode != 200) {
-        return SubscriptionInfo(ok: false, message: '获取失败：HTTP ${resp.statusCode}');
+        return SubscriptionInfo(
+          ok: false,
+          message: '获取失败：HTTP ${resp.statusCode}',
+        );
       }
       return _parseUserInfo(resp.headers['subscription-userinfo']);
     } on Exception catch (e) {

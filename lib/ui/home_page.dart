@@ -4,15 +4,14 @@ import 'package:flutter/material.dart';
 
 import '../config/runtime_config.dart';
 import '../config/subscription.dart';
-import '../core/apple_core_controller.dart';
 import '../core/core_controller.dart';
 
-/// M1 最小连接界面：获取配置（拉取订阅验证）、连接/断开、隧道状态与内存指标显示。
+/// 连接页：获取配置（拉取订阅验证）、连接/断开、隧道状态与内存指标显示。
+/// CoreController 由 HomeShell 持有并注入（多页共享同一实例）。
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, CoreController? controller})
-    : _injectedController = controller;
+  const HomePage({super.key, required this.controller});
 
-  final CoreController? _injectedController;
+  final CoreController controller;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -33,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _controller = widget._injectedController ?? AppleCoreController();
+    _controller = widget.controller;
     _urlController.addListener(_onUrlChanged);
     _controller.stateStream.listen((CoreState state) {
       if (!mounted) {
@@ -162,67 +161,64 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('通途')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            TextField(
-              controller: _urlController,
-              decoration: const InputDecoration(
-                labelText: '订阅链接',
-                hintText: 'https://...',
-                border: OutlineInputBorder(),
-              ),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          TextField(
+            controller: _urlController,
+            decoration: const InputDecoration(
+              labelText: '订阅链接',
+              hintText: 'https://...',
+              border: OutlineInputBorder(),
             ),
+          ),
+          const SizedBox(height: 12),
+          FilledButton.tonalIcon(
+            onPressed: _canFetch ? _fetchConfig : null,
+            icon: _fetching
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.cloud_download_outlined),
+            label: Text(_fetching ? '获取中…' : '获取配置'),
+          ),
+          if (_info != null) ...<Widget>[
             const SizedBox(height: 12),
-            FilledButton.tonalIcon(
-              onPressed: _canFetch ? _fetchConfig : null,
-              icon: _fetching
-                  ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.cloud_download_outlined),
-              label: Text(_fetching ? '获取中…' : '获取配置'),
-            ),
-            if (_info != null) ...<Widget>[
-              const SizedBox(height: 12),
-              _buildInfoCard(_info!),
-            ],
-            const SizedBox(height: 16),
-            Text('状态：${_stateText(_state)}'),
-            if (_memory != null) ...<Widget>[
-              const SizedBox(height: 8),
-              _buildMemoryCard(_memory!),
-            ],
-            const SizedBox(height: 16),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: FilledButton(
-                    onPressed: _canConnect ? _connect : null,
-                    child: const Text('连接'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: _state == CoreState.stopped ? null : _disconnect,
-                    child: const Text('断开'),
-                  ),
-                ),
-              ],
-            ),
-            if (_message != null) ...<Widget>[
-              const SizedBox(height: 16),
-              Text(_message!, style: const TextStyle(color: Colors.red)),
-            ],
+            _buildInfoCard(_info!),
           ],
-        ),
+          const SizedBox(height: 16),
+          Text('状态：${_stateText(_state)}'),
+          if (_memory != null) ...<Widget>[
+            const SizedBox(height: 8),
+            _buildMemoryCard(_memory!),
+          ],
+          const SizedBox(height: 16),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: FilledButton(
+                  onPressed: _canConnect ? _connect : null,
+                  child: const Text('连接'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: _state == CoreState.stopped ? null : _disconnect,
+                  child: const Text('断开'),
+                ),
+              ),
+            ],
+          ),
+          if (_message != null) ...<Widget>[
+            const SizedBox(height: 16),
+            Text(_message!, style: const TextStyle(color: Colors.red)),
+          ],
+        ],
       ),
     );
   }
@@ -252,7 +248,9 @@ class _HomePageState extends State<HomePage> {
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Expanded(child: Text(info.message ?? (info.ok ? '订阅可达' : '获取失败'))),
+                Expanded(
+                  child: Text(info.message ?? (info.ok ? '订阅可达' : '获取失败')),
+                ),
               ],
             ),
             for (final String line in lines) ...<Widget>[
@@ -318,7 +316,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   static String _formatExpire(int unixSeconds) {
-    final DateTime date = DateTime.fromMillisecondsSinceEpoch(unixSeconds * 1000);
+    final DateTime date = DateTime.fromMillisecondsSinceEpoch(
+      unixSeconds * 1000,
+    );
     final String month = date.month.toString().padLeft(2, '0');
     final String day = date.day.toString().padLeft(2, '0');
     return '${date.year}-$month-$day';

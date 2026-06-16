@@ -74,9 +74,15 @@ void main() {
     });
 
     test('Traffic / LogEntry / ConnectionItem 解析', () {
-      expect(Traffic.fromJson(<String, dynamic>{'up': 100, 'down': 200}).up, 100);
       expect(
-        LogEntry.fromJson(<String, dynamic>{'type': 'info', 'payload': 'hi'}).payload,
+        Traffic.fromJson(<String, dynamic>{'up': 100, 'down': 200}).up,
+        100,
+      );
+      expect(
+        LogEntry.fromJson(<String, dynamic>{
+          'type': 'info',
+          'payload': 'hi',
+        }).payload,
         'hi',
       );
       final ConnectionItem conn = ConnectionItem.fromJson(<String, dynamic>{

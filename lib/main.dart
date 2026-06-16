@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'ui/home_page.dart';
+import 'ui/home_shell.dart';
 
 void main() {
   runApp(const TongtuApp());
@@ -17,7 +17,7 @@ class TongtuApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
       ),
-      home: const HomePage(),
+      home: const HomeShell(),
     );
   }
 }

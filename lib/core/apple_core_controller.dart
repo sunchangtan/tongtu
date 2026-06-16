@@ -10,9 +10,11 @@ import 'core_controller.dart';
 /// 隧道状态经事件通道回传 Dart。external-controller 端口/secret 在 start 内部
 /// 随机生成并持有（供 clash-api 复用），同时注入扩展。
 class AppleCoreController implements CoreController {
-  AppleCoreController({MethodChannel? methodChannel, EventChannel? eventChannel})
-    : _method = methodChannel ?? const MethodChannel(_methodName),
-      _events = eventChannel ?? const EventChannel(_eventName) {
+  AppleCoreController({
+    MethodChannel? methodChannel,
+    EventChannel? eventChannel,
+  }) : _method = methodChannel ?? const MethodChannel(_methodName),
+       _events = eventChannel ?? const EventChannel(_eventName) {
     _subscription = _events.receiveBroadcastStream().listen(_onNativeState);
   }
 
@@ -56,8 +58,8 @@ class AppleCoreController implements CoreController {
 
   @override
   Future<MemorySnapshot?> memorySnapshot() async {
-    final Map<dynamic, dynamic>? raw =
-        await _method.invokeMapMethod<dynamic, dynamic>('memory');
+    final Map<dynamic, dynamic>? raw = await _method
+        .invokeMapMethod<dynamic, dynamic>('memory');
     if (raw == null) {
       return null;
     }

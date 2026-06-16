@@ -184,6 +184,24 @@ class ClashApi {
     return (body['delay'] as num?)?.toInt() ?? 0;
   }
 
+  /// 查询当前活动连接快照。
+  Future<List<ConnectionItem>> getConnections() async {
+    final http.Response resp = await _client.get(
+      _rest('/connections'),
+      headers: _headers,
+    );
+    if (resp.statusCode != 200) {
+      throw ClashApiException('查询连接失败：HTTP ${resp.statusCode}');
+    }
+    final Map<String, dynamic> body =
+        jsonDecode(resp.body) as Map<String, dynamic>;
+    final List<dynamic> conns =
+        (body['connections'] as List<dynamic>?) ?? <dynamic>[];
+    return conns
+        .map((dynamic c) => ConnectionItem.fromJson(c as Map<String, dynamic>))
+        .toList();
+  }
+
   /// 实时流量速率（WebSocket）。
   Stream<Traffic> trafficStream() =>
       _wsStream('/traffic').map(Traffic.fromJson);
@@ -192,8 +210,9 @@ class ClashApi {
   Stream<LogEntry> logsStream() => _wsStream('/logs').map(LogEntry.fromJson);
 
   Stream<Map<String, dynamic>> _wsStream(String path) {
-    final Uri uri = Uri.parse('${_endpoint.baseUrl(websocket: true)}$path')
-        .replace(queryParameters: <String, String>{'token': _endpoint.secret});
+    final Uri uri = Uri.parse(
+      '${_endpoint.baseUrl(websocket: true)}$path',
+    ).replace(queryParameters: <String, String>{'token': _endpoint.secret});
     final WebSocketChannel channel = WebSocketChannel.connect(uri);
     return channel.stream.map(
       (dynamic event) => jsonDecode(event as String) as Map<String, dynamic>,
