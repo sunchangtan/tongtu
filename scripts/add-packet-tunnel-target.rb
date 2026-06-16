@@ -71,6 +71,10 @@ embed = runner.copy_files_build_phases.find { |p| p.symbol_dst_subfolder_spec ==
 embed ||= runner.new_copy_files_build_phase('Embed App Extensions')
 embed.symbol_dst_subfolder_spec = :plug_ins
 embed.add_file_reference(ext.product_reference)
+# 把 Embed App Extensions 移到 Flutter 的 "Thin Binary" 相位之前，否则 Xcode 报 "Cycle inside Runner"
+runner.build_phases.delete(embed)
+thin_index = runner.build_phases.index { |ph| ph.display_name == 'Thin Binary' }
+runner.build_phases.insert(thin_index || runner.build_phases.size, embed)
 # Runner 含 Flutter 注入的依赖项（target 可能为 nil），xcodeproj 的 add_dependency 遍历时会崩；
 # embed 阶段已引用扩展产物，Xcode 据此自动推断构建顺序，故显式依赖失败可安全跳过。
 begin

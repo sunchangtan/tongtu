@@ -14,10 +14,10 @@
 
 ## 3. 统一内核控制抽象与 Platform Channel
 
-- [ ] 3.1 定义 CoreController(Dart) 抽象接口与状态枚举（stopped/connecting/connected/error），含状态流
-- [ ] 3.2 实现 apple_core_controller：MethodChannel 启停 + EventChannel 状态回流
-- [ ] 3.3 原生 Swift 侧：MethodChannel handler 经 NETunnelProviderManager 启停隧道、隧道状态经 EventChannel 上报
-- [ ] 3.4 Dart 单元测试：CoreController 状态机与 Channel 协议（mock channel），覆盖 flutter-app-shell 场景
+- [x] 3.1 定义 CoreController(Dart) 抽象接口与状态枚举（stopped/connecting/connected/error），含状态流
+- [x] 3.2 实现 apple_core_controller：MethodChannel 启停 + EventChannel 状态回流
+- [x] 3.3 原生 Swift 侧：MethodChannel handler 经 NETunnelProviderManager 启停隧道、隧道状态经 EventChannel 上报
+- [x] 3.4 Dart 单元测试：CoreController 状态机与 Channel 协议（mock channel），覆盖 flutter-app-shell 场景
 
 ## 4. 订阅导入与运行时配置生成
 
