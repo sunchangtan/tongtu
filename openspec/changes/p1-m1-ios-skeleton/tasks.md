@@ -35,5 +35,5 @@
 
 - [ ] 6.1 真机：导入真实订阅 → 连接 → 经代理节点出站连通（浏览器打开需代理的站点）
 - [ ] 6.2 真机：满负载内存复测，确认仍满足常驻 < 40MiB / 峰值 < 50MiB（沿用 P0 方法与 phys_footprint 自报）
-- [ ] 6.3 质量门禁：swiftlint --strict + dart analyze + go vet 全绿，第一方 0 警告
+- [x] 6.3 质量门禁：swiftlint --strict + dart analyze + go vet 全绿，第一方 0 警告
 - [ ] 6.4 更新进度文档与报告，openspec validate p1-m1-ios-skeleton 通过，准备 archive
