@@ -6,7 +6,8 @@ import Combine
 @MainActor
 final class TunnelManager: ObservableObject {
     @Published var status: NEVPNStatus = .invalid
-    @Published var memoryText: String = "—"
+    @Published var footprintText: String = "—"   // phys_footprint：jetsam 50MiB 红线判据
+    @Published var memoryText: String = "—"        // 内核 Go 堆 HeapAlloc：辅助趋势
     @Published var startResult: String = "—"
     @Published var lastError: String?
 
@@ -89,21 +90,33 @@ final class TunnelManager: ObservableObject {
             }
     }
 
-    /// 轮询读取扩展写入的内存指标（新鲜度 ≤10s 判定）
+    /// 轮询读取扩展写入的内存指标（新鲜度 ≤10s 判定）：
+    /// footprintText = phys_footprint（jetsam 红线判据），memoryText = 内核 Go 堆（辅助趋势）
     private func startMemoryPolling() {
         memoryTimer?.invalidate()
         memoryTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
             Task { @MainActor in
                 self.startResult = SharedStore.lastStartResult.isEmpty ? "—" : SharedStore.lastStartResult
                 let age = Date().timeIntervalSince1970 - SharedStore.memoryStatsAt
-                guard age <= 10, let data = SharedStore.memoryStatsJSON.data(using: .utf8),
-                      let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                      let total = obj["totalSys"] as? NSNumber else {
+                guard age <= 10 else {
+                    self.footprintText = "—（数据过期）"
                     self.memoryText = "—（数据过期）"
                     return
                 }
-                let mib = Double(truncating: total) / 1024 / 1024
-                self.memoryText = String(format: "%.1f MiB（采集于 %.0fs 前）", mib, age)
+                // phys_footprint：50MiB jetsam 红线判据
+                let footprintMiB = Double(SharedStore.physFootprintBytes) / 1024 / 1024
+                self.footprintText = footprintMiB > 0
+                    ? String(format: "%.1f MiB（红线 50 / 常驻 40）", footprintMiB)
+                    : "—"
+                // 内核 Go 堆 HeapAlloc（实际活跃堆，区别于 totalSys 的虚拟保留）：辅助趋势
+                if let data = SharedStore.memoryStatsJSON.data(using: .utf8),
+                   let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   let heap = obj["heapAlloc"] as? NSNumber {
+                    let mib = Double(truncating: heap) / 1024 / 1024
+                    self.memoryText = String(format: "%.1f MiB（采集 %.0fs 前）", mib, age)
+                } else {
+                    self.memoryText = "—"
+                }
             }
         }
     }

@@ -19,8 +19,12 @@ struct ContentView: View {
 
             VStack(spacing: 8) {
                 Text("隧道状态：\(tunnel.statusDescription)")
-                Text("扩展内存：\(tunnel.memoryText)")
+                Text("扩展 Footprint：\(tunnel.footprintText)")
                     .font(.system(.body, design: .monospaced))
+                    .bold()
+                Text("内核 Go 堆：\(tunnel.memoryText)")
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundColor(.secondary)
                 Text("内核启动：\(tunnel.startResult)")
                     .font(.caption)
                     .multilineTextAlignment(.center)

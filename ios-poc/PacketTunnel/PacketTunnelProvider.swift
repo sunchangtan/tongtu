@@ -94,6 +94,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
     private func startMemoryReporting() {
         let timer = Timer(timeInterval: 5, repeats: true) { _ in
             SharedStore.memoryStatsJSON = MihomocoreMemoryStats()
+            SharedStore.physFootprintBytes = ProcessMemory.physFootprintBytes()
             SharedStore.memoryStatsAt = Date().timeIntervalSince1970
         }
         RunLoop.main.add(timer, forMode: .common)
