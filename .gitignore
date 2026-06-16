@@ -22,3 +22,23 @@ DerivedData/
 # Xcode 工程（由 xcodegen 从 project.yml 生成）
 ios-poc/*.xcodeproj
 ios-poc/DerivedData/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+# IntelliJ / Android Studio（Flutter 生成）
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Flutter iOS 生成物（CocoaPods 与构建中间产物）
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/ephemeral/
+ios/Pods/
+ios/.symlinks/

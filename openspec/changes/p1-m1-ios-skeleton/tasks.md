@@ -1,8 +1,8 @@
 ## 1. Flutter 工程脚手架
 
-- [ ] 1.1 仓库根创建 Flutter 工程（保留现有 core-bridge/ios-poc/openspec/docs），配置 pubspec 基础依赖
-- [ ] 1.2 建立 lib/ 目录结构（core/config/ui，对齐 architecture.md §7）
-- [ ] 1.3 配置 Dart analyzer 关键项升 error（质量门禁），可跑 dart analyze 零问题
+- [x] 1.1 仓库根创建 Flutter 工程（保留现有 core-bridge/ios-poc/openspec/docs），配置 pubspec 基础依赖
+- [x] 1.2 建立 lib/ 目录结构（core/config/ui，对齐 architecture.md §7）
+- [x] 1.3 配置 Dart analyzer 关键项升 error（质量门禁），可跑 dart analyze 零问题
 
 ## 2. NE 扩展迁入与生产化
 
