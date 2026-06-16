@@ -6,11 +6,11 @@
 
 ## 2. NE 扩展迁入与生产化
 
-- [ ] 2.1 在 Flutter ios/ 工程加入 PacketTunnel 扩展 target + App Group + NE entitlement（敲定加 target 的稳定方式：手动 pbxproj 或 xcodegen）
-- [ ] 2.2 迁入 ios-poc 扩展 Swift 代码（PacketTunnelProvider/TunFD/InterfaceMonitor/SharedStore/ProcessMemory）至 ios/PacketTunnel
-- [ ] 2.3 扩展链接复用 core-bridge 的 MihomoCore.xcframework（不改 Go 代码）
-- [ ] 2.4 去除 PoC 包袱：移除固定 9090/写死 secret/TONGTU_STRESS/内联 demoConfig，改为读取 App Group 注入的端口/secret/运行时配置
-- [ ] 2.5 真机复测数据通路（直连打开网页），确认 4 个沙盒坑修复随迁移无回归
+- [x] 2.1 在 Flutter ios/ 工程加入 PacketTunnel 扩展 target + App Group + NE entitlement（脚本化 scripts/add-packet-tunnel-target.rb，xcodeproj gem）
+- [x] 2.2 迁入 ios-poc 扩展 Swift 代码（PacketTunnelProvider/TunFD/InterfaceMonitor/SharedStore/ProcessMemory）至 ios/PacketTunnel、ios/Shared
+- [x] 2.3 扩展链接复用 core-bridge 的 MihomoCore.xcframework（不改 Go 代码）
+- [x] 2.4 去除 PoC 包袱：移除固定 9090/写死 secret，改为读取 App Group 注入的端口/secret（运行时 configYAML 由主 App 写）
+- [ ] 2.5 真机复测数据通路（直连打开网页），确认 4 个沙盒坑修复随迁移无回归（依赖 3-5 app 可连接，随任务 6 真机一并验证）
 
 ## 3. 统一内核控制抽象与 Platform Channel
 
