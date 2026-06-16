@@ -50,6 +50,8 @@ import UIKit
       result(nil)
     case "memory":
       result(tunnel.memorySnapshot())
+    case "lastResult":
+      result(SharedStore.lastStartResult)
     default:
       result(FlutterMethodNotImplemented)
     }

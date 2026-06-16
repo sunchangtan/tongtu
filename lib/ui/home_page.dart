@@ -27,18 +27,21 @@ class _HomePageState extends State<HomePage> {
   SubscriptionInfo? _info;
   MemorySnapshot? _memory;
   Timer? _memoryTimer;
+  Timer? _connectTimer;
   String? _message;
 
   @override
   void initState() {
     super.initState();
     _controller = widget._injectedController ?? AppleCoreController();
+    _urlController.addListener(_onUrlChanged);
     _controller.stateStream.listen((CoreState state) {
       if (!mounted) {
         return;
       }
       setState(() => _state = state);
       if (state == CoreState.connected) {
+        _connectTimer?.cancel();
         _startMemoryPolling();
       } else {
         _stopMemoryPolling();
@@ -46,6 +49,20 @@ class _HomePageState extends State<HomePage> {
     });
     _loadSubscription();
   }
+
+  void _onUrlChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
+  bool get _canFetch =>
+      SubscriptionStore.isValidUrl(_urlController.text) && !_fetching;
+
+  bool get _canConnect =>
+      SubscriptionStore.isValidUrl(_urlController.text) &&
+      _state != CoreState.connected &&
+      _state != CoreState.connecting;
 
   Future<void> _loadSubscription() async {
     final String? url = await _subscriptions.load();
@@ -70,6 +87,22 @@ class _HomePageState extends State<HomePage> {
     if (mounted) {
       setState(() => _memory = null);
     }
+  }
+
+  /// 连接超时检测：15 秒未建立隧道则读取扩展诊断（内核启动失败原因）并提示。
+  void _scheduleConnectTimeout() {
+    _connectTimer?.cancel();
+    _connectTimer = Timer(const Duration(seconds: 15), () async {
+      if (!mounted || _state == CoreState.connected) {
+        return;
+      }
+      final String diag = await _controller.lastResult();
+      if (mounted) {
+        setState(() {
+          _message = diag.isNotEmpty ? diag : '连接超时（15 秒未建立隧道）';
+        });
+      }
+    });
   }
 
   Future<void> _fetchConfig() async {
@@ -107,6 +140,7 @@ class _HomePageState extends State<HomePage> {
         controllerPort: RuntimeConfig.generatePort(),
         controllerSecret: RuntimeConfig.generateSecret(),
       );
+      _scheduleConnectTimeout();
     } on Exception catch (e) {
       if (mounted) {
         setState(() => _message = e.toString());
@@ -115,12 +149,15 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _disconnect() async {
+    _connectTimer?.cancel();
     await _controller.stop();
   }
 
   @override
   void dispose() {
+    _connectTimer?.cancel();
     _memoryTimer?.cancel();
+    _urlController.removeListener(_onUrlChanged);
     _urlController.dispose();
     super.dispose();
   }
@@ -144,7 +181,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 12),
             FilledButton.tonalIcon(
-              onPressed: _fetching ? null : _fetchConfig,
+              onPressed: _canFetch ? _fetchConfig : null,
               icon: _fetching
                   ? const SizedBox(
                       width: 16,
@@ -169,7 +206,7 @@ class _HomePageState extends State<HomePage> {
               children: <Widget>[
                 Expanded(
                   child: FilledButton(
-                    onPressed: _state == CoreState.connected ? null : _connect,
+                    onPressed: _canConnect ? _connect : null,
                     child: const Text('连接'),
                   ),
                 ),

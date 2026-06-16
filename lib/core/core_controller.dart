@@ -43,4 +43,7 @@ abstract class CoreController {
 
   /// 读取扩展进程内存快照；未运行或无数据时返回 null。
   Future<MemorySnapshot?> memorySnapshot();
+
+  /// 读取最近一次内核启动结果诊断（来自扩展，绕过真机日志通道）。
+  Future<String> lastResult();
 }

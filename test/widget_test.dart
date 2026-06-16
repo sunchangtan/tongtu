@@ -28,6 +28,9 @@ class _FakeController implements CoreController {
 
   @override
   Future<MemorySnapshot?> memorySnapshot() async => null;
+
+  @override
+  Future<String> lastResult() async => '';
 }
 
 void main() {

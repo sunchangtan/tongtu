@@ -78,5 +78,17 @@ void main() {
       expect(snapshot.goHeapBytes, 8388608);
       await controller.dispose();
     });
+
+    test('lastResult 经 MethodChannel 读取启动诊断', () async {
+      messenger.setMockMethodCallHandler(method, (MethodCall call) async {
+        if (call.method == 'lastResult') {
+          return '✅ 内核已启动';
+        }
+        return null;
+      });
+      final AppleCoreController controller = AppleCoreController();
+      expect(await controller.lastResult(), '✅ 内核已启动');
+      await controller.dispose();
+    });
   });
 }

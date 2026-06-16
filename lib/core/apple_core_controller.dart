@@ -60,6 +60,12 @@ class AppleCoreController implements CoreController {
     );
   }
 
+  @override
+  Future<String> lastResult() async {
+    final String? result = await _method.invokeMethod<String>('lastResult');
+    return result ?? '';
+  }
+
   void _onNativeState(dynamic event) {
     final CoreState? next = _parseState(event);
     if (next != null) {
