@@ -43,3 +43,6 @@ ios/Flutter/flutter_export_environment.sh
 ios/Flutter/ephemeral/
 ios/Pods/
 ios/.symlinks/
+
+# FVM Flutter 版本管理（.fvmrc 入库锁版本，.fvm/ 本地缓存与符号链接忽略）
+.fvm/
