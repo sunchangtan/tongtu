@@ -29,6 +29,7 @@ ios-poc/DerivedData/
 .flutter-plugins-dependencies
 .pub-cache/
 .pub/
+devtools_options.yaml
 
 # IntelliJ / Android Studio（Flutter 生成）
 *.iml
