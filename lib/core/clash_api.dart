@@ -53,6 +53,7 @@ class LogEntry {
     : time = time ?? DateTime.now();
 
   factory LogEntry.fromJson(Map<String, dynamic> json) {
+    // 刻意不传 time：mihomo /logs 不下发时间戳，由构造函数默认取「收到时刻」。
     return LogEntry(
       type: json['type'] as String? ?? 'info',
       payload: json['payload'] as String? ?? '',

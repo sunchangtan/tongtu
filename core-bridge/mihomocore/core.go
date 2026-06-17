@@ -45,13 +45,19 @@ type coreOverrides struct {
 	LogDir             string `json:"log-dir"`             // 日志落盘目录（App Group 容器内），空则不落盘
 }
 
+// 日志滚动限容常量：硬约束「绝不无限增长」的唯一事实源，生产代码与测试共用，
+// 避免两处各写一份 magic number 靠注释同步而失配。
+const (
+	logMaxSizeMiB = 1 // 单文件上限（MiB）
+	logMaxBackups = 4 // 保留旧文件数（叠加当前文件，总量约 5 MiB 封顶）
+)
+
 var (
 	mu            sync.Mutex
 	state         = "stopped"
 	lastOverrides coreOverrides // Reload 复用上次启动的覆写项
 	freeOSStop    chan struct{}
-	logSub        observable.Subscription[log.Event] // 内核日志订阅（落盘）
-	logWriter     *lumberjack.Logger                 // 滚动日志写入器
+	logSub        observable.Subscription[log.Event] // 内核日志订阅（落盘，供 stop 取消）
 	logDone       chan struct{}                      // 落盘 goroutine 收尾信号
 )
 
@@ -78,6 +84,7 @@ func Start(configYAML string, overridesJSON string) error {
 
 	state = "starting"
 	if err := applyConfig(configYAML, ov); err != nil {
+		stopLogPersist() // 失败清理：避免日志订阅与落盘 goroutine 泄漏（回压会卡内核）
 		state = "stopped"
 		return err
 	}
@@ -85,6 +92,7 @@ func Start(configYAML string, overridesJSON string) error {
 	// 用完整 HTTP 请求而非 TCP 拨测：保证上游 start() 已执行到 Serve（httpServer 赋值完成），
 	// 规避上游 ReCreateServer 异步 goroutine 对全局 httpServer 的竞争窗口（详见 README 已知问题）。
 	if ov.ExternalController != "" && !waitControllerReady(ov.ExternalController, ov.Secret, 3*time.Second) {
+		stopLogPersist() // 失败清理：同上
 		state = "stopped"
 		return errors.New("外部控制器启动超时: " + ov.ExternalController)
 	}
@@ -258,17 +266,19 @@ func startLogPersist(logDir string) {
 	if logDir == "" {
 		return
 	}
-	logWriter = &lumberjack.Logger{
+	// 用局部变量供 goroutine 捕获：避免重复 Start 覆盖全局后，残留的旧 goroutine
+	// 误关闭/误写当前轮的 channel 与 writer（防 close-of-closed-channel panic 与日志串档）。
+	writer := &lumberjack.Logger{
 		Filename:   filepath.Join(logDir, "core.log"),
-		MaxSize:    1, // MiB（单文件上限）
-		MaxBackups: 4, // 保留旧文件数（总量约 5 MiB 封顶，绝不无限增长）
+		MaxSize:    logMaxSizeMiB, // 单文件上限
+		MaxBackups: logMaxBackups, // 保留旧文件数（总量约 5 MiB 封顶，绝不无限增长）
 		Compress:   false,
 	}
-	logSub = log.Subscribe()
-	logDone = make(chan struct{})
+	sub := log.Subscribe()
+	done := make(chan struct{})
 	internal := make(chan log.Event, 1000)
 	go func() { // A：瞬时排空订阅，绝不回压内核
-		for ev := range logSub {
+		for ev := range sub {
 			select {
 			case internal <- ev:
 			default: // 内部缓冲满，丢弃以保护内核（宁丢日志不卡内核）
@@ -277,13 +287,17 @@ func startLogPersist(logDir string) {
 		close(internal)
 	}()
 	go func() { // B：从内部缓冲写文件（慢也只影响落盘，不回压内核）
-		defer close(logDone)
+		defer close(done)
+		defer func() { _ = writer.Close() }() // 先于 close(done) 执行：done 信号时 writer 已关闭
 		for ev := range internal {
 			line := fmt.Sprintf("%s [%s] %s\n",
 				time.Now().Format("2006-01-02T15:04:05.000"), ev.Type(), ev.Payload)
-			_, _ = logWriter.Write([]byte(line))
+			_, _ = writer.Write([]byte(line))
 		}
 	}()
+	// 全局仅记录当前轮，供 stopLogPersist 取消订阅与等待收尾
+	logSub = sub
+	logDone = done
 }
 
 // stopLogPersist 取消订阅并等待落盘 goroutine 收尾，最后关闭写入器。
@@ -291,11 +305,9 @@ func stopLogPersist() {
 	if logSub == nil {
 		return
 	}
-	log.UnSubscribe(logSub) // 关闭订阅 channel → A 退出 → close(internal) → B 退出
-	<-logDone               // 等 B 收尾，避免写已关闭的 writer
-	_ = logWriter.Close()
+	log.UnSubscribe(logSub) // 关闭订阅 channel → A 退出 → close(internal) → B 退出（B 自行关闭 writer）
+	<-logDone               // 等 B 收尾
 	logSub = nil
-	logWriter = nil
 	logDone = nil
 }
 

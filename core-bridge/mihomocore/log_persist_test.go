@@ -35,25 +35,66 @@ func TestLogPersist_WritesToFile(t *testing.T) {
 // 场景：空目录不落盘（不订阅，避免无谓回压风险）；stop 幂等不 panic
 func TestLogPersist_EmptyDirNoop(t *testing.T) {
 	startLogPersist("")
-	if logSub != nil || logWriter != nil {
+	if logSub != nil || logDone != nil {
 		t.Fatal("空目录不应初始化落盘")
 	}
 	stopLogPersist()
 }
 
-// 场景：滚动配置正确 —— 单文件 1 MiB、保留 4 个旧文件
-func TestLogPersist_RotationConfig(t *testing.T) {
+// 场景：重复 start/stop 配对不 panic，且 stop 后全局清空、重复 stop 幂等
+// （守护修复：goroutine 捕获局部 writer/sub/done，不因重复 Start 误关上一轮
+//  channel 触发 close-of-closed-channel panic；stopLogPersist 首句 nil 判空幂等）。
+func TestLogPersist_RepeatStartStopNoPanic(t *testing.T) {
 	dir := t.TempDir()
-	startLogPersist(dir)
-	defer stopLogPersist()
-	if logWriter == nil {
-		t.Fatal("logWriter 未初始化")
+	for i := 0; i < 5; i++ {
+		startLogPersist(dir) // 同一目录反复开关，兼测重开同一 core.log 不出错
+		for j := 0; j < 20; j++ {
+			log.Warnln("轮次-%d-日志-%d", i, j)
+		}
+		stopLogPersist() // 同步等本轮 goroutine 收尾
+		if logSub != nil || logDone != nil {
+			t.Fatalf("第 %d 轮 stop 后全局应清空", i)
+		}
 	}
-	if logWriter.MaxSize != 1 {
-		t.Errorf("MaxSize=%d, 期望 1 MiB", logWriter.MaxSize)
+	stopLogPersist() // 已停止状态重复 stop，幂等不 panic
+}
+
+// 场景：连续两轮落盘到不同目录，各自独立、互不串档
+// （守护修复：writer 为 goroutine 捕获的局部变量，旧轮不会写进新目录、新轮不写回旧目录）。
+func TestLogPersist_NoCrossContamination(t *testing.T) {
+	dir1 := t.TempDir()
+	startLogPersist(dir1)
+	for i := 0; i < 30; i++ {
+		log.Warnln("第一轮-标记-%d", i)
 	}
-	if logWriter.MaxBackups != 4 {
-		t.Errorf("MaxBackups=%d, 期望 4", logWriter.MaxBackups)
+	stopLogPersist()
+
+	dir2 := t.TempDir()
+	startLogPersist(dir2)
+	for i := 0; i < 30; i++ {
+		log.Warnln("第二轮-标记-%d", i)
+	}
+	stopLogPersist()
+
+	d1, err := os.ReadFile(filepath.Join(dir1, "core.log"))
+	if err != nil {
+		t.Fatalf("读第一轮日志失败: %v", err)
+	}
+	d2, err := os.ReadFile(filepath.Join(dir2, "core.log"))
+	if err != nil {
+		t.Fatalf("读第二轮日志失败: %v", err)
+	}
+	if !strings.Contains(string(d1), "第一轮-标记") {
+		t.Error("第一轮目录缺少第一轮日志")
+	}
+	if strings.Contains(string(d1), "第二轮-标记") {
+		t.Error("第一轮目录串入第二轮日志（writer 未隔离）")
+	}
+	if !strings.Contains(string(d2), "第二轮-标记") {
+		t.Error("第二轮目录缺少第二轮日志")
+	}
+	if strings.Contains(string(d2), "第一轮-标记") {
+		t.Error("第二轮目录串入第一轮日志（writer 未隔离）")
 	}
 }
 
@@ -61,9 +102,10 @@ func TestLogPersist_RotationConfig(t *testing.T) {
 func TestLogRotation_CapsTotalSize(t *testing.T) {
 	dir := t.TempDir()
 	w := &lumberjack.Logger{
-		Filename:   filepath.Join(dir, "core.log"),
-		MaxSize:    1, // 与 startLogPersist 一致
-		MaxBackups: 4,
+		Filename: filepath.Join(dir, "core.log"),
+		// 直接复用生产常量：保证测的就是 startLogPersist 实际滚动配置，而非另写一份
+		MaxSize:    logMaxSizeMiB,
+		MaxBackups: logMaxBackups,
 	}
 	line := []byte(strings.Repeat("x", 1024) + "\n")
 	for i := 0; i < 6*1024; i++ { // 写约 6 MiB，触发多次滚动

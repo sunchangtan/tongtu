@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../config/runtime_config.dart';
 import '../config/subscription.dart';
 import '../core/core_controller.dart';
+import '../util/format.dart';
 
 /// 连接页：获取配置（拉取订阅验证）、连接/断开、隧道状态与内存指标显示。
 /// CoreController 由 HomeShell 持有并注入（多页共享同一实例）。
@@ -289,7 +290,7 @@ class _HomePageState extends State<HomePage> {
     final int? total = info.total;
     if (total != null) {
       final int used = (info.upload ?? 0) + (info.download ?? 0);
-      lines.add('流量：${_formatBytes(used)} / ${_formatBytes(total)}');
+      lines.add('流量：${formatBytes(used)} / ${formatBytes(total)}');
     }
     final int? expire = info.expire;
     if (expire != null && expire > 0) {
@@ -363,17 +364,6 @@ class _HomePageState extends State<HomePage> {
       case CoreState.error:
         return '错误';
     }
-  }
-
-  static String _formatBytes(int bytes) {
-    const List<String> units = <String>['B', 'KB', 'MB', 'GB', 'TB'];
-    double value = bytes.toDouble();
-    int unit = 0;
-    while (value >= 1024 && unit < units.length - 1) {
-      value /= 1024;
-      unit++;
-    }
-    return '${value.toStringAsFixed(unit == 0 ? 0 : 2)} ${units[unit]}';
   }
 
   static String _formatExpire(int unixSeconds) {

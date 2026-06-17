@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../core/clash_api.dart';
 import '../core/core_controller.dart';
+import '../util/format.dart';
 import 'log_viewer_page.dart';
 
 /// 监控页：实时流量速率（WS）+ 活动连接（REST 轮询）+ 日志流（WS）。
@@ -21,6 +22,7 @@ class MonitorPage extends StatefulWidget {
 
 class _MonitorPageState extends State<MonitorPage> {
   ClashApi? _api;
+  StreamSubscription<CoreState>? _stateSub; // 状态流订阅，dispose 时取消防泄漏
   StreamSubscription<Traffic>? _trafficSub;
   StreamSubscription<LogEntry>? _logSub;
   Timer? _connTimer;
@@ -36,7 +38,7 @@ class _MonitorPageState extends State<MonitorPage> {
   @override
   void initState() {
     super.initState();
-    widget.controller.stateStream.listen((CoreState state) {
+    _stateSub = widget.controller.stateStream.listen((CoreState state) {
       if (!mounted) {
         return;
       }
@@ -143,6 +145,7 @@ class _MonitorPageState extends State<MonitorPage> {
 
   @override
   void dispose() {
+    _stateSub?.cancel();
     _trafficSub?.cancel();
     _logSub?.cancel();
     _connTimer?.cancel();
@@ -270,7 +273,7 @@ class _MonitorPageState extends State<MonitorPage> {
         Text(label, style: const TextStyle(fontSize: 12)),
         const SizedBox(height: 4),
         Text(
-          _formatRate(bytesPerSec),
+          formatRate(bytesPerSec),
           style: const TextStyle(fontWeight: FontWeight.w500),
         ),
       ],
@@ -285,16 +288,5 @@ class _MonitorPageState extends State<MonitorPage> {
         Text(value, style: const TextStyle(fontWeight: FontWeight.w500)),
       ],
     );
-  }
-
-  static String _formatRate(int bytesPerSec) {
-    const List<String> units = <String>['B/s', 'KB/s', 'MB/s'];
-    double value = bytesPerSec.toDouble();
-    int unit = 0;
-    while (value >= 1024 && unit < units.length - 1) {
-      value /= 1024;
-      unit++;
-    }
-    return '${value.toStringAsFixed(unit == 0 ? 0 : 1)} ${units[unit]}';
   }
 }

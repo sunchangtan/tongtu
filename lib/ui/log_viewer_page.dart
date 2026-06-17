@@ -51,6 +51,35 @@ class _LogViewerPageState extends State<LogViewerPage> {
     }
   }
 
+  /// 清空全部落盘日志（含 backups），先弹确认防误删，清空后重载。
+  Future<void> _clear() async {
+    final bool? ok = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext ctx) => AlertDialog(
+        title: const Text('清空日志'),
+        content: const Text('将删除全部落盘日志文件（含历史滚动文件），不可恢复。确定？'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('清空'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) {
+      return;
+    }
+    await _store.clear();
+    if (!mounted) {
+      return;
+    }
+    await _load();
+  }
+
   List<String> get _filtered {
     if (_query.isEmpty) {
       return _allLines;
@@ -75,6 +104,11 @@ class _LogViewerPageState extends State<LogViewerPage> {
             icon: const Icon(Icons.ios_share),
             onPressed: _export,
             tooltip: '导出',
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline),
+            onPressed: _clear,
+            tooltip: '清空',
           ),
         ],
       ),
