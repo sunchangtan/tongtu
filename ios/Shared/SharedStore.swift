@@ -15,18 +15,6 @@ enum SharedStore {
         set { defaults?.set(newValue, forKey: "configYAML") }
     }
 
-    // 主 App 写入、扩展读取：external-controller 监听端口（随机生成，替代 PoC 固定 9090）
-    static var controllerPort: Int {
-        get { defaults?.integer(forKey: "controllerPort") ?? 0 }
-        set { defaults?.set(newValue, forKey: "controllerPort") }
-    }
-
-    // 主 App 写入、扩展读取：external-controller secret（随机生成，替代 PoC UUID）
-    static var controllerSecret: String {
-        get { defaults?.string(forKey: "controllerSecret") ?? "" }
-        set { defaults?.set(newValue, forKey: "controllerSecret") }
-    }
-
     // 扩展写入、主 App 读取：内存指标 JSON（来自 MihomoCore.MemoryStats）
     static var memoryStatsJSON: String {
         get { defaults?.string(forKey: "memoryStatsJSON") ?? "" }

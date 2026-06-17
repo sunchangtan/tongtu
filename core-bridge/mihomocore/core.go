@@ -7,19 +7,24 @@ package mihomocore
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net"
 	"net/http"
+	"path/filepath"
 	"runtime"
 	"runtime/debug"
 	"sync"
 	"time"
 
+	"github.com/metacubex/mihomo/common/observable"
 	"github.com/metacubex/mihomo/config"
 	mihomoConst "github.com/metacubex/mihomo/constant"
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/hub"
 	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/hub/route"
+	"github.com/metacubex/mihomo/log"
+	lumberjack "gopkg.in/natefinch/lumberjack.v2"
 )
 
 // 内存防护默认值（D4；30MiB 为 P0 压测扫描前的暂定档，任务 5.3 确定终值）
@@ -37,6 +42,7 @@ type coreOverrides struct {
 	GoMemLimitMiB      int64  `json:"gomemlimit-mib"`      // GOMEMLIMIT，单位 MiB，0 取默认值
 	GoGC               int    `json:"gogc"`                // GOGC 百分比，0 取默认值
 	TunFD              int    `json:"tun-fd"`              // 外部 TUN 文件描述符（iOS NE 从 packetFlow 取得），>0 时启用 TUN（D3）
+	LogDir             string `json:"log-dir"`             // 日志落盘目录（App Group 容器内），空则不落盘
 }
 
 var (
@@ -44,6 +50,9 @@ var (
 	state         = "stopped"
 	lastOverrides coreOverrides // Reload 复用上次启动的覆写项
 	freeOSStop    chan struct{}
+	logSub        observable.Subscription[log.Event] // 内核日志订阅（落盘）
+	logWriter     *lumberjack.Logger                 // 滚动日志写入器
+	logDone       chan struct{}                      // 落盘 goroutine 收尾信号
 )
 
 // Start 以 YAML 配置启动内核。
@@ -64,6 +73,8 @@ func Start(configYAML string, overridesJSON string) error {
 	if ov.HomeDir != "" {
 		mihomoConst.SetHomeDir(ov.HomeDir)
 	}
+	// 日志落盘须在 applyConfig 之前订阅，确保捕获 proxy-provider 下载等最早日志
+	startLogPersist(ov.LogDir)
 
 	state = "starting"
 	if err := applyConfig(configYAML, ov); err != nil {
@@ -91,6 +102,7 @@ func Stop() error {
 		return nil
 	}
 	stopFreeOSMemoryTimer()
+	stopLogPersist()
 	route.ReCreateServer(&route.Config{}) // 空地址 = 关闭外部控制器监听（异步）
 	executor.Shutdown()                   // 清理入站监听与 TUN
 	// 等待控制器端口真正释放，保证 Stop 返回后端口可立即复用
@@ -236,6 +248,55 @@ func stopFreeOSMemoryTimer() {
 		close(freeOSStop)
 		freeOSStop = nil
 	}
+}
+
+// startLogPersist 订阅内核日志并滚动落盘（lumberjack）。
+// 安全约束（取证 1.1）：内核日志 logCh 无缓冲、Emit 阻塞，慢消费会回压卡内核；
+// 故用两级缓冲——goroutine A 用 select default 瞬时排空订阅（满则丢弃，绝不回压），
+// goroutine B 慢写文件。日志非关键，宁丢不卡内核。
+func startLogPersist(logDir string) {
+	if logDir == "" {
+		return
+	}
+	logWriter = &lumberjack.Logger{
+		Filename:   filepath.Join(logDir, "core.log"),
+		MaxSize:    1, // MiB（单文件上限）
+		MaxBackups: 4, // 保留旧文件数（总量约 5 MiB 封顶，绝不无限增长）
+		Compress:   false,
+	}
+	logSub = log.Subscribe()
+	logDone = make(chan struct{})
+	internal := make(chan log.Event, 1000)
+	go func() { // A：瞬时排空订阅，绝不回压内核
+		for ev := range logSub {
+			select {
+			case internal <- ev:
+			default: // 内部缓冲满，丢弃以保护内核（宁丢日志不卡内核）
+			}
+		}
+		close(internal)
+	}()
+	go func() { // B：从内部缓冲写文件（慢也只影响落盘，不回压内核）
+		defer close(logDone)
+		for ev := range internal {
+			line := fmt.Sprintf("%s [%s] %s\n",
+				time.Now().Format("2006-01-02T15:04:05.000"), ev.Type(), ev.Payload)
+			_, _ = logWriter.Write([]byte(line))
+		}
+	}()
+}
+
+// stopLogPersist 取消订阅并等待落盘 goroutine 收尾，最后关闭写入器。
+func stopLogPersist() {
+	if logSub == nil {
+		return
+	}
+	log.UnSubscribe(logSub) // 关闭订阅 channel → A 退出 → close(internal) → B 退出
+	<-logDone               // 等 B 收尾，避免写已关闭的 writer
+	_ = logWriter.Close()
+	logSub = nil
+	logWriter = nil
+	logDone = nil
 }
 
 // waitPortState 轮询等待 TCP 端口达到期望状态（open=true 等可达，false 等释放），超时返回 false

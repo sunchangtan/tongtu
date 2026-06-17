@@ -28,6 +28,7 @@ class _HomePageState extends State<HomePage> {
   Timer? _memoryTimer;
   Timer? _connectTimer;
   String? _message;
+  String? _diag;
 
   @override
   void initState() {
@@ -38,10 +39,16 @@ class _HomePageState extends State<HomePage> {
       if (!mounted) {
         return;
       }
-      setState(() => _state = state);
+      setState(() {
+        _state = state;
+        if (state != CoreState.connected) {
+          _diag = null;
+        }
+      });
       if (state == CoreState.connected) {
         _connectTimer?.cancel();
         _startMemoryPolling();
+        _loadDiag();
       } else {
         _stopMemoryPolling();
       }
@@ -67,6 +74,15 @@ class _HomePageState extends State<HomePage> {
     final String? url = await _subscriptions.load();
     if (url != null && mounted) {
       _urlController.text = url;
+    }
+  }
+
+  /// 诊断：连接后读取内核启动结果（经 App Group 共享，不走有问题的 loopback），
+  /// 用于真机定位数据通路问题（内核是否启动、tunFD、运行状态）。
+  Future<void> _loadDiag() async {
+    final String diag = await _controller.lastResult();
+    if (mounted) {
+      setState(() => _diag = diag);
     }
   }
 
@@ -150,6 +166,28 @@ class _HomePageState extends State<HomePage> {
     await _controller.stop();
   }
 
+  /// 查看实际下发给内核的 mihomo 配置原文（含订阅 URL 与 proxy-provider），便于诊断。
+  void _showConfig() {
+    final String yaml = RuntimeConfig.generateYAML(
+      subscriptionUrl: _urlController.text.trim(),
+    );
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        title: const Text('下发配置（mihomo YAML）'),
+        content: SingleChildScrollView(
+          child: SelectableText(yaml, style: const TextStyle(fontSize: 12)),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _connectTimer?.cancel();
@@ -161,48 +199,71 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          TextField(
-            controller: _urlController,
-            decoration: const InputDecoration(
-              labelText: '订阅链接',
-              hintText: 'https://...',
-              border: OutlineInputBorder(),
+    // SelectionArea 统一托管文本选择：错误提示等可选中复制，点击空白处自动取消选择，
+    // 子控件（按钮/输入框）点击照常，避免单独用 SelectableText 时的选择手势粘连问题。
+    return SelectionArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            TextField(
+              controller: _urlController,
+              decoration: const InputDecoration(
+                labelText: '订阅链接',
+                hintText: 'https://...',
+                border: OutlineInputBorder(),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          FilledButton.tonalIcon(
-            onPressed: _canFetch ? _fetchConfig : null,
-            icon: _fetching
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.cloud_download_outlined),
-            label: Text(_fetching ? '获取中…' : '获取配置'),
-          ),
-          if (_info != null) ...<Widget>[
             const SizedBox(height: 12),
-            _buildInfoCard(_info!),
-          ],
-          const SizedBox(height: 16),
-          Text('状态：${_stateText(_state)}'),
-          if (_memory != null) ...<Widget>[
+            FilledButton.tonalIcon(
+              onPressed: _canFetch ? _fetchConfig : null,
+              icon: _fetching
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.cloud_download_outlined),
+              label: Text(_fetching ? '获取中…' : '获取配置'),
+            ),
             const SizedBox(height: 8),
-            _buildMemoryCard(_memory!),
-          ],
-          const SizedBox(height: 16),
-          _buildActionButton(),
-          if (_message != null) ...<Widget>[
+            TextButton.icon(
+              onPressed: _showConfig,
+              icon: const Icon(Icons.description_outlined),
+              label: const Text('查看下发配置'),
+            ),
+            if (_info != null) ...<Widget>[
+              const SizedBox(height: 12),
+              _buildInfoCard(_info!),
+            ],
             const SizedBox(height: 16),
-            Text(_message!, style: const TextStyle(color: Colors.red)),
+            Text('状态：${_stateText(_state)}'),
+            if (_memory != null) ...<Widget>[
+              const SizedBox(height: 8),
+              _buildMemoryCard(_memory!),
+            ],
+            const SizedBox(height: 16),
+            _buildActionButton(),
+            if (_diag != null && _diag!.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 12),
+              Card(
+                color: Colors.blue.shade50,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Text(
+                    '主App端口：${_controller.currentEndpoint?.port ?? "?"}\n内核诊断：${_diag!}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ),
+              ),
+            ],
+            if (_message != null) ...<Widget>[
+              const SizedBox(height: 16),
+              Text(_message!, style: const TextStyle(color: Colors.red)),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

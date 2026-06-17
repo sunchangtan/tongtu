@@ -49,7 +49,8 @@ class Traffic {
 
 /// 内核日志条目。
 class LogEntry {
-  const LogEntry({required this.type, required this.payload});
+  LogEntry({required this.type, required this.payload, DateTime? time})
+    : time = time ?? DateTime.now();
 
   factory LogEntry.fromJson(Map<String, dynamic> json) {
     return LogEntry(
@@ -60,6 +61,9 @@ class LogEntry {
 
   final String type;
   final String payload;
+
+  /// 接收时刻（mihomo /logs 不带时间，用主 App 收到的时刻）。
+  final DateTime time;
 }
 
 /// 活动连接条目。
@@ -209,12 +213,19 @@ class ClashApi {
   /// 实时日志（WebSocket）。
   Stream<LogEntry> logsStream() => _wsStream('/logs').map(LogEntry.fromJson);
 
-  Stream<Map<String, dynamic>> _wsStream(String path) {
+  Stream<Map<String, dynamic>> _wsStream(String path) async* {
     final Uri uri = Uri.parse(
       '${_endpoint.baseUrl(websocket: true)}$path',
     ).replace(queryParameters: <String, String>{'token': _endpoint.secret});
     final WebSocketChannel channel = WebSocketChannel.connect(uri);
-    return channel.stream.map(
+    // 先等连接就绪：连接被拒（内核 controller 未就绪）时错误在此抛出并纳入本 stream，
+    // 交由订阅方 onError 处理，避免 channel.ready 的未捕获 future 错误（debugger 中断/崩溃）。
+    try {
+      await channel.ready;
+    } on Exception catch (e) {
+      throw ClashApiException('WebSocket 连接失败：$e');
+    }
+    yield* channel.stream.map(
       (dynamic event) => jsonDecode(event as String) as Map<String, dynamic>,
     );
   }

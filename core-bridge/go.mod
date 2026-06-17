@@ -2,7 +2,10 @@ module tongtu.app/core-bridge
 
 go 1.26.0
 
-require github.com/metacubex/mihomo v1.19.27
+require (
+	github.com/metacubex/mihomo v1.19.27
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1
+)
 
 require (
 	github.com/RyuaNerin/go-krypto v1.3.0 // indirect

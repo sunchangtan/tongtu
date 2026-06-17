@@ -16,11 +16,11 @@ dns:
   fake-ip-range: 198.18.0.1/16
   nameserver: [223.5.5.5, 8.8.8.8]
 proxy-providers:
-  default:
+  subscription:
     type: http
     url: "$subscriptionUrl"
     interval: 86400
-    path: ./providers/default.yaml
+    path: ./providers/subscription.yaml
     health-check:
       enable: true
       url: https://www.gstatic.com/generate_204
@@ -28,7 +28,7 @@ proxy-providers:
 proxy-groups:
   - name: PROXY
     type: select
-    use: [default]
+    use: [subscription]
 rules:
   - MATCH,PROXY
 ''';

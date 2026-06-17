@@ -52,6 +52,11 @@ import UIKit
       result(tunnel.memorySnapshot())
     case "lastResult":
       result(SharedStore.lastStartResult)
+    case "logDir":
+      // 返回 App Group 容器内日志目录绝对路径（主 App 用 dart:io 读取落盘日志）
+      let container = FileManager.default
+        .containerURL(forSecurityApplicationGroupIdentifier: SharedStore.appGroup)
+      result(container?.appendingPathComponent("logs", isDirectory: true).path)
     default:
       result(FlutterMethodNotImplemented)
     }
@@ -90,13 +95,18 @@ final class TunnelController {
   }
 
   func start(configYAML: String, port: Int, secret: String, completion: @escaping (Error?) -> Void) {
-    // 注入运行时配置与控制器端口/secret 到 App Group，供扩展启动时读取
+    // config(YAML) 体积大，仍经 App Group 共享；端口/secret 改用 providerConfiguration
+    // 随 VPN 配置可靠下发（避免 App Group UserDefaults 跨进程同步不及时导致端口不一致）。
     SharedStore.configYAML = configYAML
-    SharedStore.controllerPort = port
-    SharedStore.controllerSecret = secret
 
     let mgr = manager ?? makeManager()
     manager = mgr
+    let proto = (mgr.protocolConfiguration as? NETunnelProviderProtocol)
+      ?? NETunnelProviderProtocol()
+    proto.providerBundleIdentifier = providerBundleId
+    proto.serverAddress = "Tongtu"
+    proto.providerConfiguration = ["port": port, "secret": secret]
+    mgr.protocolConfiguration = proto
     mgr.isEnabled = true
     mgr.saveToPreferences { [weak self] error in
       if let error = error { completion(error); return }

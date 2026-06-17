@@ -95,5 +95,16 @@ void main() {
       expect(conn.host, 'example.com');
       expect(conn.chains, <String>['PROXY', 'A']);
     });
+
+    test('LogEntry 记录接收时间戳', () {
+      final DateTime before = DateTime.now();
+      final LogEntry e = LogEntry.fromJson(<String, dynamic>{
+        'type': 'warning',
+        'payload': 'x',
+      });
+      // mihomo /logs 不带时间，时间戳取接收时刻，应 >= 调用前
+      expect(e.time.isBefore(before), isFalse);
+      expect(e.type, 'warning');
+    });
   });
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/services.dart';
@@ -39,14 +40,14 @@ class AppleCoreController implements CoreController {
   ControllerEndpoint? get currentEndpoint => _endpoint;
 
   @override
-  Future<void> start({required String configYAML}) {
+  Future<void> start({required String configYAML}) async {
     final ControllerEndpoint endpoint = ControllerEndpoint(
       host: '127.0.0.1',
-      port: _randomPort(),
+      port: await _pickAvailablePort(),
       secret: _randomSecret(),
     );
     _endpoint = endpoint;
-    return _method.invokeMethod<void>('start', <String, dynamic>{
+    await _method.invokeMethod<void>('start', <String, dynamic>{
       'config': configYAML,
       'port': endpoint.port,
       'secret': endpoint.secret,
@@ -99,10 +100,31 @@ class AppleCoreController implements CoreController {
     }
   }
 
-  /// 随机 external-controller 端口（20000-59999，避开常用端口）。
-  static int _randomPort([Random? random]) {
+  /// 选取空闲的随机 external-controller 端口（20000-59999，避开常用端口）。
+  /// 用 ServerSocket 试探绑定校验可用性，被占用则换一个重试；
+  /// 多次失败兜底由系统分配（bind 端口 0 必得空闲端口）。
+  static Future<int> _pickAvailablePort([Random? random]) async {
     final Random rng = random ?? Random.secure();
-    return 20000 + rng.nextInt(40000);
+    for (int i = 0; i < 10; i++) {
+      final int port = 20000 + rng.nextInt(40000);
+      try {
+        final ServerSocket socket = await ServerSocket.bind(
+          InternetAddress.loopbackIPv4,
+          port,
+        );
+        await socket.close();
+        return port;
+      } on SocketException {
+        continue; // 端口被占用，换一个
+      }
+    }
+    final ServerSocket socket = await ServerSocket.bind(
+      InternetAddress.loopbackIPv4,
+      0,
+    );
+    final int port = socket.port;
+    await socket.close();
+    return port;
   }
 
   /// 随机 external-controller secret（32 位十六进制）。

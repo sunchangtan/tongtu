@@ -51,18 +51,26 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
 
         // 4. 覆写项：external-controller 端口/secret 由主 App 经 App Group 注入（不再硬编码 9090/UUID），
         //    使主 App 能用同一 secret 连接控制器；其余为内存防护参数 + home-dir + tun-fd（D2/D3/D4）。
-        let controllerPort = SharedStore.controllerPort
-        let controllerSecret = SharedStore.controllerSecret
+        // 端口/secret 由主 App 经 providerConfiguration 可靠下发（替代 App Group UserDefaults）
+        let providerConfig = (protocolConfiguration as? NETunnelProviderProtocol)?
+            .providerConfiguration
+        let controllerPort = (providerConfig?["port"] as? Int) ?? 0
+        let controllerSecret = (providerConfig?["secret"] as? String) ?? ""
         guard controllerPort > 0, !controllerSecret.isEmpty else {
             SharedStore.lastStartResult = "❌ 未注入 external-controller 端口/secret"
             completionHandler(NSError(domain: "Tongtu", code: -4,
                 userInfo: [NSLocalizedDescriptionKey: "缺少主 App 注入的控制器端口/secret"]))
             return
         }
+        // 日志落盘目录（App Group 容器内 logs/，扩展自算，无需主 App 传）；确保存在
+        let logsDir = container.appendingPathComponent("logs", isDirectory: true)
+        try? FileManager.default.createDirectory(
+            at: logsDir, withIntermediateDirectories: true)
         let overrides: [String: Any] = [
             "external-controller": "127.0.0.1:\(controllerPort)",
             "secret": controllerSecret,
             "home-dir": container.path,
+            "log-dir": logsDir.path,
             "gomemlimit-mib": 30,
             "gogc": 30,
             "tun-fd": Int(tunFD)
@@ -84,7 +92,7 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 userInfo: [NSLocalizedDescriptionKey: msg]))
             return
         }
-        SharedStore.lastStartResult = "✅ 内核已启动 tunFD=\(tunFD) 状态=\(MihomocoreState())"
+        SharedStore.lastStartResult = "✅ 内核已启动 tunFD=\(tunFD) 端口=\(controllerPort) 状态=\(MihomocoreState())"
         startMemoryReporting()
         completionHandler(nil)
     }
