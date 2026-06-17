@@ -3,7 +3,7 @@
 - [x] 1.1 读 `mihomo@v1.19.27` 的 `log` 包与 `hub/route` 的 `/logs` 实现，确认日志订阅 / 取消订阅 API 与事件结构（systematic 首步，落地前先取证）。取证结论：`log.Subscribe()→Subscription[Event]`（buffer 200）/`UnSubscribe`；`Event{LogLevel,Payload}`；**无缓冲 logCh + 阻塞 Emit → 慢消费会回压卡内核 → 落盘须两级 buffer + select default 丢弃，绝不回压**
 - [x] 1.2 `go.mod` 加 `gopkg.in/natefinch/lumberjack.v2` 依赖
 - [x] 1.3 `core.go`：`Start` 在 `applyConfig` 前订阅日志，goroutine 非阻塞写入 `lumberjack`（`MaxSize=1MiB` / `MaxBackups=4`）；overrides 增加日志目录路径；`Stop` 取消订阅并结束 goroutine（两级 buffer + select default 防回压；编译 + vet 通过）
-- [ ] 1.4 Go 单测：落盘写入正确；文件滚动限容（超 `MaxSize` 滚动、超 `MaxBackups` 删旧、总量封顶、重启不累积）
+- [x] 1.4 Go 单测：落盘写入正确；文件滚动限容（4 个测试全过，含 condition-based poll 处理 lumberjack 异步删除）
 - [x] 1.5 `go vet` + `go build` + 全量 `go test` 通过（4 个日志测试 + 回归全绿）；golangci-lint 本机未装，统一在 5.2 最终门禁安装后补跑
 
 ## 2. 日志路径下发（Swift 扩展）
@@ -22,7 +22,7 @@
 
 ## 4. LogStore + 回看 + 导出（Dart，TDD）
 
-- [ ] 4.1 `pubspec.yaml` 加 `path_provider` + `share_plus`，`pub get`
+- [x] 4.1 `pubspec.yaml` 加 `share_plus`（path_provider 评估后移除——LogStore 用 channel 取目录、未实际使用），`pub get`
 - [x] 4.2 `LogStore`：经 channel 取日志目录、读全量文件（含 backups 按时间合并）、定位当前文件、清空（含单测）
 - [x] 4.3 `LogViewerPage`：从文件回看全量日志（含最早、跨会话）+ 关键词搜索 + 刷新（含 widget 测试）
 - [x] 4.4 导出：`share_plus` 分享日志文件（回看页导出按钮）；监控页日志 tab 加「完整」入口跳回看页
