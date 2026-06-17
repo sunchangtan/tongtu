@@ -1,7 +1,7 @@
 # 通途（Tongtu）总体架构设计文档
 
-- 版本：v1.4
-- 日期：2026-06-17
+- 版本：v1.5
+- 日期：2026-06-18
 - 状态：已确认（方案经用户评审通过）
 - 项目名称：通途（Tongtu）——「一桥飞架南北，天堑变通途」；国际化名用拼音 Tongtu（已验证代理/VPN 领域无撞名，2026-06-12）
 
@@ -76,8 +76,9 @@
 
 ## 6. 配置与订阅设计
 
-- 原生消费 mihomo YAML；订阅 = `proxy-providers`，规则 = `rule-providers`（`.mrs` 优先）。
-- 内置「metacubex 推荐配置」模板（DNS fake-ip、geodata、TUN、嗅探等按官方 wiki 推荐值）；用户配置 = 模板 + 用户覆写（override）合并生成运行时 YAML，不做私有格式转换，保证与上游 100% 兼容。
+- 原生消费 mihomo YAML；**订阅 = 完整 clash 主配置正文**（含其自带的 `proxy-providers`/`proxy-groups`/`rules`，`.mrs` 优先），不发明私有格式；下载后整份作为内核主配置、原样保留嵌套结构。
+- 运行时参数由**内核侧（core-bridge `coreOverrides`）覆写注入**订阅配置：external-controller 端口/secret、tun-fd，以及 TUN 模式下的 fake-ip DNS（fake-ip-filter 并集 + dns-hijack + store-fake-ip 持久化）；不再以「推荐模板包装订阅为单一 proxy-provider」。与上游 100% 兼容（消费原生 YAML，不做私有格式转换）。
+- 订阅合法性在「获取」阶段用 Dart YAML 解析校验（须含非空 proxies/proxy-providers），连接时内核 `Start` 终校验兜底；外网访问不到订阅源时由内核默认缓存（订阅自带 path 或 `md5(url)`）回退本地节点。
 - iOS 模板内置内存保护参数：`GOMEMLIMIT`≈30MiB、`GOGC` 调低、`geodata-loader: memconservative`、定期 `FreeOSMemory()`；导入超大规则集时警告。
 
 ## 7. 模块划分
@@ -155,3 +156,4 @@ tongtu/
 | v1.2 | 2026-06-12 | 规范固化：新建项目级 CLAUDE.md 作为强制载体，§12 增加引用与本文档维护协议 |
 | v1.3 | 2026-06-15 | §11 路线图重排：Android 自原 P5 提前至 P3（桌面之前），确立分三波发布策略（Apple 三端／Android／Win-Linux），新增「发布波次」列；P0 标记完成、P1 标注 M1→M4 里程碑递进 |
 | v1.4 | 2026-06-17 | iOS 工具链与构建：Flutter 3.32.5→3.44.2（FVM 锁定，修复 iOS 26 真机 debug JIT 崩溃）；Apple 依赖管理 CocoaPods→Swift Package Manager 迁移（决策表新增两行，能力规格见 specs/ios-dependency-management） |
+| v1.5 | 2026-06-18 | §6 订阅消费模型修正：订阅从「单一 proxy-provider 源」改为「完整 clash 主配置」（修复『没走 vpn』根因，change p1-subscription-as-config）；运行时参数改由内核侧 `coreOverrides` 覆写注入（fake-ip DNS / tun-fd / external-controller），废弃「模板包装订阅」；订阅校验用 Dart YAML 解析、外网容灾依赖内核默认缓存 |
