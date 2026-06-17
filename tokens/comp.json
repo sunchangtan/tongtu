@@ -1,0 +1,9 @@
+{
+  "comp": {
+    "button": {
+      "container-height": { "$type": "dimension", "$value": "40px" },
+      "icon-size": { "$type": "dimension", "$value": "18px" },
+      "outline-width": { "$type": "dimension", "$value": "1px" }
+    }
+  }
+}

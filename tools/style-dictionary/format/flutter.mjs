@@ -3,6 +3,7 @@
 
 const isColor = (t) => t.path[0] === 'sys' && t.path[1] === 'color';
 const isDim = (t) => t.path[0] === 'sys' && t.path[1] === 'ui';
+const isComp = (t) => t.path[0] === 'comp';
 const dval = (t) => t.$value ?? t.value;
 
 function kebabToCamel(s) {
@@ -48,6 +49,16 @@ function dimClass(tokens) {
   return `/// UI 维度（sys/ui：间距 / 圆角 / 字号；无明暗）\nclass TongtuDimens {\n  TongtuDimens._();\n\n${lines.join('\n')}\n}`;
 }
 
+// comp/button/container-height → buttonContainerHeight
+const compName = (t) => kebabToCamel(t.path.slice(1).join('-'));
+
+function compClass(tokens) {
+  const lines = tokens
+    .filter(isComp)
+    .map((t) => `  static const ${compName(t)} = ${dartDouble(dval(t))};`);
+  return `/// 组件级 token（comp：组件固有尺寸）\nclass TongtuComp {\n  TongtuComp._();\n\n${lines.join('\n')}\n}`;
+}
+
 export function toDart({ lightTokens, darkTokens }) {
   const header = [
     '// GENERATED — DO NOT EDIT.',
@@ -64,5 +75,7 @@ export function toDart({ lightTokens, darkTokens }) {
     colorClass('TongtuSysColorsDark', '深色语义色（sys.color.dark + ref）', darkTokens),
     '',
     dimClass(lightTokens),
+    '',
+    compClass(lightTokens),
   ].join('\n')}\n`;
 }

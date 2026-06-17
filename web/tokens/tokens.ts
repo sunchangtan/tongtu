@@ -62,3 +62,9 @@ export const dims = {
   fontXl: 24,
   font2xl: 32,
 } as const;
+
+export const comp = {
+  buttonContainerHeight: 40,
+  buttonIconSize: 18,
+  buttonOutlineWidth: 1,
+} as const;

@@ -21,6 +21,7 @@ async function resolveTokens(colorFile) {
       path.join(TOK, 'ref.json'),
       path.join(TOK, colorFile),
       path.join(TOK, 'sys.dimension.json'),
+      path.join(TOK, 'comp.json'),
     ],
     usesDtcg: true,
     platforms: { noop: { transforms: [] } },

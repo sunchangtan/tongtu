@@ -96,7 +96,10 @@ class AppTheme {
       EdgeInsets.symmetric(horizontal: TongtuDimens.spaceXl),
     ),
     textStyle: WidgetStatePropertyAll<TextStyle?>(tongtuTextTheme.labelLarge),
-    minimumSize: const WidgetStatePropertyAll<Size>(Size(0, 40)),
+    minimumSize: const WidgetStatePropertyAll<Size>(
+      Size(0, TongtuComp.buttonContainerHeight),
+    ),
+    iconSize: const WidgetStatePropertyAll<double>(TongtuComp.buttonIconSize),
   );
 
   /// 组装主题：colorScheme + textTheme + Button component themes + 扩展 token。

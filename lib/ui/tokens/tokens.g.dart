@@ -76,3 +76,12 @@ class TongtuDimens {
   static const fontXl = 24.0;
   static const font2xl = 32.0;
 }
+
+/// 组件级 token（comp：组件固有尺寸）
+class TongtuComp {
+  TongtuComp._();
+
+  static const buttonContainerHeight = 40.0;
+  static const buttonIconSize = 18.0;
+  static const buttonOutlineWidth = 1.0;
+}

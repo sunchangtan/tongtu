@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material/styles';
-import { colorsLight, dims } from '../tokens/tokens';
+import { colorsLight, dims, comp } from '../tokens/tokens';
 
 // 通途 MUI 主题：palette + Button 样式全部取自跨栈 token（与 Flutter/CSS 同源）。
 export const tongtuTheme = createTheme({
@@ -19,7 +19,7 @@ export const tongtuTheme = createTheme({
           borderRadius: dims.radiusFull,
           paddingLeft: dims.spaceXl,
           paddingRight: dims.spaceXl,
-          minHeight: 40,
+          minHeight: comp.buttonContainerHeight,
           textTransform: 'none',
         },
       },

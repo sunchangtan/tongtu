@@ -38,6 +38,9 @@
   --sys-ui-font-lg: 20px;
   --sys-ui-font-xl: 24px;
   --sys-ui-font-2xl: 32px;
+  --comp-button-container-height: 40px;
+  --comp-button-icon-size: 18px;
+  --comp-button-outline-width: 1px;
 }
 
 [data-theme="dark"] {
