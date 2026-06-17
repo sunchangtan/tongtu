@@ -1,8 +1,8 @@
-# 多端组件库 · 设计方案（子项目 A：Figma 组件库）
+# 多端组件库 · 设计方案（子项目 A：组件库，按组件三端）
 
-- 版本：v1.0（设计阶段，待评审）
+- 版本：v1.1（设计阶段）
 - 日期：2026-06-18
-- 定位：通途多端组件库工作线的**子项目 A**（Figma 设计库），承接子项目 0（token 同步）
+- 定位：通途多端组件库工作线的**子项目 A**（按组件垂直三端：Figma + Flutter + Web），承接子项目 0（token 同步）
 - 关联：`docs/design/token-sync-design.md`（子项目 0）、`openspec/specs/design-tokens`、Figma「Tongtu Brand」
 
 ---
@@ -12,8 +12,8 @@
 广泛通用、**app(Flutter) + web(React-MUI) 跨平台共享**的 Figma 组件库：
 
 - 以 **Material 3** 为设计语言；消费子项目 0 已建的 token（`sys/color` + `sys/ui`）。
-- Figma 是设计真相源，定义组件的**视觉 + 变体 + 属性**；子项目 B（Flutter）/ C（Web）按它实现。
-- 「广泛通用」≠ 直接铺全集——广度越大方法返工代价越高，故先立方法（契约 + 标杆）再铺广。
+- **按组件垂直三端**：每个组件走完整流程——Figma 设计（真相源）→ Flutter 代码 → Web(React-MUI) 代码 → Code Connect 绑定，一个组件三端打通即可用（不再按端分 A/B/C 阶段）。
+- 「广泛通用」≠ 直接铺全集——广度越大方法返工代价越高，故先立方法（契约 + 标杆三端打通）再铺广。
 
 ---
 
@@ -71,8 +71,8 @@
 | 阶段 | 内容 | 依赖/理由 |
 |------|------|----------|
 | **A1 · 基础** | 补全 typography（M3 type scale → Figma Text Styles + 扩 token 管线生成 Flutter `TextTheme`/CSS）+ Foundations 展示页 | 组件文字依赖 type scale；颜色/间距 token 已就绪 |
-| **A2 · 标杆** | Button 完整 M3 变体 + 跨端契约规范（立方法） | 一个组件压测方法，防全集返工 |
-| **A3 · 铺广** | 按契约扩到 M3 组件全集（20+） | 方法立住后批量 |
+| **A2 · 标杆** | Button **三端打通**（Figma + Flutter + Web React-MUI）+ 跨端契约规范 + Code Connect（React 官方 / Flutter template）；Web 端首建 React+MUI 工程 | 一个组件走通完整流程，验证契约+方法，防全集返工 |
+| **A3 · 铺广** | 按契约 + Code Connect 模板，逐个组件三端铺到全集（20+） | 方法立住后批量 |
 
 每阶段独立交付验证。本设计为 A 总览；各阶段再出自己的 OpenSpec change。
 
@@ -88,19 +88,19 @@
 
 ---
 
-## 7. 与子项目 0 / B / C 的关系
+## 7. 与子项目 0 的关系 + 三端架构
 
 - **依赖子项目 0**：颜色/间距/圆角 token 直接复用；A1 扩 token 管线增加 typography。
-- **供 B / C**：A 产出 Figma 组件 + 跨端映射约定；B（Flutter）/ C（Web-MUI）据此实现。Code Connect（Figma↔代码）在 B/C 阶段做（依赖代码存在）。
+- **三端按组件垂直**：原「A Figma / B Flutter / C Web」按端分阶段，调整为**每个组件走通三端**——Figma 设计 → Flutter widget（`lib/ui/components/`）→ Web React-MUI（`web/` 工程）→ Code Connect 绑定。
+- **Code Connect**：React 用官方 `figma.connect`；Flutter 无官方集成，用 template files（框架无关）。Web 端首次（A2）建 React+MUI 工程。
 
 ---
 
 ## 8. 范围外（future）
 
-- 组件的代码实现（子项目 B/C）。
-- Code Connect 元数据（B/C 阶段）。
 - 阴影/高度（elevation）、动效 token（后续 Foundations 扩展）。
-- 响应式/自适应布局（页面层面，归 B/C 实现）。
+- 响应式/自适应布局（页面层面，组件实现时按端处理）。
+- A3 其余组件（A2 标杆立法后逐个三端铺）。
 
 ---
 
@@ -120,3 +120,4 @@
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.0 | 2026-06-18 | 初稿：定位（广泛通用 app+web 跨端共享 Figma 组件库）；范围（Foundations + 完整 M3 type scale + 组件全集）；跨端中性契约；Figma 结构；三阶段 A1/A2/A3；typography 补全为 A1 核心。经 brainstorming 逐项确认。 |
+| v1.1 | 2026-06-18 | 调整为「按组件垂直三端」：每组件 Figma→Flutter→Web(React-MUI)→Code Connect，替代原 A/B/C 按端分阶段；A2 标杆 Button 三端打通 + Code Connect（React 官方 / Flutter template）；Web 端 A2 首建 React+MUI 工程。 |
