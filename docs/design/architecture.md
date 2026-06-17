@@ -1,7 +1,7 @@
 # 通途（Tongtu）总体架构设计文档
 
-- 版本：v1.3
-- 日期：2026-06-15
+- 版本：v1.4
+- 日期：2026-06-17
 - 状态：已确认（方案经用户评审通过）
 - 项目名称：通途（Tongtu）——「一桥飞架南北，天堑变通途」；国际化名用拼音 Tongtu（已验证代理/VPN 领域无撞名，2026-06-12）
 
@@ -19,6 +19,8 @@
 | 发布 | 公开发布，iOS/macOS 上架 App Store（海外区） |
 | 许可 | GPL-3.0 开源（与 mihomo/FlClash 一致） |
 | UI 参照 | KaringX/clashmi（仅设计参照，不复制其代码） |
+| Apple 依赖管理 | Swift Package Manager（取代 CocoaPods）；MihomoCore.xcframework 与 NE 扩展 target 手动集成、不受影响 |
+| Flutter 版本 | FVM 锁定（当前 3.44.2）；iOS 26 真机 debug 要求 Flutter ≥3.35（JIT W^X 用 pthread_jit_write_protect_np 修复） |
 
 ## 2. 调研核实的关键事实（2026-06-12）
 
@@ -152,3 +154,4 @@ tongtu/
 | v1.1 | 2026-06-12 | 新增文档语言约定（§12）；项目定名「通途（Tongtu）」并全文统一 |
 | v1.2 | 2026-06-12 | 规范固化：新建项目级 CLAUDE.md 作为强制载体，§12 增加引用与本文档维护协议 |
 | v1.3 | 2026-06-15 | §11 路线图重排：Android 自原 P5 提前至 P3（桌面之前），确立分三波发布策略（Apple 三端／Android／Win-Linux），新增「发布波次」列；P0 标记完成、P1 标注 M1→M4 里程碑递进 |
+| v1.4 | 2026-06-17 | iOS 工具链与构建：Flutter 3.32.5→3.44.2（FVM 锁定，修复 iOS 26 真机 debug JIT 崩溃）；Apple 依赖管理 CocoaPods→Swift Package Manager 迁移（决策表新增两行，能力规格见 specs/ios-dependency-management） |
