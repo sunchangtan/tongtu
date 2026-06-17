@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'ui/app_theme.dart';
 import 'ui/home_shell.dart';
 
 void main() {
@@ -14,9 +15,9 @@ class TongtuApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: '通途',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
       home: const HomeShell(),
     );
   }
