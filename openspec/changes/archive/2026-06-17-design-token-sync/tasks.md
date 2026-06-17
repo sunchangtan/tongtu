@@ -32,4 +32,4 @@
 - [x] 6.1 `dart analyze` 0 错误 0 警告 + `dart format` 规范 + `flutter test` 全过（fvm Flutter 3.44.2 / Dart 3.12.2，38 测试）
 - [x] 6.2 `tools/style-dictionary/README.md`：记录同步流程（Figma 导出 → `node build.mjs` → 抽样核对 → 提交 `tokens/` 与生成物）
 - [x] 6.3 跨栈同值终检：同一语义 token 在 `tokens.g.dart` 与 `tokens.css` 同值（明暗各抽样）
-- [ ] 6.4 `openspec validate design-token-sync --strict` 通过（已）；实施完成后 `openspec archive`
+- [x] 6.4 `openspec validate design-token-sync --strict` 通过；模拟器明暗视觉确认（浅白 / 深 `#15161b`，primary 靛蓝 → 浅靛，明暗切换正常）；`openspec archive`
