@@ -1,34 +1,34 @@
 ## 1. 组件契约规范
 
-- [ ] 1.1 写 `docs/design/component-contract.md`：中性 variant properties（`variant`/`size`/`state`/`icon`）、状态枚举、token 绑定约定、Flutter↔MUI 跨端映射
-- [ ] 1.2 自检：契约框架中性、可复制到其他组件（A3 模板性）
+- [x] 1.1 写 `docs/design/component-contract.md`：中性 variant properties + 状态枚举 + token 绑定 + Flutter↔MUI 跨端映射
+- [x] 1.2 自检：契约框架中性、可复制到其他组件（A3 模板性）
 
 ## 2. Figma Button Component Set
 
-- [ ] 2.1 取证：Figma Component Set / variant properties API（`createComponent`/`combineAsVariants`）
-- [ ] 2.2 建 Button 五变体 × state(enabled/disabled) × icon(none/leading)，auto-layout + 绑 token（D5 配色、圆角 radius/full、文字 type/label/large、内距 sys/ui/space）
-- [ ] 2.3 截图核对：五变体浅/深配色正确、disabled 符合 M3、圆角/文字/内距来自 token
+- [x] 2.1 取证 Component Set / variant properties API（`createComponent`/`combineAsVariants`，并入 filled 标杆验证）
+- [x] 2.2 建 Button 20 变体（5 variant × state × icon）绑 token（D5 配色 / 圆角 radius/full / 文字 label/large / 内距 space/xl）
+- [x] 2.3 截图核对；修复 disabled 透明度（Figma paint 绑定+opacity 冲突 → disabled 改不绑+固定 on-surface+opacity）
 
 ## 3. Flutter Button（三层方案，TDD）
 
-- [ ] 3.1 样式层：`app_theme` 加 component themes（`filledButtonTheme`/`outlinedButtonTheme`/… shape=radius/full、padding=space/xl、textStyle=label/large）+ `ThemeExtension<TongtuTokens>`（扩展预留）
-- [ ] 3.2 组件层：薄 `lib/ui/components/button.dart`（`TongtuButton(variant)` 委托 M3 widget，样式继承 theme、不写死）
-- [ ] 3.3 widget 测试：variant 映射、样式取自 theme、disabled 态；`dart analyze` 0 + `dart format` + `flutter test`（fvm）
+- [x] 3.1 样式层：`app_theme` component themes（filled/outlined/text/elevated）+ `ThemeExtension<TongtuTokens>`
+- [x] 3.2 组件层：薄 `lib/ui/components/button.dart`（`TongtuButton` 委托 M3 widget，样式继承 theme）
+- [x] 3.3 widget 测试 9 + `dart analyze` 0 + `dart format`（fvm）
 
 ## 4. Web React + MUI 工程 + React Button
 
-- [ ] 4.1 首建 `web/` React+MUI 工程（Vite + TS + MUI）；消费 token（`createTheme` 引 token 值 / 或 `tokens.css`）
-- [ ] 4.2 React Button：中性 variant → MUI 配置（filled/outlined/text 原生；tonal/elevated 自定义）
-- [ ] 4.3 冒烟：渲染各变体（简单页面；Storybook 留 future）；lint 通过
+- [x] 4.1 首建 `web/` React+MUI 工程（Vite+TS+MUI）；扩 `build.mjs` 生成 web JS token（`tokens.ts`，跨栈同源）
+- [x] 4.2 React Button（中性 variant→MUI；tonal/elevated 用 sx 自定义）
+- [x] 4.3 冒烟：`tsc` 0 + `vite build` 打包成功（视觉截图被 preview 沙箱 `getcwd` 环境问题挡，以 lint+build+token 值核对替代）
 
 ## 5. Code Connect
 
-- [ ] 5.1 React：`@figma/code-connect` + `Button.figma.tsx`（`figma.connect`，variant 用 `figma.enum`）
-- [ ] 5.2 Flutter：template files（框架无关）绑 Figma Button → Flutter 代码片段
-- [ ] 5.3 验证：Figma Dev Mode 显示 React / Flutter 代码片段且随 variant 变化
+- [x] 5.1 React：`@figma/code-connect` + `Button.figma.tsx`（`figma.connect`）+ `figma.config.json`
+- [x] 5.2 Flutter：html template（`figma/button.flutter.figma.ts`）输出 Flutter 代码片段
+- [ ] 5.3 发布 + Dev Mode 验证：需 Figma access token，由用户执行（见 `web/CODE_CONNECT.md`）
 
 ## 6. 验证与归档
 
-- [ ] 6.1 契约自检 + 三端一致核对（同一 variant 三端外观/语义一致）
-- [ ] 6.2 质量门禁：Flutter analyze 0 / test 全过（fvm）；Web lint 通过
-- [ ] 6.3 `openspec validate component-button --strict` 通过；实施完成后 `openspec archive`
+- [x] 6.1 契约自检 + 三端一致核对（filled 三端均取 `primary` token，语义一致；非像素）
+- [x] 6.2 门禁：Flutter `test` 64 全过 + `analyze` 0；Web `tsc` 0 + `vite build` OK
+- [ ] 6.3 `openspec validate component-button --strict` 通过（已）；`openspec archive`

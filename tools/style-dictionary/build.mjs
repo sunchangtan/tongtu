@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { toDart } from './format/flutter.mjs';
 import { toCss } from './format/css.mjs';
 import { toFlutterTypography, toCssTypography } from './format/typography.mjs';
+import { toTs } from './format/ts.mjs';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(dirname, '../..');
@@ -58,6 +59,7 @@ await fs.writeFile(dartPath, toDart({ lightTokens, darkTokens }));
 await fs.writeFile(cssPath, toCss({ lightTokens, darkTokens }));
 await fs.writeFile(typoDartPath, toFlutterTypography(typoTokens));
 await fs.writeFile(typoCssPath, toCssTypography(typoTokens));
+await fs.writeFile(path.join(ROOT, 'web/tokens/tokens.ts'), toTs({ lightTokens, darkTokens }));
 
 // 用 dart format 规范化生成的 Flutter 文件（typography 的 TextStyle 行较长，需换行）
 try {
@@ -71,3 +73,4 @@ const nDim = lightTokens.filter((t) => t.path[1] === 'ui').length;
 const nTypo = typoTokens.filter((t) => t.path[0] === 'type').length;
 console.log(`✓ 颜色 ${nColor}×明暗 / 维度 ${nDim} → tokens.g.dart + tokens.css`);
 console.log(`✓ typography ${nTypo} 档 → typography.g.dart + typography.css`);
+console.log('✓ web JS token → web/tokens/tokens.ts');

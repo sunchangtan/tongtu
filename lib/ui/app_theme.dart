@@ -1,7 +1,33 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
 
 import 'tokens/tokens.g.dart';
 import 'tokens/typography.g.dart';
+
+/// 通途自定义 token（ThemeExtension）：放 M3 `ColorScheme` / `textTheme` 之外的
+/// 通途可定制项（扩展层，见 `docs/design/component-contract.md` §6）。
+/// v1 仅 `buttonMinHeight` 作扩展点示范，后续按需扩字段。
+@immutable
+class TongtuTokens extends ThemeExtension<TongtuTokens> {
+  const TongtuTokens({required this.buttonMinHeight});
+
+  final double buttonMinHeight;
+
+  @override
+  TongtuTokens copyWith({double? buttonMinHeight}) =>
+      TongtuTokens(buttonMinHeight: buttonMinHeight ?? this.buttonMinHeight);
+
+  @override
+  TongtuTokens lerp(ThemeExtension<TongtuTokens>? other, double t) {
+    if (other is! TongtuTokens) return this;
+    return TongtuTokens(
+      buttonMinHeight:
+          lerpDouble(buttonMinHeight, other.buttonMinHeight, t) ??
+          buttonMinHeight,
+    );
+  }
+}
 
 /// 通途 App 主题配色：由生成的设计 token 推导，明暗两套（Material 3）。
 ///
@@ -58,17 +84,38 @@ class AppTheme {
         onError: TongtuSysColorsDark.onError,
       );
 
-  /// 浅色主题。
-  static final ThemeData light = ThemeData(
-    colorScheme: lightScheme,
-    useMaterial3: true,
-    textTheme: tongtuTextTheme,
+  /// Button 样式层（三层方案 §6）：shape=`radius/full`、padding=`space/xl`、
+  /// 文字=`label/large`、高度 40。样式集中在此，改一处全局生效，组件不写死。
+  static final ButtonStyle _buttonStyle = ButtonStyle(
+    shape: WidgetStatePropertyAll<OutlinedBorder>(
+      RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(TongtuDimens.radiusFull),
+      ),
+    ),
+    padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
+      EdgeInsets.symmetric(horizontal: TongtuDimens.spaceXl),
+    ),
+    textStyle: WidgetStatePropertyAll<TextStyle?>(tongtuTextTheme.labelLarge),
+    minimumSize: const WidgetStatePropertyAll<Size>(Size(0, 40)),
   );
 
-  /// 深色主题。
-  static final ThemeData dark = ThemeData(
-    colorScheme: darkScheme,
+  /// 组装主题：colorScheme + textTheme + Button component themes + 扩展 token。
+  static ThemeData _theme(ColorScheme scheme) => ThemeData(
+    colorScheme: scheme,
     useMaterial3: true,
     textTheme: tongtuTextTheme,
+    filledButtonTheme: FilledButtonThemeData(style: _buttonStyle),
+    outlinedButtonTheme: OutlinedButtonThemeData(style: _buttonStyle),
+    textButtonTheme: TextButtonThemeData(style: _buttonStyle),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: _buttonStyle),
+    extensions: const <ThemeExtension<dynamic>>[
+      TongtuTokens(buttonMinHeight: 40),
+    ],
   );
+
+  /// 浅色主题。
+  static final ThemeData light = _theme(lightScheme);
+
+  /// 深色主题。
+  static final ThemeData dark = _theme(darkScheme);
 }
