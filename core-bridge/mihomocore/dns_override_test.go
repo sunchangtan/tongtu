@@ -1,6 +1,5 @@
-// TUN 模式 fake-ip DNS 覆写与 proxy-provider 缓存 path 注入测试
-// 对应 openspec/changes/p1-subscription-as-config 的 core-bridge spec
-// 「TUN 模式 DNS 覆写注入」「proxy-provider 本地缓存 path 注入」需求。
+// TUN 模式 fake-ip DNS 覆写测试
+// 对应 openspec/changes/p1-subscription-as-config 的 core-bridge spec「TUN 模式 DNS 覆写注入」。
 package mihomocore
 
 import (
@@ -10,15 +9,24 @@ import (
 	mihomoConst "github.com/metacubex/mihomo/constant"
 )
 
-// 场景：TUN 模式 + 订阅自带 DNS → 保留上游、强制 fake-ip、补 filter、dns-hijack、持久化
+func containsStr(ss []string, target string) bool {
+	for _, s := range ss {
+		if s == target {
+			return true
+		}
+	}
+	return false
+}
+
+// 场景：TUN + 订阅自带 DNS → 保留上游 nameserver、强制 fake-ip、filter 并集（必需项 + 订阅自带项都在）
 func TestBuildRawConfig_TunKeepsUpstreamAndForcesFakeIP(t *testing.T) {
 	yaml := "mixed-port: 7890\n" +
 		"dns:\n" +
 		"  enable: true\n" +
 		"  nameserver:\n" +
 		"    - https://doh.pub/dns-query\n" +
-		"  proxy-server-nameserver:\n" +
-		"    - https://dns.alidns.com/dns-query\n"
+		"  fake-ip-filter:\n" +
+		"    - \"+.example.test\"\n"
 	rawCfg, err := buildRawConfig(yaml, coreOverrides{TunFD: 100})
 	if err != nil {
 		t.Fatalf("buildRawConfig: %v", err)
@@ -29,17 +37,17 @@ func TestBuildRawConfig_TunKeepsUpstreamAndForcesFakeIP(t *testing.T) {
 	if !rawCfg.DNS.Enable {
 		t.Error("dns.enable 应为 true")
 	}
-	if rawCfg.DNS.FakeIPRange == "" {
-		t.Error("fake-ip-range 应已设")
-	}
-	if len(rawCfg.DNS.FakeIPFilter) == 0 {
-		t.Error("fake-ip-filter 应非空")
+	if rawCfg.DNS.FakeIPRange != fakeIPRange {
+		t.Errorf("fake-ip-range=%q 应为 %q", rawCfg.DNS.FakeIPRange, fakeIPRange)
 	}
 	if !strings.Contains(strings.Join(rawCfg.DNS.NameServer, ","), "doh.pub") {
 		t.Errorf("应保留订阅 nameserver 上游，实际 %v", rawCfg.DNS.NameServer)
 	}
-	if len(rawCfg.DNS.ProxyServerNameserver) == 0 {
-		t.Error("应保留订阅 proxy-server-nameserver 上游")
+	if !containsStr(rawCfg.DNS.FakeIPFilter, "*.push.apple.com") {
+		t.Error("fake-ip-filter 应含必需项 *.push.apple.com（防 APNs 被 fake-ip 走代理）")
+	}
+	if !containsStr(rawCfg.DNS.FakeIPFilter, "+.example.test") {
+		t.Error("fake-ip-filter 应保留订阅自带项 +.example.test")
 	}
 	if len(rawCfg.Tun.DNSHijack) == 0 {
 		t.Error("tun.dns-hijack 应已设")
@@ -49,8 +57,9 @@ func TestBuildRawConfig_TunKeepsUpstreamAndForcesFakeIP(t *testing.T) {
 	}
 }
 
-// 场景：TUN 模式 + 订阅无 DNS → 用默认 fake-ip DNS（含默认 nameserver、filter）
-func TestBuildRawConfig_TunDefaultDNSWhenAbsent(t *testing.T) {
+// 回归（修复 #1 守卫死代码）：订阅无 dns 段时，UnmarshalRawConfig 以 DefaultRawConfig 为基底，
+// DNS.FakeIPFilter 已预置上游默认（非空）——必需项仍须经并集补入，旧的 len==0 守卫会漏掉。
+func TestBuildRawConfig_TunForcesFilterEvenWhenUpstreamDefaultsPresent(t *testing.T) {
 	rawCfg, err := buildRawConfig("mixed-port: 7890\n", coreOverrides{TunFD: 100})
 	if err != nil {
 		t.Fatalf("buildRawConfig: %v", err)
@@ -58,15 +67,15 @@ func TestBuildRawConfig_TunDefaultDNSWhenAbsent(t *testing.T) {
 	if rawCfg.DNS.EnhancedMode != mihomoConst.DNSFakeIP {
 		t.Error("应为 fake-ip")
 	}
-	if len(rawCfg.DNS.NameServer) == 0 {
-		t.Error("应有 nameserver（默认 DoH）")
+	if !containsStr(rawCfg.DNS.FakeIPFilter, "*.push.apple.com") {
+		t.Error("上游默认 filter 非空时，仍须并集补入 *.push.apple.com（否则 APNs 推送断裂）")
 	}
-	if len(rawCfg.DNS.FakeIPFilter) == 0 {
-		t.Error("应注入默认 fake-ip-filter")
+	if len(rawCfg.DNS.NameServer) == 0 {
+		t.Error("应有 nameserver（上游默认 DoH 基底）")
 	}
 }
 
-// 场景：非 TUN 模式 → 不启用 tun，也不强制 fake-ip 持久化
+// 场景：非 TUN → 不启用 tun、不强制 fake-ip 持久化
 func TestBuildRawConfig_NonTunNoInject(t *testing.T) {
 	rawCfg, err := buildRawConfig("mixed-port: 7890\n", coreOverrides{TunFD: 0})
 	if err != nil {
@@ -80,23 +89,10 @@ func TestBuildRawConfig_NonTunNoInject(t *testing.T) {
 	}
 }
 
-// 场景：http proxy-provider 注入本地缓存 path（file 类型不注入）
-func TestBuildRawConfig_InjectProviderCachePath(t *testing.T) {
-	yaml := "mixed-port: 7890\n" +
-		"proxy-providers:\n" +
-		"  sub1:\n" +
-		"    type: http\n" +
-		"    url: \"http://example.com/sub1\"\n"
-	rawCfg, err := buildRawConfig(yaml, coreOverrides{TunFD: 100})
-	if err != nil {
-		t.Fatalf("buildRawConfig: %v", err)
-	}
-	prov := rawCfg.ProxyProvider["sub1"]
-	if prov == nil {
-		t.Fatal("无 sub1 provider")
-	}
-	path, _ := prov["path"].(string)
-	if !strings.HasPrefix(path, "providers/") {
-		t.Errorf("http provider 应注入 providers/ 下的 path，实际 %q", path)
+// unionStrings 去重保序
+func TestUnionStrings(t *testing.T) {
+	got := unionStrings([]string{"a", "b"}, []string{"b", "c"})
+	if strings.Join(got, ",") != "a,b,c" {
+		t.Errorf("unionStrings=%v 期望 [a b c]", got)
 	}
 }

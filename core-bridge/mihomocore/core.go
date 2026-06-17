@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"hash/fnv"
 	"net"
 	"net/http"
 	"path/filepath"
@@ -214,71 +213,58 @@ func buildRawConfig(configYAML string, ov coreOverrides) (*config.RawConfig, err
 		// openspec/changes/p1-subscription-as-config design §9）
 		applyFakeIPDNS(rawCfg)
 	}
-	// 为 http proxy-providers 注入本地缓存 path：外网访问不到订阅源时，内核回退
-	// 使用本地缓存（component/resource/fetcher.go Initial 的「本地→bundle→远程」回退）
-	injectProviderCachePath(rawCfg)
+	// 不再自行注入 proxy-provider 缓存 path：mihomo 在 path 为空时已自动按 md5(url) 落盘缓存
+	// 到 home-dir/proxies/（adapter/provider/parser.go），更强且尊重订阅显式 path；外网不可达
+	// 时由该默认缓存提供回退（component/resource/fetcher.go Initial 的「本地→远程」回退）。
 	return rawCfg, nil
 }
 
-// applyFakeIPDNS 在 TUN 模式注入 fake-ip 必需的 DNS：保留订阅自带的 nameserver 等上游，
-// 仅强制 fake-ip 相关字段；订阅无上游则补默认国内 DoH。配套 dns-hijack 与 fake-ip 映射持久化。
+// fake-ip 相关常量（唯一事实源，生产与测试共用）。
+const fakeIPRange = "198.18.0.1/16"
+
+// requiredFakeIPFilter 是 TUN+fake-ip 下必须直连真解析、不参与 fake-ip 的域名：
+// 局域网 / 网络连通性探测 / Apple 推送 / 厂商探测 / NTP / STUN。并入订阅与上游已有 filter。
+var requiredFakeIPFilter = []string{
+	"*.lan", "*.local", "*.localhost",
+	"localhost.ptlogin2.qq.com",
+	"+.msftconnecttest.com", "+.msftncsi.com",
+	"*.push.apple.com", "captive.apple.com",
+	"connectivity-check.ubuntu.com",
+	"+.market.xiaomi.com", "connect.rom.miui.com",
+	"time.*.com", "time.*.apple.com", "+.pool.ntp.org",
+	"stun.*.*", "stun.*.*.*",
+}
+
+// applyFakeIPDNS 在 TUN 模式强制注入 fake-ip 必需的 DNS 配置。
+// 注意：config.UnmarshalRawConfig 以 DefaultRawConfig 为基底，DNS 各字段已预置上游默认值，
+// 故不能用 len==0 判断「订阅是否自带」——对 fake-ip-filter 改为并集合并，确保必需域名
+// （Apple 推送/局域网/STUN 等）始终生效；nameserver 沿用订阅或上游默认，无需补充。
 func applyFakeIPDNS(rawCfg *config.RawConfig) {
 	d := &rawCfg.DNS
 	d.Enable = true
 	d.EnhancedMode = mihomoConst.DNSFakeIP
-	if d.FakeIPRange == "" {
-		d.FakeIPRange = "198.18.0.1/16"
-	}
-	if len(d.FakeIPFilter) == 0 {
-		d.FakeIPFilter = defaultFakeIPFilter()
-	}
-	if len(d.NameServer) == 0 { // 保留订阅上游；订阅无则补默认 DoH（防污染）
-		d.NameServer = []string{
-			"https://doh.pub/dns-query",
-			"https://dns.alidns.com/dns-query",
-		}
-	}
-	if len(rawCfg.Tun.DNSHijack) == 0 { // 劫持 53 端口进内核，否则应用直连公共 DNS 绕过 fake-ip
+	d.FakeIPRange = fakeIPRange
+	d.FakeIPFilter = unionStrings(d.FakeIPFilter, requiredFakeIPFilter) // 保留已有 + 补必需
+	if len(rawCfg.Tun.DNSHijack) == 0 {                                 // 劫持 53 端口进内核，否则应用直连公共 DNS 绕过 fake-ip
 		rawCfg.Tun.DNSHijack = []string{"any:53"}
 	}
 	rawCfg.Profile.StoreFakeIP = true // 持久化 fake-ip 映射，防 NE 重启后 fake DNS record missing 断连
 }
 
-// defaultFakeIPFilter 返回不参与 fake-ip 的域名（局域网/网络探测/推送/NTP/STUN，直接真解析）。
-func defaultFakeIPFilter() []string {
-	return []string{
-		"*.lan", "*.local", "*.localhost",
-		"localhost.ptlogin2.qq.com",
-		"+.msftconnecttest.com", "+.msftncsi.com",
-		"*.push.apple.com",
-		"time.*.com", "time.*.apple.com",
-		"stun.*.*", "stun.*.*.*",
+// unionStrings 返回 a、b 的有序去重并集（a 在前，保序）。
+func unionStrings(a, b []string) []string {
+	seen := make(map[string]struct{}, len(a)+len(b))
+	out := make([]string, 0, len(a)+len(b))
+	for _, group := range [][]string{a, b} {
+		for _, s := range group {
+			if _, ok := seen[s]; ok {
+				continue
+			}
+			seen[s] = struct{}{}
+			out = append(out, s)
+		}
 	}
-}
-
-// injectProviderCachePath 为 http 类型 proxy-providers 注入相对 home-dir 的本地缓存 path，
-// 内核据此把下载内容落盘；远程订阅源不可达时回退使用本地缓存。统一覆盖以集中缓存目录。
-func injectProviderCachePath(rawCfg *config.RawConfig) {
-	for _, p := range rawCfg.ProxyProvider {
-		if p == nil {
-			continue
-		}
-		if typ, _ := p["type"].(string); typ != "http" {
-			continue // file/inline 类型无需缓存 path
-		}
-		rawURL, _ := p["url"].(string)
-		if rawURL == "" {
-			continue
-		}
-		p["path"] = "providers/" + hashProviderURL(rawURL) + ".yaml"
-	}
-}
-
-// hashProviderURL 用 FNV-1a 生成稳定短哈希作缓存文件名，避免 provider 名含特殊字符/重名。
-func hashProviderURL(rawURL string) string {
-	h := fnv.New32a()
-	_, _ = h.Write([]byte(rawURL))
-	return fmt.Sprintf("%08x", h.Sum32())
+	return out
 }
 
 // applyConfig 解析 YAML 并应用到内核（Start 与 Reload 共用）

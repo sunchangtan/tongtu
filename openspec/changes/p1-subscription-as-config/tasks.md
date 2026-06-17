@@ -32,3 +32,13 @@
 - [ ] 5.2 实际流量走代理（出口 IP 验证）+ 域名 DNS 解析正常（fake-ip 生效）
 - [ ] 5.3 扩展内存复测仍在红线内（常驻 < 40MiB / 峰值 < 50MiB）
 - [ ] 5.4 实施完成且真机通过后，按 archive 顺序（`p1-m1-ios-skeleton` 在前）`openspec archive p1-subscription-as-config`
+
+## 6. Review 修复（2026-06-18，code-review 抓到 2 严重 + 中/cleanup，已全修）
+
+- [x] 6.1 #1 fake-ip-filter 守卫死代码（真机 APNs blocker）：`UnmarshalRawConfig` 以 `DefaultRawConfig` 为基底致 `len==0` 永不成立 → 改并集合并 `unionStrings` + 补必需项（含 `*.push.apple.com`/captive/连通性探测）+ `fake-ip-range` 强制设；回归测试（上游默认非空时仍补必需项）
+- [x] 6.2 #2 移除自注入缓存 path：上游已按订阅自带 path / `md5(url)` 自动缓存，注入覆盖订阅 path 且 fnv32 更弱 → 删 `injectProviderCachePath`/`hashProviderURL`；真实订阅端到端实测移除后缓存仍有效（远程黑洞回退 143 节点）
+- [x] 6.3 #3 stale config：`saveContent` 存来源 url + `_connect` 校验当前 url 一致性，不符提示重新获取
+- [x] 6.4 #4 弱校验：正则行首锚定 `^(proxies|proxy-providers):` 替代子串 `contains`，含测试
+- [x] 6.5 #5 DNS only TUN：保持（iOS NE 恒 TUN 正确），design 注明非 TUN 待 P3
+- [x] 6.6 cleanup：`SubscriptionInfo.copyWith` / content 存文件（path_provider）/ home_page `_lastContent` state 缓存 / `requiredFakeIPFilter`+`fakeIPRange` 提常量
+- [x] 6.7 门禁：`go vet`/`go test`（5）+ `flutter analyze`（第一方 0）/`test`（40）全绿

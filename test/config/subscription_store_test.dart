@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -8,9 +10,22 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('SubscriptionStore', () {
+    late Directory tmp;
+
     setUp(() {
       SharedPreferences.setMockInitialValues(<String, Object>{});
+      tmp = Directory.systemTemp.createTempSync('sub_test');
     });
+
+    tearDown(() {
+      if (tmp.existsSync()) {
+        tmp.deleteSync(recursive: true);
+      }
+    });
+
+    // 注入临时目录作为配置正文落盘位置（生产用 path_provider）
+    SubscriptionStore storeWithDir() =>
+        SubscriptionStore(configDir: () async => tmp);
 
     test('保存并读取有效订阅链接', () async {
       final SubscriptionStore store = SubscriptionStore();
@@ -26,7 +41,7 @@ void main() {
       );
     });
 
-    test('获取配置：解析 subscription-userinfo 流量/到期', () async {
+    test('获取配置：解析 subscription-userinfo 流量/到期 + 保留完整正文', () async {
       final SubscriptionStore store = SubscriptionStore();
       final MockClient client = MockClient((http.Request request) async {
         return http.Response(
@@ -46,7 +61,7 @@ void main() {
       expect(info.total, 1000);
       expect(info.download, 200);
       expect(info.expire, 1700000000);
-      expect(info.content, 'proxies: []'); // 保留完整正文作为内核主配置
+      expect(info.content, 'proxies: []'); // copyWith 保留完整正文
     });
 
     test('获取配置：HTTP 错误返回 ok=false', () async {
@@ -67,7 +82,7 @@ void main() {
       expect(info.ok, isFalse);
     });
 
-    test('获取配置：非合法 clash 配置（无 proxies/proxy-providers）ok=false', () async {
+    test('获取配置：非合法 clash 配置（无顶层 proxies/proxy-providers）ok=false', () async {
       final SubscriptionStore store = SubscriptionStore();
       final MockClient client = MockClient((http.Request request) async {
         return http.Response('<html>error page</html>', 200);
@@ -80,11 +95,34 @@ void main() {
       expect(info.content, isNull);
     });
 
-    test('保存并读取完整配置正文', () async {
+    test('获取配置：proxies 仅出现在非行首（注释/字符串）不误判为合法', () async {
+      // 行首锚定校验：含字样但非顶层 key → 仍判非法（修复子串 contains 误判）
       final SubscriptionStore store = SubscriptionStore();
+      final MockClient client = MockClient((http.Request request) async {
+        return http.Response(
+          '# this config has no proxies yet\n{"error":"too many proxies"}',
+          200,
+        );
+      });
+      final SubscriptionInfo info = await store.fetch(
+        'https://example.com/sub',
+        client: client,
+      );
+      expect(info.ok, isFalse);
+    });
+
+    test('保存并读取完整配置正文（落文件）+ 来源 url', () async {
+      final SubscriptionStore store = storeWithDir();
       const String yaml = 'proxy-providers:\n  sub: {type: http}\n';
-      await store.saveContent(yaml);
+      await store.saveContent(yaml, 'https://example.com/sub');
       expect(await store.loadContent(), yaml);
+      expect(await store.loadContentSourceUrl(), 'https://example.com/sub');
+      expect(File('${tmp.path}/subscription.yaml').existsSync(), isTrue);
+    });
+
+    test('未保存时 loadContent 返回 null', () async {
+      final SubscriptionStore store = storeWithDir();
+      expect(await store.loadContent(), isNull);
     });
   });
 }

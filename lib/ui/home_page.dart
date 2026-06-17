@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   Timer? _connectTimer;
   String? _message;
   String? _diag;
+  String? _lastContent; // fetch 成功后缓存的完整配置正文，连接/查看优先用，省去重复读盘
 
   @override
   void initState() {
@@ -131,9 +132,10 @@ class _HomePageState extends State<HomePage> {
       final SubscriptionInfo info = await _subscriptions.fetch(
         _urlController.text,
       );
-      // 获取成功即保存完整配置正文，连接时直接使用（不每次连接都重新下载）
+      // 获取成功即保存完整配置正文（落文件）+ 来源 url，连接时直接用（不每次连接都重新下载）
       if (info.ok && info.content != null) {
-        await _subscriptions.saveContent(info.content!);
+        await _subscriptions.saveContent(info.content!, _urlController.text);
+        _lastContent = info.content;
       }
       if (mounted) {
         setState(() => _info = info);
@@ -153,10 +155,19 @@ class _HomePageState extends State<HomePage> {
     setState(() => _message = null);
     try {
       // 用「获取配置」时保存的完整 clash 配置正文作为内核主配置
-      final String? content = await _subscriptions.loadContent();
+      final String? content =
+          _lastContent ?? await _subscriptions.loadContent();
       if (content == null || content.isEmpty) {
         if (mounted) {
           setState(() => _message = '请先「获取配置」再连接');
+        }
+        return;
+      }
+      // 防止改了订阅链接却未重新获取就连接：来源 url 与当前输入不一致则拦截
+      final String? sourceUrl = await _subscriptions.loadContentSourceUrl();
+      if (sourceUrl != null && sourceUrl != _urlController.text.trim()) {
+        if (mounted) {
+          setState(() => _message = '订阅链接已变，请重新「获取配置」');
         }
         return;
       }
@@ -176,7 +187,7 @@ class _HomePageState extends State<HomePage> {
 
   /// 查看下发给内核的完整配置正文（订阅原文，已获取时），便于诊断。
   Future<void> _showConfig() async {
-    final String? content = await _subscriptions.loadContent();
+    final String? content = _lastContent ?? await _subscriptions.loadContent();
     if (!mounted) {
       return;
     }

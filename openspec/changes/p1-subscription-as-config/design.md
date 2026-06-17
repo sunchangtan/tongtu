@@ -38,17 +38,16 @@ FlClash/clashmi 在 Dart 层把订阅解析成 map、覆写字段、再编码回
 - 职责清晰：Dart 只「下载完整正文 + 传入」，Go 负责「注入运行参数」。
 - 代价：DNS 覆写逻辑需用 Go 操作 mihomo `RawConfig.DNS` 结构（可接受，见决策 3）。
 
-### 决策 3：TUN 模式下注入 fake-ip DNS（条件合并保留订阅上游）+ fake-ip-filter + 映射持久化 + dns-hijack
+### 决策 3：TUN 模式下注入 fake-ip DNS（强制并集 filter + 沿用订阅上游）+ dns-hijack + 映射持久化
 
-iOS NE 的 TUN 通路必须 fake-ip 才能按域名分流（机制见 §9 fake-ip 工作原理）。`core.go` 现状不处理 DNS，本次必补。采主流最优的**条件合并**策略（对齐 FlClash，优于 clashmi 的粗暴整替）。仅当 `tun-fd > 0`：
+iOS NE 的 TUN 通路必须 fake-ip 才能按域名分流（机制见 §9）。`core.go` 现状不处理 DNS，本次必补。仅当 `tun-fd > 0`：
 
-- **订阅自带 `dns.enable=true`**：**保留**其 `nameserver`/`fallback`/`proxy-server-nameserver`/`direct-nameserver` 上游（订阅作者的防污染优化），仅**强制**注入 `enhanced-mode=fake-ip`、`fake-ip-range=198.18.0.1/16`（缺省时）、补全 `fake-ip-filter`（缺省时）；
-- **订阅无 `dns` 段或未启用**：用**完整默认** fake-ip DNS（`nameserver` 取国内 DoH `https://doh.pub/dns-query`、`https://dns.alidns.com/dns-query`）；
-- **总是**：`tun.dns-hijack=["any:53"]`（FlClash 写法，比 clashmi `0.0.0.0:53` 更通配）把应用 53 端口 DNS 劫持进内核，否则绕过 fake-ip；启用 **fake-ip 映射持久化**（`profile.store-fake-ip`），避免 NE 重启后 `fake DNS record missing`（`tunnel/tunnel.go:304`）致断连。
+- **强制**：`enable=true`、`enhanced-mode=fake-ip`、`fake-ip-range=198.18.0.1/16`、`fake-ip-filter` **并集合并**（保留订阅/上游已有 + 补必需项 `requiredFakeIPFilter`）、`tun.dns-hijack=["any:53"]`、`profile.store-fake-ip`（持久化映射，防 NE 重启后 `tunnel.go:304` 的 `fake DNS record missing` 断连）；
+- **沿用**：`nameserver`/`fallback`/`proxy-server-nameserver` 等上游由订阅或上游默认提供（`UnmarshalRawConfig` 已填），不补充、不覆盖。
 
-**fake-ip-filter 主流列表**（这些域名不走 fake-ip，直接真解析）：`*.lan` / `*.local` / `localhost`、`localhost.ptlogin2.qq.com`、`+.msftconnecttest.com` / `+.msftncsi.com`、`*.push.apple.com`、`time.*.com` / `time.*.apple.com`、`stun.*.*` / `stun.*.*.*` 等（局域网 / 网络探测 / 推送 / NTP / STUN）。
+> **⚠️ Review 修正（关键）**：初版用 `len(FakeIPFilter)==0`/`len(NameServer)==0` 判断「订阅是否自带」。但 `config.UnmarshalRawConfig` 以 `DefaultRawConfig()` 为基底，DNS 各字段已预置上游默认（非空），守卫**永不成立**——`fake-ip-filter` 停留在上游默认（仅 msftnsci 几条，**缺 `*.push.apple.com`**），TUN 下 APNs 推送域名拿 fake IP 走代理致推送/连通性断裂。故改为：`fake-ip-range` 强制设、`fake-ip-filter` **并集合并**（必需项始终在）、`nameserver` 沿用不补。
 
-理由：subconverter 等订阅常自带 DoH + `proxy-server-nameserver` 优化，保留之优于整替；fake-ip 是 TUN 硬需求，强制注入；fake-ip-filter 不配会致局域网 / 推送 / STUN 异常（讲透 fake-ip 后补强）。
+**fake-ip-filter 必需项 `requiredFakeIPFilter`**（不走 fake-ip、直连真解析）：局域网 `*.lan`/`*.local`、`localhost.ptlogin2.qq.com`、网络探测 `+.msftconnecttest.com`/`+.msftncsi.com`/`captive.apple.com`/`connectivity-check.ubuntu.com`、Apple 推送 `*.push.apple.com`、厂商探测 `+.market.xiaomi.com`/`connect.rom.miui.com`、NTP `time.*.com`/`+.pool.ntp.org`、STUN `stun.*.*`。
 
 ## 9. fake-ip 工作原理（mihomo 实现，决策 3 依据）
 
@@ -58,12 +57,14 @@ iOS NE 的 TUN 通路必须 fake-ip 才能按域名分流（机制见 §9 fake-i
 
 配套硬需求：`dns-hijack`（劫持 53 端口，否则应用直连公共 DNS 绕过）、`fake-ip-filter`（特殊域名不参与）、映射持久化（重启不丢映射，否则 `fake DNS record missing`）。
 
-### 决策 4：嵌套 providers/groups/rules 原样保留，并由 Go 层为 http proxy-providers 注入本地缓存 path
-不展开、不改写订阅里的 `proxy-providers`/`proxy-groups`/`rules`/`rule-providers` 的语义（已实跑验证内核能据此下载出节点）；但在 `buildRawConfig` 中遍历 `RawConfig.ProxyProvider`（`map[string]map[string]any`），为每个 `type: http` 的 provider **注入指向持久化 home-dir 的本地缓存 `path`**（如 `providers/<url-hash>.yaml`），统一覆盖以集中缓存目录——采 **FlClash 做法**而非 clashmi 的纯原样。
+### 决策 4：嵌套 providers/groups/rules 原样保留，外网容灾依赖内核默认缓存（不自行注入 path）
+不展开、不改写订阅里的 `proxy-providers`/`proxy-groups`/`rules`/`rule-providers`（已实跑验证内核能据此下载出节点）。**不自行注入缓存 path**——`home-dir` 由 coreOverrides 指向 App Group 容器即可。
 
-**理由（外网容灾，用户提出）**：订阅源常在内网 NAS（如 `10.0.8.4:5000`），手机切到外网时访问不到。已核实 mihomo `Fetcher.Initial()` 的回退顺序为「**本地缓存文件 → bundle → 远程下载**」（`component/resource/fetcher.go:57-70`）：只要 provider 有 `path` 且本地缓存存在，启动时**先用本地缓存的节点**，远程下载转入后台 `pullLoop` 异步进行、失败则 backoff 重试。于是「曾在内网成功拉取过一次」之后，外网启动也有节点可用，不会全空。
+**外网容灾仍然有效（关键，已实测）**：缓存来自两条内核默认路径——① 订阅 provider **自带 `path`**（如 subconverter 生成的 `./providers/Provider_*.yaml`）时落盘到该 path；② provider 无 path 时上游**自动**按 `md5(url)` 落盘到 `home-dir/proxies/`（`adapter/provider/parser.go:87-89` `GetPathByHash`）。两种情况 `Fetcher.Initial()` 回退顺序均为「**本地缓存 → bundle → 远程**」（`component/resource/fetcher.go:57-70`）。于是「曾在内网成功拉取过一次」后，外网启动先用本地缓存节点、远程下载转后台重试。已用真实订阅端到端实测坐实：移除注入后**尊重订阅自带 path**落盘 `providers/`、远程黑洞下回退 **143 节点**（与可达时一致）。
 
-**限制**：首次启动（无任何缓存）时若远程不可达，仍为 0 节点——必须至少有一次能访问订阅源。`home-dir` 已由 coreOverrides 指向 App Group 容器，缓存跨启动持久。
+> **⚠️ Review 修正（关键）**：初版在 `buildRawConfig` 为 http provider 注入 `providers/<fnv32(url)>.yaml`。经查证这是**重复造轮子且有害**：① 上游本就用更强的 `md5(url)` 自动缓存；② 注入**覆盖订阅显式 path**（违本决策「原样保留」）；③ fnv32(32 位) 弱于 md5、有碰撞串档风险；④ 与上游一样未解决 `url` 含 `_dc`/token 易变致缓存 miss 的根因。故**移除注入**，依赖上游默认缓存。
+
+**限制 / `_dc` 易变**：若 provider url 含每次刷新就变的 query（`_dc`/token），缓存 key 变、回退失效。通途「**获取配置存正文 / 连接用存正文**」设计天然规避——连接复用同一份存储正文（url 固定），缓存 key 稳定命中；仅「重新获取配置」才可能变，而那时正在联网。首次无缓存且远程不可达仍为 0 节点。
 
 ### 决策 5：订阅完整正文经现有 `configYAML` 通道传入
 `Start(configYAML, overridesJSON)` 的 `configYAML` 由「`runtime_config` 生成的极简包装」改为「订阅下载的完整正文」。`overridesJSON` 不变（external-controller/secret/tun-fd/home-dir/log-dir/内存参数）。

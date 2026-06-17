@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 订阅拉取结果（流量/到期来自 subscription-userinfo 响应头，字节 / Unix 秒）。
@@ -22,12 +25,38 @@ class SubscriptionInfo {
   final int? download;
   final int? total;
   final int? expire;
+
+  /// 仅覆盖给定字段，其余沿用原值——避免新增字段时漏改手工组装点。
+  SubscriptionInfo copyWith({bool? ok, String? message, String? content}) {
+    return SubscriptionInfo(
+      ok: ok ?? this.ok,
+      message: message ?? this.message,
+      content: content ?? this.content,
+      upload: upload,
+      download: download,
+      total: total,
+      expire: expire,
+    );
+  }
 }
 
-/// 订阅管理（M1 最小：单订阅链接，持久化于 SharedPreferences）。
+/// 订阅管理（M1 最小：单订阅，链接持久化于 SharedPreferences，完整配置正文落文件）。
 class SubscriptionStore {
+  /// [configDir] 为配置正文落盘目录的提供者（测试可注入临时目录）；默认 app 支持目录。
+  SubscriptionStore({Future<Directory> Function()? configDir})
+    : _configDir = configDir ?? getApplicationSupportDirectory;
+
+  final Future<Directory> Function() _configDir;
+
   static const String _key = 'subscription_url';
-  static const String _contentKey = 'subscription_content';
+  static const String _contentSourceKey = 'subscription_content_url';
+
+  /// 合法 clash 配置标记：顶层须含 `proxies:` 或 `proxy-providers:`（行首锚定，
+  /// 避免注释/字符串/HTML 错误页里出现字样导致的子串误判）。
+  static final RegExp _clashConfigMarker = RegExp(
+    r'^(proxies|proxy-providers):',
+    multiLine: true,
+  );
 
   /// 校验是否为合法 http/https 订阅链接。
   static bool isValidUrl(String url) {
@@ -52,16 +81,29 @@ class SubscriptionStore {
     return prefs.getString(_key);
   }
 
-  /// 保存订阅完整配置正文（作为内核主配置，连接时读取传入内核）。
-  Future<void> saveContent(String content) async {
+  Future<File> _contentFile() async {
+    final Directory dir = await _configDir();
+    return File('${dir.path}/subscription.yaml');
+  }
+
+  /// 保存订阅完整配置正文（落文件）与其来源 url（存 prefs，供连接前一致性校验）。
+  Future<void> saveContent(String content, String sourceUrl) async {
+    final File f = await _contentFile();
+    await f.writeAsString(content);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_contentKey, content);
+    await prefs.setString(_contentSourceKey, sourceUrl.trim());
   }
 
   /// 读取已保存的订阅完整配置正文（无则返回 null）。
   Future<String?> loadContent() async {
+    final File f = await _contentFile();
+    return f.existsSync() ? await f.readAsString() : null;
+  }
+
+  /// 读取已保存正文的来源 url（无则返回 null）。
+  Future<String?> loadContentSourceUrl() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_contentKey);
+    return prefs.getString(_contentSourceKey);
   }
 
   /// 获取配置：HTTP 拉取订阅，校验为合法 clash 配置并返回完整正文（作为内核主配置），
@@ -89,25 +131,16 @@ class SubscriptionStore {
         );
       }
       final String body = resp.body;
-      // 校验为合法 clash 配置：须含 proxies 或 proxy-providers，否则不作为配置写入
-      if (!body.contains('proxies') && !body.contains('proxy-providers')) {
+      // 行首锚定校验：合法 clash 配置须有顶层 proxies / proxy-providers
+      if (!_clashConfigMarker.hasMatch(body)) {
         return const SubscriptionInfo(
           ok: false,
-          message: '订阅内容非合法 clash 配置（缺 proxies / proxy-providers）',
+          message: '订阅内容非合法 clash 配置（缺顶层 proxies / proxy-providers）',
         );
       }
-      final SubscriptionInfo info = _parseUserInfo(
+      return _parseUserInfo(
         resp.headers['subscription-userinfo'],
-      );
-      return SubscriptionInfo(
-        ok: true,
-        message: info.message,
-        content: body,
-        upload: info.upload,
-        download: info.download,
-        total: info.total,
-        expire: info.expire,
-      );
+      ).copyWith(ok: true, content: body);
     } on Exception catch (e) {
       return SubscriptionInfo(ok: false, message: '获取失败：${e.runtimeType}');
     } finally {
