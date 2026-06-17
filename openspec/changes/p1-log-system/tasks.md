@@ -4,7 +4,7 @@
 - [x] 1.2 `go.mod` 加 `gopkg.in/natefinch/lumberjack.v2` 依赖
 - [x] 1.3 `core.go`：`Start` 在 `applyConfig` 前订阅日志，goroutine 非阻塞写入 `lumberjack`（`MaxSize=1MiB` / `MaxBackups=4`）；overrides 增加日志目录路径；`Stop` 取消订阅并结束 goroutine（两级 buffer + select default 防回压；编译 + vet 通过）
 - [x] 1.4 Go 单测：落盘写入正确；文件滚动限容（4 个测试全过，含 condition-based poll 处理 lumberjack 异步删除）
-- [x] 1.5 `go vet` + `go build` + 全量 `go test` 通过（4 个日志测试 + 回归全绿）；golangci-lint 本机未装，统一在 5.2 最终门禁安装后补跑
+- [x] 1.5 `go vet` + `go build` + 全量 `go test` 通过（4 个日志测试 + 回归全绿）；golangci-lint 已在 5.2 补跑零问题
 
 ## 2. 日志路径下发（Swift 扩展）
 
@@ -30,7 +30,7 @@
 ## 5. 质量门禁与真机验证
 
 - [x] 5.1 `flutter analyze` 0 警告 0 错误 + `dart format` 规范 + `flutter test` 全过（25 个测试）
-- [x] 5.2 `swiftlint --strict` 通过 + `go vet` 通过（golangci-lint 本机未安装，待 CI/本机安装后补跑，不阻塞软件完成）
+- [x] 5.2 `swiftlint --strict` 通过 + `go vet` 通过 + **`golangci-lint` v2.12.2 补跑零问题**（2026-06-18 安装后跑 `core-bridge/mihomocore`，errcheck 报 7 处未检查 `Close` 返回值，已逐个显式忽略 `_ = x.Close()`；第一方门禁全绿）
 - [ ] 5.3 真机验证：App Group 日志文件生成、含最早 provider 下载日志、滚动限容（多次重启不累积）、实时显示 / 暂停 / 回看 / 搜索 / 导出
 - [ ] 5.4 真机内存复测：扩展 `phys_footprint` 仍在 <40MiB 常驻 / <50MiB 峰值红线内（落盘开销可忽略）
 - [ ] 5.5 `openspec validate p1-log-system --strict` 通过，实施完成后 `openspec archive`

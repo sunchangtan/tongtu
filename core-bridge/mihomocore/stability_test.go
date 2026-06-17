@@ -16,7 +16,7 @@ func openFDCount(t *testing.T) int {
 	if err != nil {
 		t.Fatalf("打开 /dev/fd 失败: %v", err)
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	names, err := f.Readdirnames(-1)
 	if err != nil {
 		t.Fatalf("读取 /dev/fd 失败: %v", err)

@@ -26,7 +26,7 @@ func freePort(t *testing.T) int {
 	if err != nil {
 		t.Fatalf("申请空闲端口失败: %v", err)
 	}
-	defer l.Close()
+	defer func() { _ = l.Close() }()
 	return l.Addr().(*net.TCPAddr).Port
 }
 
@@ -79,7 +79,7 @@ func TestStartWithValidConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("external-controller 不可达: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("/version 应返回 200，实际为 %d", resp.StatusCode)
 	}
@@ -137,7 +137,7 @@ func TestReloadAppliesNewConfig(t *testing.T) {
 	if err != nil {
 		t.Fatalf("重载后 external-controller 不可达: %v", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	var cfg struct {
 		Mode string `json:"mode"`
 	}
@@ -158,7 +158,7 @@ func TestControllerSecretEnforced(t *testing.T) {
 	if err != nil {
 		t.Fatalf("请求失败: %v", err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 	if resp.StatusCode != http.StatusUnauthorized {
 		t.Fatalf("无凭据请求应返回 401，实际为 %d", resp.StatusCode)
 	}
@@ -167,7 +167,7 @@ func TestControllerSecretEnforced(t *testing.T) {
 	if err != nil {
 		t.Fatalf("带凭据请求失败: %v", err)
 	}
-	resp2.Body.Close()
+	_ = resp2.Body.Close()
 	if resp2.StatusCode != http.StatusOK {
 		t.Fatalf("带凭据请求应返回 200，实际为 %d", resp2.StatusCode)
 	}

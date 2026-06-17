@@ -394,7 +394,7 @@ func waitControllerReady(addr, secret string, timeout time.Duration) bool {
 			req.Header.Set("Authorization", "Bearer "+secret)
 		}
 		if resp, err := client.Do(req); err == nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			if resp.StatusCode == http.StatusOK {
 				return true
 			}
