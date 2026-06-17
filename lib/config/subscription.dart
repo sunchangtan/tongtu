@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:yaml/yaml.dart';
 
 /// 订阅拉取结果（流量/到期来自 subscription-userinfo 响应头，字节 / Unix 秒）。
 class SubscriptionInfo {
@@ -51,12 +52,28 @@ class SubscriptionStore {
   static const String _key = 'subscription_url';
   static const String _contentSourceKey = 'subscription_content_url';
 
-  /// 合法 clash 配置标记：顶层须含 `proxies:` 或 `proxy-providers:`（行首锚定，
-  /// 避免注释/字符串/HTML 错误页里出现字样导致的子串误判）。
-  static final RegExp _clashConfigMarker = RegExp(
-    r'^(proxies|proxy-providers):',
-    multiLine: true,
-  );
+  /// 校验为合法 clash 配置：能解析为 YAML 映射且含**非空** proxies 或 proxy-providers。
+  /// 用真 YAML 解析（而非子串匹配），杜绝注释/HTML 错误页里出现字样的误判，并能识别
+  /// `proxies: []` 空列表；返回 null 表示合法，否则返回中文原因。连接时内核 Start 仍会终校验兜底。
+  static String? _validateClashConfig(String body) {
+    final dynamic doc;
+    try {
+      doc = loadYaml(body);
+    } catch (_) {
+      return 'YAML 解析失败';
+    }
+    if (doc is! Map) {
+      return '内容不是有效的 YAML 配置';
+    }
+    final dynamic proxies = doc['proxies'];
+    final dynamic providers = doc['proxy-providers'];
+    final bool hasProxies = proxies is List && proxies.isNotEmpty;
+    final bool hasProviders = providers is Map && providers.isNotEmpty;
+    if (!hasProxies && !hasProviders) {
+      return '缺少节点：proxies / proxy-providers 为空或不存在';
+    }
+    return null;
+  }
 
   /// 校验是否为合法 http/https 订阅链接。
   static bool isValidUrl(String url) {
@@ -131,12 +148,10 @@ class SubscriptionStore {
         );
       }
       final String body = resp.body;
-      // 行首锚定校验：合法 clash 配置须有顶层 proxies / proxy-providers
-      if (!_clashConfigMarker.hasMatch(body)) {
-        return const SubscriptionInfo(
-          ok: false,
-          message: '订阅内容非合法 clash 配置（缺顶层 proxies / proxy-providers）',
-        );
+      // 用真 YAML 解析校验（杜绝子串误判）；连接时内核 Start 仍会终校验兜底
+      final String? invalidReason = _validateClashConfig(body);
+      if (invalidReason != null) {
+        return SubscriptionInfo(ok: false, message: '订阅内容非合法配置：$invalidReason');
       }
       return _parseUserInfo(
         resp.headers['subscription-userinfo'],

@@ -43,9 +43,11 @@ void main() {
 
     test('获取配置：解析 subscription-userinfo 流量/到期 + 保留完整正文', () async {
       final SubscriptionStore store = SubscriptionStore();
+      const String body =
+          'proxies:\n  - {name: a, type: socks5, server: 1.1.1.1, port: 1080}\n';
       final MockClient client = MockClient((http.Request request) async {
         return http.Response(
-          'proxies: []',
+          body,
           200,
           headers: <String, String>{
             'subscription-userinfo':
@@ -61,7 +63,7 @@ void main() {
       expect(info.total, 1000);
       expect(info.download, 200);
       expect(info.expire, 1700000000);
-      expect(info.content, 'proxies: []'); // copyWith 保留完整正文
+      expect(info.content, body); // copyWith 保留完整正文
     });
 
     test('获取配置：HTTP 错误返回 ok=false', () async {
@@ -96,7 +98,7 @@ void main() {
     });
 
     test('获取配置：proxies 仅出现在非行首（注释/字符串）不误判为合法', () async {
-      // 行首锚定校验：含字样但非顶层 key → 仍判非法（修复子串 contains 误判）
+      // 真 YAML 解析：含字样但非顶层 key → 仍判非法（杜绝子串 contains 误判）
       final SubscriptionStore store = SubscriptionStore();
       final MockClient client = MockClient((http.Request request) async {
         return http.Response(
@@ -109,6 +111,33 @@ void main() {
         client: client,
       );
       expect(info.ok, isFalse);
+    });
+
+    test('获取配置：proxies 为空列表 → 判非法（真 YAML 识别空节点，正则做不到）', () async {
+      final SubscriptionStore store = SubscriptionStore();
+      final MockClient client = MockClient((http.Request request) async {
+        return http.Response('proxies: []', 200);
+      });
+      final SubscriptionInfo info = await store.fetch(
+        'https://example.com/sub',
+        client: client,
+      );
+      expect(info.ok, isFalse);
+    });
+
+    test('获取配置：含非空 proxy-providers → 合法', () async {
+      final SubscriptionStore store = SubscriptionStore();
+      final MockClient client = MockClient((http.Request request) async {
+        return http.Response(
+          'proxy-providers:\n  sub:\n    type: http\n    url: "http://x/y"\n',
+          200,
+        );
+      });
+      final SubscriptionInfo info = await store.fetch(
+        'https://example.com/sub',
+        client: client,
+      );
+      expect(info.ok, isTrue);
     });
 
     test('保存并读取完整配置正文（落文件）+ 来源 url', () async {
