@@ -1,0 +1,74 @@
+{
+  "sys": {
+    "color": {
+      "primary": {
+        "$type": "color",
+        "$value": "{ref.indigo.40}"
+      },
+      "on-primary": {
+        "$type": "color",
+        "$value": "{ref.neutral.100}"
+      },
+      "primary-container": {
+        "$type": "color",
+        "$value": "{ref.indigo.90}"
+      },
+      "on-primary-container": {
+        "$type": "color",
+        "$value": "{ref.indigo.10}"
+      },
+      "secondary": {
+        "$type": "color",
+        "$value": "{ref.cyan.40}"
+      },
+      "on-secondary": {
+        "$type": "color",
+        "$value": "{ref.neutral.100}"
+      },
+      "secondary-container": {
+        "$type": "color",
+        "$value": "{ref.cyan.90}"
+      },
+      "on-secondary-container": {
+        "$type": "color",
+        "$value": "{ref.cyan.30}"
+      },
+      "surface": {
+        "$type": "color",
+        "$value": "{ref.neutral.100}"
+      },
+      "on-surface": {
+        "$type": "color",
+        "$value": "{ref.neutral.10}"
+      },
+      "surface-variant": {
+        "$type": "color",
+        "$value": "{ref.neutral.94}"
+      },
+      "on-surface-variant": {
+        "$type": "color",
+        "$value": "{ref.neutral.30}"
+      },
+      "background": {
+        "$type": "color",
+        "$value": "{ref.neutral.96}"
+      },
+      "on-background": {
+        "$type": "color",
+        "$value": "{ref.neutral.10}"
+      },
+      "outline": {
+        "$type": "color",
+        "$value": "{ref.neutral.80}"
+      },
+      "error": {
+        "$type": "color",
+        "$value": "{ref.error.40}"
+      },
+      "on-error": {
+        "$type": "color",
+        "$value": "{ref.neutral.100}"
+      }
+    }
+  }
+}

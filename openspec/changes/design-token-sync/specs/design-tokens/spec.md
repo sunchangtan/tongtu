@@ -12,7 +12,7 @@
 - **则** token 以 DTCG 的 `$type` / `$value` 表达，可被支持 DTCG 的工具解析
 
 ### Requirement: 明暗双主题 token sets
-语义色必须（MUST）以明、暗两套 token set 表达（共享同一 ref 基础色层）；维度类 token（间距 / 圆角 / 尺寸 / 字号）无明暗区分，应当（SHALL）为单一 set 供明暗共用。
+语义色必须（MUST）以明、暗两套 token set 表达（共享同一 ref 基础色层）；维度类 token（间距 / 圆角 / 字号，UI 尺度）无明暗区分，应当（SHALL）为单一 set 供明暗共用。
 
 #### Scenario: 明暗各一套语义色 set
 - **当** 查看语义色 token 源

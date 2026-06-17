@@ -1,0 +1,13 @@
+{
+  "name": "tongtu-style-dictionary",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "通途跨栈 Token 同步：DTCG → Flutter (tokens.g.dart) + CSS (tokens.css)",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "style-dictionary": "^4.3.0"
+  }
+}

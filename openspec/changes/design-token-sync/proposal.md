@@ -4,7 +4,7 @@
 
 ## What Changes
 
-- 新建 `tokens/`：W3C DTCG 格式 token 源（`ref` 基础色 + `sys` 语义色明暗两套 + 维度），提交 git 作单一真相源；由 agent 半自动从 Figma 变量导出（Figma Variables REST API 仅 Enterprise 可用、当前 Organization plan，故半自动起步）。
+- 新建 `tokens/`：W3C DTCG 格式 token 源（`ref` 基础色 + `sys` 语义色明暗两套 + UI 维度 `sys/ui/*`，参照 M3 + 4dp 栅格），提交 git 作单一真相源；由 agent 半自动从 Figma 变量导出（Figma Variables REST API 仅 Enterprise 可用、当前 Organization plan，故半自动起步）。颜色沿用现有变量；UI 维度为本 change 新建（取证发现现有维度变量是 logo 资产尺度，不适合 UI）。
 - 引入 Style Dictionary（Node，隔离于 `tools/style-dictionary/`），显式开启 `usesDtcg`；用 `build.mjs` 以 SD Node API 编排明暗两套解析。
 - 生成 Flutter `lib/ui/tokens/tokens.g.dart`（明暗两组语义色常量 + 共享维度常量）与 `web/tokens/tokens.css`（`:root` 浅 + `[data-theme=dark]` 深）。
 - `lib/ui/app_theme.dart` 从硬编码颜色改为引用生成常量：`ColorScheme.fromSeed` 打底 + 生成常量 `copyWith` 覆盖品牌关键角色，`AppTheme.light/dark` 对外接口不变。
@@ -21,6 +21,7 @@
 ## Impact
 
 - **新增**：`tokens/`（DTCG 源）、`tools/style-dictionary/`（Node 工具链，隔离）、`web/tokens/tokens.css`（生成物）、`lib/ui/tokens/tokens.g.dart`（生成物）。
+- **Figma**：新建 UI 维度变量集合（`sys/ui/space|radius|font`，参照 M3 + 4dp 栅格），与 logo 资产维度隔离、不动 logo 变量。
 - **修改**：`lib/ui/app_theme.dart`（颜色值来源改为生成常量，接口不变；`main.dart` 无需改）。
 - **依赖**：引入 Node + style-dictionary v4（隔离 `tools/`，将来与 Web/React 子项目共享；不影响 Flutter / Go 构建路径）。
 - **specs**：新增 `design-tokens`。

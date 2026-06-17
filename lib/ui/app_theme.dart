@@ -1,56 +1,60 @@
 import 'package:flutter/material.dart';
 
-/// 通途 App 主题配色：由品牌色推导，明暗两套（Material 3）。
+import 'tokens/tokens.g.dart';
+
+/// 通途 App 主题配色：由生成的设计 token 推导，明暗两套（Material 3）。
 ///
-/// 配色源：`docs/design/logo-spec.md`
-/// - Primary（主色）= 品牌靛蓝 `#3F51B5`
-/// - Secondary（次色）= 品牌蓝青 `#1E9BD4`
+/// 颜色源：`tokens/*.json`（Figma 变量）→ `lib/ui/tokens/tokens.g.dart`（生成）。
+/// 改色请改 Figma 变量 → 重新导出 DTCG → `node tools/style-dictionary/build.mjs`，
+/// 不在此硬编码。
 ///
-/// 与 Figma「Tongtu Brand」文件的 `App Theme` 变量集合（Light / Dark 两 mode）一一对应。
-/// 以 `ColorScheme.fromSeed` 生成完整且版本兼容的 M3 调色，再用品牌精确色覆盖关键 token。
+/// 以 `ColorScheme.fromSeed` 生成完整 M3 调色打底，再用生成的明 / 暗语义色常量
+/// 覆盖品牌关键角色（见 `openspec/changes/design-token-sync` design D3）。
+/// token 中的 background / surface-variant 等在 Flutter M3 已并入 surface 体系，
+/// 此处不单独映射；其值仍供 CSS / 其他端使用。
 class AppTheme {
   AppTheme._();
 
   /// 浅色配色方案。
   static final ColorScheme lightScheme =
       ColorScheme.fromSeed(
-        seedColor: const Color(0xFF3F51B5),
+        seedColor: TongtuSysColorsLight.primary,
         brightness: Brightness.light,
       ).copyWith(
-        primary: const Color(0xFF3F51B5),
-        onPrimary: const Color(0xFFFFFFFF),
-        primaryContainer: const Color(0xFFE0E2FB),
-        onPrimaryContainer: const Color(0xFF161A4E),
-        secondary: const Color(0xFF1E9BD4),
-        onSecondary: const Color(0xFFFFFFFF),
-        secondaryContainer: const Color(0xFFD7EEF9),
-        onSecondaryContainer: const Color(0xFF0A5B7A),
-        surface: const Color(0xFFFFFFFF),
-        onSurface: const Color(0xFF1A1C2A),
-        outline: const Color(0xFFC4C6D0),
-        error: const Color(0xFFBA1A1A),
-        onError: const Color(0xFFFFFFFF),
+        primary: TongtuSysColorsLight.primary,
+        onPrimary: TongtuSysColorsLight.onPrimary,
+        primaryContainer: TongtuSysColorsLight.primaryContainer,
+        onPrimaryContainer: TongtuSysColorsLight.onPrimaryContainer,
+        secondary: TongtuSysColorsLight.secondary,
+        onSecondary: TongtuSysColorsLight.onSecondary,
+        secondaryContainer: TongtuSysColorsLight.secondaryContainer,
+        onSecondaryContainer: TongtuSysColorsLight.onSecondaryContainer,
+        surface: TongtuSysColorsLight.surface,
+        onSurface: TongtuSysColorsLight.onSurface,
+        outline: TongtuSysColorsLight.outline,
+        error: TongtuSysColorsLight.error,
+        onError: TongtuSysColorsLight.onError,
       );
 
   /// 深色配色方案。
   static final ColorScheme darkScheme =
       ColorScheme.fromSeed(
-        seedColor: const Color(0xFF3F51B5),
+        seedColor: TongtuSysColorsLight.primary,
         brightness: Brightness.dark,
       ).copyWith(
-        primary: const Color(0xFFBBC3FF),
-        onPrimary: const Color(0xFF1A2270),
-        primaryContainer: const Color(0xFF2B3590),
-        onPrimaryContainer: const Color(0xFFDFE1FB),
-        secondary: const Color(0xFF8DD2F2),
-        onSecondary: const Color(0xFF06384B),
-        secondaryContainer: const Color(0xFF143C4E),
-        onSecondaryContainer: const Color(0xFFBCE7FB),
-        surface: const Color(0xFF15161B),
-        onSurface: const Color(0xFFE4E2E9),
-        outline: const Color(0xFF8E9099),
-        error: const Color(0xFFFFB4AB),
-        onError: const Color(0xFF690005),
+        primary: TongtuSysColorsDark.primary,
+        onPrimary: TongtuSysColorsDark.onPrimary,
+        primaryContainer: TongtuSysColorsDark.primaryContainer,
+        onPrimaryContainer: TongtuSysColorsDark.onPrimaryContainer,
+        secondary: TongtuSysColorsDark.secondary,
+        onSecondary: TongtuSysColorsDark.onSecondary,
+        secondaryContainer: TongtuSysColorsDark.secondaryContainer,
+        onSecondaryContainer: TongtuSysColorsDark.onSecondaryContainer,
+        surface: TongtuSysColorsDark.surface,
+        onSurface: TongtuSysColorsDark.onSurface,
+        outline: TongtuSysColorsDark.outline,
+        error: TongtuSysColorsDark.error,
+        onError: TongtuSysColorsDark.onError,
       );
 
   /// 浅色主题。
