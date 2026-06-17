@@ -52,6 +52,51 @@ void main() {
       api.dispose();
     });
 
+    test('getRules 解析生效规则（实证格式）并附 Bearer 鉴权', () async {
+      final MockClient client = MockClient((http.Request req) async {
+        expect(req.url.path, '/rules');
+        expect(req.headers['Authorization'], 'Bearer s3cr3t');
+        return http.Response(
+          jsonEncode(<String, dynamic>{
+            'rules': <dynamic>[
+              <String, dynamic>{
+                'index': 0,
+                'type': 'DOMAIN-SUFFIX',
+                'payload': 'google.com',
+                'proxy': 'PROXY',
+                'size': -1,
+              },
+              <String, dynamic>{
+                'index': 1,
+                'type': 'MATCH',
+                'payload': '',
+                'proxy': 'DIRECT',
+                'size': -1,
+              },
+            ],
+          }),
+          200,
+        );
+      });
+      final ClashApi api = ClashApi(endpoint, client: client);
+      final List<RuleItem> rules = await api.getRules();
+      expect(rules.length, 2);
+      expect(rules[0].type, 'DOMAIN-SUFFIX');
+      expect(rules[0].payload, 'google.com');
+      expect(rules[0].proxy, 'PROXY');
+      expect(rules[1].type, 'MATCH');
+      api.dispose();
+    });
+
+    test('getRules 鉴权失败抛 ClashApiException', () async {
+      final MockClient client = MockClient(
+        (http.Request req) async => http.Response('', 401),
+      );
+      final ClashApi api = ClashApi(endpoint, client: client);
+      await expectLater(api.getRules(), throwsA(isA<ClashApiException>()));
+      api.dispose();
+    });
+
     test('testDelay 返回毫秒', () async {
       final MockClient client = MockClient((http.Request req) async {
         return http.Response(jsonEncode(<String, dynamic>{'delay': 123}), 200);

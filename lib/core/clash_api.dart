@@ -100,6 +100,27 @@ class ConnectionItem {
   final int download;
 }
 
+/// 一条生效分流规则（GET /rules，实证格式 {"rules":[{index,type,payload,proxy,...}]}）。
+class RuleItem {
+  const RuleItem({
+    required this.type,
+    required this.payload,
+    required this.proxy,
+  });
+
+  factory RuleItem.fromJson(Map<String, dynamic> json) {
+    return RuleItem(
+      type: json['type'] as String? ?? '',
+      payload: json['payload'] as String? ?? '',
+      proxy: json['proxy'] as String? ?? '',
+    );
+  }
+
+  final String type;
+  final String payload;
+  final String proxy;
+}
+
 /// clash-api 调用异常。
 class ClashApiException implements Exception {
   ClashApiException(this.message);
@@ -204,6 +225,24 @@ class ClashApi {
         (body['connections'] as List<dynamic>?) ?? <dynamic>[];
     return conns
         .map((dynamic c) => ConnectionItem.fromJson(c as Map<String, dynamic>))
+        .toList();
+  }
+
+  /// 查询当前生效的分流规则（GET /rules）。
+  Future<List<RuleItem>> getRules() async {
+    final http.Response resp = await _client.get(
+      _rest('/rules'),
+      headers: _headers,
+    );
+    if (resp.statusCode != 200) {
+      throw ClashApiException('查询规则失败：HTTP ${resp.statusCode}');
+    }
+    final Map<String, dynamic> body =
+        jsonDecode(resp.body) as Map<String, dynamic>;
+    final List<dynamic> rules =
+        (body['rules'] as List<dynamic>?) ?? <dynamic>[];
+    return rules
+        .map((dynamic r) => RuleItem.fromJson(r as Map<String, dynamic>))
         .toList();
   }
 

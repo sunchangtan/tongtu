@@ -19,9 +19,9 @@
 
 ## 4. 规则查看（clash-api + UI）
 
-- [ ] 4.1 `clash_api`：新增 `getRules()`（GET `/rules` + Bearer）+ `RuleItem` 模型（type/payload/proxy，按实证格式 `{"rules":[...]}`）
-- [ ] 4.2 `lib/ui/rules_page.dart`：列表（type/payload/proxy）+ 搜索 + 空态（未连接/无数据）
-- [ ] 4.3 测试：`getRules` mock HTTP **按实证格式** + 鉴权失败抛异常；rules_page 空态 + mock rules widget 测试
+- [x] 4.1 `clash_api`：新增 `getRules()`（GET `/rules` + Bearer）+ `RuleItem` 模型（type/payload/proxy，按实证格式 `{"rules":[...]}`）
+- [x] 4.2 `lib/ui/rules_page.dart`：列表（type/payload/proxy）+ 搜索 + 空态（未连接/无数据）
+- [x] 4.3 测试：`getRules` mock HTTP **按实证格式** + 鉴权失败抛异常；rules_page 空态 + mock rules widget 测试
 
 ## 5. 导航集成
 
