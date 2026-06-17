@@ -197,29 +197,29 @@ class _HomePageState extends State<HomePage> {
             _buildMemoryCard(_memory!),
           ],
           const SizedBox(height: 16),
-          Row(
-            children: <Widget>[
-              Expanded(
-                child: FilledButton(
-                  onPressed: _canConnect ? _connect : null,
-                  child: const Text('连接'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _state == CoreState.stopped ? null : _disconnect,
-                  child: const Text('断开'),
-                ),
-              ),
-            ],
-          ),
+          _buildActionButton(),
           if (_message != null) ...<Widget>[
             const SizedBox(height: 16),
             Text(_message!, style: const TextStyle(color: Colors.red)),
           ],
         ],
       ),
+    );
+  }
+
+  /// 单一动作按钮：未连接显示「连接」，连接中/已连接显示「断开」（可取消/断开）。
+  Widget _buildActionButton() {
+    final bool active =
+        _state == CoreState.connected || _state == CoreState.connecting;
+    if (active) {
+      return FilledButton.tonal(
+        onPressed: _disconnect,
+        child: Text(_state == CoreState.connecting ? '连接中…（取消）' : '断开'),
+      );
+    }
+    return FilledButton(
+      onPressed: _canConnect ? _connect : null,
+      child: const Text('连接'),
     );
   }
 
