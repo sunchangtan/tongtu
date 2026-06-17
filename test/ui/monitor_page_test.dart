@@ -50,6 +50,9 @@ class _FakeApi implements ClashApi {
   Future<List<ConnectionItem>> getConnections() async => <ConnectionItem>[];
 
   @override
+  Future<List<RuleItem>> getRules() async => <RuleItem>[];
+
+  @override
   Future<Map<String, ProxyGroup>> getProxyGroups() async =>
       <String, ProxyGroup>{};
 

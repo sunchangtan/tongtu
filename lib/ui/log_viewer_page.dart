@@ -19,8 +19,8 @@ class LogViewerPage extends StatelessWidget {
       title: '完整日志',
       loader: s.readAll,
       searchHint: '搜索日志',
-      actionsBuilder:
-          (Future<void> Function() reload, String fullText) => <Widget>[
+      actionsBuilder: (Future<void> Function() reload, String fullText) =>
+          <Widget>[
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: reload,

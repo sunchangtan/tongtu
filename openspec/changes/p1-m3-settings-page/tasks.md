@@ -6,16 +6,16 @@
 
 ## 2. 主题持久化 + 应用设置
 
-- [ ] 2.1 `lib/core/theme_controller.dart`：`ValueNotifier<ThemeMode>` + shared_preferences 持久化（key `theme_mode`，缺省 system）
-- [ ] 2.2 `main.dart`：`ValueListenableBuilder` 包 `MaterialApp`，启动读取持久值、切换即时重建
-- [ ] 2.3 `lib/core/kernel_version.dart`：内核版本静态常量（`v1.19.27`，注释「与 core-bridge/go.mod 同步」）
-- [ ] 2.4 `lib/ui/settings_page.dart`：分组（外观主题切换 / 配置入口 / 规则入口 / 关于=app版本+内核版本+GPL+日志入口）
-- [ ] 2.5 widget 测试：主题切换持久化（SharedPreferences mock）、关于信息展示
+- [x] 2.1 `lib/core/theme_controller.dart`：`ValueNotifier<ThemeMode>` + shared_preferences 持久化（key `theme_mode`，缺省 system）
+- [x] 2.2 `main.dart`：`ValueListenableBuilder` 包 `MaterialApp`，启动读取持久值、切换即时重建
+- [x] 2.3 `lib/core/kernel_version.dart`：内核版本静态常量（`v1.19.27`，注释「与 core-bridge/go.mod 同步」）
+- [x] 2.4 `lib/ui/settings_page.dart`：分组（外观主题切换 / 配置入口 / 规则入口 / 关于=app版本+内核版本+GPL+日志入口）
+- [x] 2.5 widget 测试：主题切换持久化（SharedPreferences mock）、关于信息展示
 
 ## 3. 配置查看子页
 
-- [ ] 3.1 `lib/ui/config_viewer_page.dart`：复用 `text_viewer_page`，加载器 = `SubscriptionStore.loadContent`（订阅原文只读）
-- [ ] 3.2 widget 测试：mock content 展示 + 未获取空态
+- [x] 3.1 `lib/ui/config_viewer_page.dart`：复用 `text_viewer_page`，加载器 = `SubscriptionStore.loadContent`（订阅原文只读）
+- [x] 3.2 widget 测试：mock content 展示 + 未获取空态
 
 ## 4. 规则查看（clash-api + UI）
 
@@ -25,14 +25,14 @@
 
 ## 5. 导航集成
 
-- [ ] 5.1 `home_shell`：底部导航加第 4 tab「设置」（连接/节点/监控/设置），`IndexedStack` 加一项
-- [ ] 5.2 widget 测试：4 tab 渲染、切到设置 tab
+- [x] 5.1 `home_shell`：底部导航加第 4 tab「设置」（连接/节点/监控/设置），`IndexedStack` 加一项
+- [x] 5.2 widget 测试：4 tab 渲染、切到设置 tab
 
 ## 6. 质量门禁
 
-- [ ] 6.1 `flutter analyze` 0 警告 0 错误 + `dart format` + `flutter test` 全过
-- [ ] 6.2 `go vet` + `golangci-lint`（若动 core-bridge）+ `swiftlint --strict`（若动 Swift）通过
-- [ ] 6.3 `openspec validate p1-m3-settings-page --strict` 通过
+- [x] 6.1 `flutter analyze` 0 警告 0 错误 + `dart format` + `flutter test` 全过
+- [x] 6.2 `go vet` + `golangci-lint`（若动 core-bridge）+ `swiftlint --strict`（若动 Swift）通过
+- [x] 6.3 `openspec validate p1-m3-settings-page --strict` 通过
 
 ## 7. 真机验证与归档（gate）
 

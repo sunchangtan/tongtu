@@ -5,8 +5,9 @@ import '../core/core_controller.dart';
 import 'home_page.dart';
 import 'monitor_page.dart';
 import 'nodes_page.dart';
+import 'settings_page.dart';
 
-/// 应用主框架：持有共享 CoreController，底部导航切换 连接 / 节点 / 监控 三页。
+/// 应用主框架：持有共享 CoreController，底部导航切换 连接 / 节点 / 监控 / 设置 四页。
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key, CoreController? controller})
     : _injectedController = controller;
@@ -21,7 +22,7 @@ class _HomeShellState extends State<HomeShell> {
   late final CoreController _controller;
   int _index = 0;
 
-  static const List<String> _titles = <String>['通途', '节点', '监控'];
+  static const List<String> _titles = <String>['通途', '节点', '监控', '设置'];
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _HomeShellState extends State<HomeShell> {
           HomePage(controller: _controller),
           NodesPage(controller: _controller),
           MonitorPage(controller: _controller),
+          SettingsPage(controller: _controller),
         ],
       ),
       bottomNavigationBar: NavigationBar(
@@ -53,6 +55,10 @@ class _HomeShellState extends State<HomeShell> {
           NavigationDestination(
             icon: Icon(Icons.monitor_heart_outlined),
             label: '监控',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.settings_outlined),
+            label: '设置',
           ),
         ],
       ),

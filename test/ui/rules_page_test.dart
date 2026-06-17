@@ -55,7 +55,11 @@ void main() {
               'payload': 'google.com',
               'proxy': 'PROXY',
             },
-            <String, dynamic>{'type': 'MATCH', 'payload': '', 'proxy': 'DIRECT'},
+            <String, dynamic>{
+              'type': 'MATCH',
+              'payload': '',
+              'proxy': 'DIRECT',
+            },
           ],
         }),
         200,

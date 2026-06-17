@@ -25,7 +25,11 @@ void main() {
   testWidgets('内容为空时显示 emptyHint', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
-        home: TextViewerPage(title: '文本', loader: _emptyLoader, emptyHint: '尚无内容'),
+        home: TextViewerPage(
+          title: '文本',
+          loader: _emptyLoader,
+          emptyHint: '尚无内容',
+        ),
       ),
     );
     await tester.pumpAndSettle();
