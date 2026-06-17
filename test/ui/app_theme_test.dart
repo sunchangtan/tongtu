@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tongtu/ui/app_theme.dart';
 import 'package:tongtu/ui/tokens/tokens.g.dart';
+import 'package:tongtu/ui/tokens/typography.g.dart';
 
 void main() {
   group('AppTheme 引用生成 token', () {
@@ -34,6 +35,41 @@ void main() {
     test('主题启用 Material 3', () {
       expect(AppTheme.light.useMaterial3, isTrue);
       expect(AppTheme.dark.useMaterial3, isTrue);
+    });
+  });
+
+  group('AppTheme 接入 M3 type scale', () {
+    test('textTheme 取自 tongtuTextTheme（M3 标准值）', () {
+      final TextTheme t = AppTheme.light.textTheme;
+      expect(t.displayLarge?.fontSize, 57.0);
+      expect(t.displayLarge?.fontWeight, FontWeight.w400);
+      expect(t.titleMedium?.fontSize, 16.0);
+      expect(t.titleMedium?.fontWeight, FontWeight.w500);
+      expect(t.bodyLarge?.fontSize, 16.0);
+      expect(t.bodyLarge?.letterSpacing, 0.5);
+      expect(t.labelSmall?.fontSize, 11.0);
+    });
+
+    test('tongtuTextTheme 含完整 15 档', () {
+      const TextTheme t = tongtuTextTheme;
+      final List<TextStyle?> styles = <TextStyle?>[
+        t.displayLarge,
+        t.displayMedium,
+        t.displaySmall,
+        t.headlineLarge,
+        t.headlineMedium,
+        t.headlineSmall,
+        t.titleLarge,
+        t.titleMedium,
+        t.titleSmall,
+        t.bodyLarge,
+        t.bodyMedium,
+        t.bodySmall,
+        t.labelLarge,
+        t.labelMedium,
+        t.labelSmall,
+      ];
+      expect(styles.where((TextStyle? s) => s != null).length, 15);
     });
   });
 }

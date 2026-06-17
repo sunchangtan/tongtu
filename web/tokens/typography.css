@@ -1,0 +1,121 @@
+/* GENERATED — DO NOT EDIT. 由 tokens/typography.json 生成。 */
+
+.type-display-large {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 57px;
+  line-height: 64px;
+  letter-spacing: -0.25px;
+}
+
+.type-display-medium {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 45px;
+  line-height: 52px;
+  letter-spacing: 0px;
+}
+
+.type-display-small {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 44px;
+  letter-spacing: 0px;
+}
+
+.type-headline-large {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: 0px;
+}
+
+.type-headline-medium {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 36px;
+  letter-spacing: 0px;
+}
+
+.type-headline-small {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: 0px;
+}
+
+.type-title-large {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: 0px;
+}
+
+.type-title-medium {
+  font-family: Roboto;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.15px;
+}
+
+.type-title-small {
+  font-family: Roboto;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.1px;
+}
+
+.type-body-large {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.5px;
+}
+
+.type-body-medium {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.25px;
+}
+
+.type-body-small {
+  font-family: Roboto;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.4px;
+}
+
+.type-label-large {
+  font-family: Roboto;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.1px;
+}
+
+.type-label-medium {
+  font-family: Roboto;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0.5px;
+}
+
+.type-label-small {
+  font-family: Roboto;
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 16px;
+  letter-spacing: 0.5px;
+}

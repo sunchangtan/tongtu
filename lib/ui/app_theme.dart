@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'tokens/tokens.g.dart';
+import 'tokens/typography.g.dart';
 
 /// 通途 App 主题配色：由生成的设计 token 推导，明暗两套（Material 3）。
 ///
@@ -61,11 +62,13 @@ class AppTheme {
   static final ThemeData light = ThemeData(
     colorScheme: lightScheme,
     useMaterial3: true,
+    textTheme: tongtuTextTheme,
   );
 
   /// 深色主题。
   static final ThemeData dark = ThemeData(
     colorScheme: darkScheme,
     useMaterial3: true,
+    textTheme: tongtuTextTheme,
   );
 }
