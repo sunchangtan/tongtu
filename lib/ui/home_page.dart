@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../config/runtime_config.dart';
 import '../config/subscription.dart';
 import '../core/core_controller.dart';
 import '../util/format.dart';
@@ -132,6 +131,10 @@ class _HomePageState extends State<HomePage> {
       final SubscriptionInfo info = await _subscriptions.fetch(
         _urlController.text,
       );
+      // 获取成功即保存完整配置正文，连接时直接使用（不每次连接都重新下载）
+      if (info.ok && info.content != null) {
+        await _subscriptions.saveContent(info.content!);
+      }
       if (mounted) {
         setState(() => _info = info);
       }
@@ -149,11 +152,15 @@ class _HomePageState extends State<HomePage> {
   Future<void> _connect() async {
     setState(() => _message = null);
     try {
-      await _subscriptions.save(_urlController.text);
-      final String url = _urlController.text.trim();
-      await _controller.start(
-        configYAML: RuntimeConfig.generateYAML(subscriptionUrl: url),
-      );
+      // 用「获取配置」时保存的完整 clash 配置正文作为内核主配置
+      final String? content = await _subscriptions.loadContent();
+      if (content == null || content.isEmpty) {
+        if (mounted) {
+          setState(() => _message = '请先「获取配置」再连接');
+        }
+        return;
+      }
+      await _controller.start(configYAML: content);
       _scheduleConnectTimeout();
     } on Exception catch (e) {
       if (mounted) {
@@ -167,11 +174,15 @@ class _HomePageState extends State<HomePage> {
     await _controller.stop();
   }
 
-  /// 查看实际下发给内核的 mihomo 配置原文（含订阅 URL 与 proxy-provider），便于诊断。
-  void _showConfig() {
-    final String yaml = RuntimeConfig.generateYAML(
-      subscriptionUrl: _urlController.text.trim(),
-    );
+  /// 查看下发给内核的完整配置正文（订阅原文，已获取时），便于诊断。
+  Future<void> _showConfig() async {
+    final String? content = await _subscriptions.loadContent();
+    if (!mounted) {
+      return;
+    }
+    final String yaml = (content == null || content.isEmpty)
+        ? '（尚未获取配置，请先「获取配置」）'
+        : content;
     showDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) => AlertDialog(
@@ -230,7 +241,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 8),
             TextButton.icon(
-              onPressed: _showConfig,
+              onPressed: () => _showConfig(),
               icon: const Icon(Icons.description_outlined),
               label: const Text('查看下发配置'),
             ),

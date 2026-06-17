@@ -6,6 +6,7 @@ class SubscriptionInfo {
   const SubscriptionInfo({
     required this.ok,
     this.message,
+    this.content,
     this.upload,
     this.download,
     this.total,
@@ -14,6 +15,9 @@ class SubscriptionInfo {
 
   final bool ok;
   final String? message;
+
+  /// 订阅返回的完整 clash 配置正文（ok 时有效），作为内核主配置传入。
+  final String? content;
   final int? upload;
   final int? download;
   final int? total;
@@ -23,6 +27,7 @@ class SubscriptionInfo {
 /// 订阅管理（M1 最小：单订阅链接，持久化于 SharedPreferences）。
 class SubscriptionStore {
   static const String _key = 'subscription_url';
+  static const String _contentKey = 'subscription_content';
 
   /// 校验是否为合法 http/https 订阅链接。
   static bool isValidUrl(String url) {
@@ -47,8 +52,20 @@ class SubscriptionStore {
     return prefs.getString(_key);
   }
 
-  /// 获取配置：HTTP 拉取订阅验证可达性，解析 subscription-userinfo 流量/到期信息。
-  /// 不解析节点列表（M1 由内核 proxy-providers 连接时拉取）。
+  /// 保存订阅完整配置正文（作为内核主配置，连接时读取传入内核）。
+  Future<void> saveContent(String content) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_contentKey, content);
+  }
+
+  /// 读取已保存的订阅完整配置正文（无则返回 null）。
+  Future<String?> loadContent() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_contentKey);
+  }
+
+  /// 获取配置：HTTP 拉取订阅，校验为合法 clash 配置并返回完整正文（作为内核主配置），
+  /// 同时解析 subscription-userinfo 流量/到期信息。
   Future<SubscriptionInfo> fetch(String url, {http.Client? client}) async {
     final String trimmed = url.trim();
     if (!isValidUrl(trimmed)) {
@@ -71,7 +88,26 @@ class SubscriptionStore {
           message: '获取失败：HTTP ${resp.statusCode}',
         );
       }
-      return _parseUserInfo(resp.headers['subscription-userinfo']);
+      final String body = resp.body;
+      // 校验为合法 clash 配置：须含 proxies 或 proxy-providers，否则不作为配置写入
+      if (!body.contains('proxies') && !body.contains('proxy-providers')) {
+        return const SubscriptionInfo(
+          ok: false,
+          message: '订阅内容非合法 clash 配置（缺 proxies / proxy-providers）',
+        );
+      }
+      final SubscriptionInfo info = _parseUserInfo(
+        resp.headers['subscription-userinfo'],
+      );
+      return SubscriptionInfo(
+        ok: true,
+        message: info.message,
+        content: body,
+        upload: info.upload,
+        download: info.download,
+        total: info.total,
+        expire: info.expire,
+      );
     } on Exception catch (e) {
       return SubscriptionInfo(ok: false, message: '获取失败：${e.runtimeType}');
     } finally {

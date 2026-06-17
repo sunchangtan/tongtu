@@ -46,6 +46,7 @@ void main() {
       expect(info.total, 1000);
       expect(info.download, 200);
       expect(info.expire, 1700000000);
+      expect(info.content, 'proxies: []'); // 保留完整正文作为内核主配置
     });
 
     test('获取配置：HTTP 错误返回 ok=false', () async {
@@ -64,6 +65,26 @@ void main() {
       final SubscriptionStore store = SubscriptionStore();
       final SubscriptionInfo info = await store.fetch('not-a-url');
       expect(info.ok, isFalse);
+    });
+
+    test('获取配置：非合法 clash 配置（无 proxies/proxy-providers）ok=false', () async {
+      final SubscriptionStore store = SubscriptionStore();
+      final MockClient client = MockClient((http.Request request) async {
+        return http.Response('<html>error page</html>', 200);
+      });
+      final SubscriptionInfo info = await store.fetch(
+        'https://example.com/sub',
+        client: client,
+      );
+      expect(info.ok, isFalse);
+      expect(info.content, isNull);
+    });
+
+    test('保存并读取完整配置正文', () async {
+      final SubscriptionStore store = SubscriptionStore();
+      const String yaml = 'proxy-providers:\n  sub: {type: http}\n';
+      await store.saveContent(yaml);
+      expect(await store.loadContent(), yaml);
     });
   });
 }
