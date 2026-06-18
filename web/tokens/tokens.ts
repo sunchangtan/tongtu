@@ -75,4 +75,38 @@ export const comp = {
   buttonContainerHeight: 40,
   buttonIconSize: 18,
   buttonOutlineWidth: 1,
+  buttonPaddingHorizontal: 24,
+  buttonShape: 9999,
+} as const;
+
+export const compColorsLight = {
+  buttonFilledContainerColor: '#3f51b5',
+  buttonFilledLabelColor: '#ffffff',
+  buttonTonalContainerColor: '#d7eef9',
+  buttonTonalLabelColor: '#0a5b7a',
+  buttonOutlinedLabelColor: '#3f51b5',
+  buttonOutlinedOutlineColor: '#c4c6d0',
+  buttonTextLabelColor: '#3f51b5',
+  buttonElevatedContainerColor: '#ffffff',
+  buttonElevatedLabelColor: '#3f51b5',
+  buttonDisabledContainer: '#1a1c2a1f',
+  buttonDisabledLabel: '#1a1c2a61',
+  buttonDisabledIcon: '#1a1c2a61',
+  buttonDisabledOutline: '#1a1c2a1f',
+} as const;
+
+export const compColorsDark = {
+  buttonFilledContainerColor: '#bbc3ff',
+  buttonFilledLabelColor: '#1a2270',
+  buttonTonalContainerColor: '#143c4e',
+  buttonTonalLabelColor: '#bce7fb',
+  buttonOutlinedLabelColor: '#bbc3ff',
+  buttonOutlinedOutlineColor: '#8e9099',
+  buttonTextLabelColor: '#bbc3ff',
+  buttonElevatedContainerColor: '#15161b',
+  buttonElevatedLabelColor: '#bbc3ff',
+  buttonDisabledContainer: '#e4e2e91f',
+  buttonDisabledLabel: '#e4e2e961',
+  buttonDisabledIcon: '#e4e2e961',
+  buttonDisabledOutline: '#e4e2e91f',
 } as const;

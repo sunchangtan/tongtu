@@ -45,6 +45,21 @@
   --comp-button-container-height: 40px;
   --comp-button-icon-size: 18px;
   --comp-button-outline-width: 1px;
+  --comp-button-padding-horizontal: 24px;
+  --comp-button-shape: 9999px;
+  --comp-button-filled-container-color: #3f51b5;
+  --comp-button-filled-label-color: #ffffff;
+  --comp-button-tonal-container-color: #d7eef9;
+  --comp-button-tonal-label-color: #0a5b7a;
+  --comp-button-outlined-label-color: #3f51b5;
+  --comp-button-outlined-outline-color: #c4c6d0;
+  --comp-button-text-label-color: #3f51b5;
+  --comp-button-elevated-container-color: #ffffff;
+  --comp-button-elevated-label-color: #3f51b5;
+  --comp-button-disabled-container: #1a1c2a1f;
+  --comp-button-disabled-label: #1a1c2a61;
+  --comp-button-disabled-icon: #1a1c2a61;
+  --comp-button-disabled-outline: #1a1c2a1f;
 }
 
 [data-theme="dark"] {
@@ -69,4 +84,17 @@
   --sys-color-disabled-content: #e4e2e961;
   --sys-color-disabled-icon: #e4e2e961;
   --sys-color-disabled-border: #e4e2e91f;
+  --comp-button-filled-container-color: #bbc3ff;
+  --comp-button-filled-label-color: #1a2270;
+  --comp-button-tonal-container-color: #143c4e;
+  --comp-button-tonal-label-color: #bce7fb;
+  --comp-button-outlined-label-color: #bbc3ff;
+  --comp-button-outlined-outline-color: #8e9099;
+  --comp-button-text-label-color: #bbc3ff;
+  --comp-button-elevated-container-color: #15161b;
+  --comp-button-elevated-label-color: #bbc3ff;
+  --comp-button-disabled-container: #e4e2e91f;
+  --comp-button-disabled-label: #e4e2e961;
+  --comp-button-disabled-icon: #e4e2e961;
+  --comp-button-disabled-outline: #e4e2e91f;
 }

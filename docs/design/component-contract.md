@@ -1,6 +1,6 @@
 # 通途组件库 · 跨端契约规范
 
-- 版本：v1.0
+- 版本：v1.1
 - 定位：组件库（子项目 A）的契约基准，三端（Figma / Flutter / Web React-MUI）共享。A2 由 Button 落地，A3 所有组件遵循。
 - 关联：`docs/design/component-library-design.md`、`openspec/specs/design-tokens`、`openspec/specs/design-components`
 
@@ -34,18 +34,24 @@
 
 ---
 
-## 4. token 绑定约定
+## 4. token 绑定约定（comp 单一入口）
 
-组件**不得硬编码**，一律绑 token：
+组件**不得硬编码**。颜色与尺寸一律经 **`comp/<组件>/*` 单一入口**取用——组件只读 comp，**不直接读 sys 或框架 ColorScheme**；comp 内部经 alias 引 sys 实现语义透传。字体例外：走全局 type scale。
 
-| 维度 | token |
-|------|-------|
-| 颜色 | `sys/color`（容器 / 文字 / 描边各取对应语义角色） |
-| 圆角 | `sys/ui/radius` |
-| 文字 | `type`（M3 type scale，如 `type/label/large`） |
-| 间距 / 内距 | `sys/ui/space` |
+| 维度 | 组件取用 | comp 内部引 |
+|------|----------|-------------|
+| 颜色（容器 / 文字 / 描边，按 variant） | `comp/<组件>/<variant>/*-color` | `sys/color/*` |
+| disabled 色（容器 / 文字 / 图标 / 描边） | `comp/<组件>/disabled-*` | `sys/color/disabled-*`（带 alpha） |
+| 圆角 | `comp/<组件>/shape` | `sys/ui/radius` |
+| 内距 | `comp/<组件>/padding-*` | `sys/ui/space` |
+| 结构尺寸（容器高 / 图标尺寸 / 描边宽） | `comp/<组件>/{container-height,icon-size,outline-width}` | 固有字面值（sys 无对应档） |
+| 字体 | `type`（M3 type scale，如 `type/label/large`） | —（不经 comp，见下） |
 
-disabled 态：按 M3 用 `on-surface` 透明度（容器 12% / 文字 38%）。
+**颜色为何按 variant 拆**：对齐 M3 官方 comp 层；每 variant 独立可定制——改 `comp/<组件>/<variant>/*` 只影响该组件该变体，不动全局 sys（组件级换肤）。
+
+**字体为何不入 comp**：三端字体本就独立消费全局 type scale（Flutter `textTheme`、CSS `.type-*`、MUI `typography`）；纳入 comp 会逼各端处理 typography composite，复杂度高、收益低（组件级换字体罕见）。故 comp 单一入口范围 = **颜色 + 尺寸**。
+
+disabled 态：用带 alpha 的 `sys/color/disabled-*`（容器 12% / 文字 38%，α 烤进变量值），经 `comp/<组件>/disabled-*` 取，不用图层 opacity。
 
 ---
 
@@ -66,15 +72,16 @@ disabled 态：按 M3 用 `on-surface` 透明度（容器 12% / 文字 38%）。
 
 ---
 
-## 6. Flutter 实现约定（三层）
+## 6. Flutter 实现约定（三层 + comp 单一入口）
 
 避免「裸 widget 无扩展」与「厚 wrapper 重写样式」两个极端：
 
-1. **样式层**：`ThemeData` 的 component themes（`filledButtonTheme` 等，集中定义 shape / padding / textStyle，全绑 token）+ `ThemeExtension<TongtuTokens>`（放 M3 没有的通途自定义）。
-2. **组件层**：薄 wrapper（`TongtuXxx({variant, …})`），按 variant 委托 M3 widget，**不写死样式**（继承样式层）；提供统一 variant API + 扩展点 + Code Connect 单入口。
-3. **token 层**：`ColorScheme` / `textTheme` / `TongtuDimens`（已生成）。
+1. **样式层**：`ThemeData` component themes 放**共享尺寸**（shape / padding / minHeight / iconSize / textStyle，取自 `comp/<组件>/*` + type scale）作兜底 + `ThemeExtension<TongtuTokens>`（放 M3 没有的通途自定义）。
+2. **组件层**：薄 wrapper（`TongtuXxx({variant, …})`），按 variant 委托 M3 widget，并按 **comp 单一入口**取色——按 `variant` + 明暗从 `TongtuCompColors{Light,Dark}` 构造仅含色的 `ButtonStyle`（disabled 用 `WidgetStateProperty`）；提供统一 variant API + 扩展点 + Code Connect 单入口。
+   - **色为何在组件层而非 theme**：M3 的 `FilledButton` 与 `FilledButton.tonal` 共享同一 `FilledButtonTheme`，色无法经 component theme 区分 variant；故色置组件层显式给出，尺寸（variant 无关）仍走 component theme。
+3. **token 层**：`ColorScheme` / `textTheme` / `TongtuComp`（尺寸）/ `TongtuCompColors{Light,Dark}`（按 variant 明暗色）。
 
-原则：**样式进 theme（全局可换肤），wrapper 保持薄**。
+原则：**尺寸进 theme（共享兜底），色按 variant 从 comp 取（组件级可换肤），wrapper 仍薄（只选 widget + 取 comp 色）**。
 
 ---
 
@@ -82,7 +89,7 @@ disabled 态：按 M3 用 `on-surface` 透明度（容器 12% / 文字 38%）。
 
 - 工程：`web/`（Vite + TypeScript + MUI）。
 - token：`createTheme` 引 token 值（或 `tokens.css` CSS vars）。
-- 组件：React wrapper，中性 variant → MUI 配置；MUI 无原生者（tonal / elevated）用 theme variants + `sx` 自定义达成同等语义。
+- 组件：React wrapper，中性 variant → MUI 配置；按 **comp 单一入口**，各 variant 色（含 disabled）从 `compColorsLight` 经 `sx` 取（不依赖 MUI palette 默认），尺寸经 `createTheme` 的 `MuiButton` styleOverrides 取自 `comp`；MUI 无原生者（tonal / elevated）用 `sx` 自定义达成同等语义。
 
 ---
 
@@ -107,3 +114,4 @@ disabled 态：按 M3 用 `on-surface` 透明度（容器 12% / 文字 38%）。
 | 版本 | 日期 | 变更 |
 |------|------|------|
 | v1.0 | 2026-06-18 | A2 标杆立契约：中性 variant / 状态模型 / token 绑定 / 跨端映射 / Flutter 三层 / Web React-MUI / Code Connect 约定；Button 作为首个落地范例。 |
+| v1.1 | 2026-06-18 | 升级为 comp 单一入口：颜色 + 尺寸经 `comp/<组件>/*` 取（comp 引 sys），字体走 type scale；Flutter 色置组件层（filled/tonal 共享 theme）；Web 各 variant `sx` 取 comp 色。A3 沿此模板。 |

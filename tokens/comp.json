@@ -3,7 +3,32 @@
     "button": {
       "container-height": { "$type": "dimension", "$value": "40px" },
       "icon-size": { "$type": "dimension", "$value": "18px" },
-      "outline-width": { "$type": "dimension", "$value": "1px" }
+      "outline-width": { "$type": "dimension", "$value": "1px" },
+      "padding-horizontal": { "$type": "dimension", "$value": "{sys.ui.space.xl}" },
+      "shape": { "$type": "dimension", "$value": "{sys.ui.radius.full}" },
+      "filled": {
+        "container-color": { "$type": "color", "$value": "{sys.color.primary}" },
+        "label-color": { "$type": "color", "$value": "{sys.color.on-primary}" }
+      },
+      "tonal": {
+        "container-color": { "$type": "color", "$value": "{sys.color.secondary-container}" },
+        "label-color": { "$type": "color", "$value": "{sys.color.on-secondary-container}" }
+      },
+      "outlined": {
+        "label-color": { "$type": "color", "$value": "{sys.color.primary}" },
+        "outline-color": { "$type": "color", "$value": "{sys.color.outline}" }
+      },
+      "text": {
+        "label-color": { "$type": "color", "$value": "{sys.color.primary}" }
+      },
+      "elevated": {
+        "container-color": { "$type": "color", "$value": "{sys.color.surface}" },
+        "label-color": { "$type": "color", "$value": "{sys.color.primary}" }
+      },
+      "disabled-container": { "$type": "color", "$value": "{sys.color.disabled-container}" },
+      "disabled-label": { "$type": "color", "$value": "{sys.color.disabled-content}" },
+      "disabled-icon": { "$type": "color", "$value": "{sys.color.disabled-icon}" },
+      "disabled-outline": { "$type": "color", "$value": "{sys.color.disabled-border}" }
     }
   }
 }

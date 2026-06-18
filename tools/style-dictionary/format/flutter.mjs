@@ -4,6 +4,8 @@
 const isColor = (t) => t.path[0] === 'sys' && t.path[1] === 'color';
 const isDim = (t) => t.path[0] === 'sys' && t.path[1] === 'ui';
 const isComp = (t) => t.path[0] === 'comp';
+const isCompColor = (t) => isComp(t) && t.$type === 'color';
+const isCompDim = (t) => isComp(t) && t.$type === 'dimension';
 const dval = (t) => t.$value ?? t.value;
 
 function kebabToCamel(s) {
@@ -52,11 +54,20 @@ function dimClass(tokens) {
 // comp/button/container-height → buttonContainerHeight
 const compName = (t) => kebabToCamel(t.path.slice(1).join('-'));
 
-function compClass(tokens) {
+// comp 尺寸（无明暗）：固有尺寸 + 引 sys 的内距/圆角
+function compDimClass(tokens) {
   const lines = tokens
-    .filter(isComp)
+    .filter(isCompDim)
     .map((t) => `  static const ${compName(t)} = ${dartDouble(dval(t))};`);
-  return `/// 组件级 token（comp：组件固有尺寸）\nclass TongtuComp {\n  TongtuComp._();\n\n${lines.join('\n')}\n}`;
+  return `/// 组件级尺寸 token（comp：固有尺寸 + 引 sys 的内距 / 圆角；无明暗）\nclass TongtuComp {\n  TongtuComp._();\n\n${lines.join('\n')}\n}`;
+}
+
+// comp 颜色（随明暗，引 sys.color）：comp/button/filled/container-color → buttonFilledContainerColor
+function compColorClass(className, doc, tokens) {
+  const lines = tokens
+    .filter(isCompColor)
+    .map((t) => `  static const ${compName(t)} = ${dartColor(dval(t))};`);
+  return `/// ${doc}\nclass ${className} {\n  ${className}._();\n\n${lines.join('\n')}\n}`;
 }
 
 export function toDart({ lightTokens, darkTokens }) {
@@ -76,6 +87,10 @@ export function toDart({ lightTokens, darkTokens }) {
     '',
     dimClass(lightTokens),
     '',
-    compClass(lightTokens),
+    compDimClass(lightTokens),
+    '',
+    compColorClass('TongtuCompColorsLight', '组件色（comp，浅色；引 sys.color.light）', lightTokens),
+    '',
+    compColorClass('TongtuCompColorsDark', '组件色（comp，深色；引 sys.color.dark）', darkTokens),
   ].join('\n')}\n`;
 }

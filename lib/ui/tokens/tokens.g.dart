@@ -85,11 +85,51 @@ class TongtuDimens {
   static const font2xl = 32.0;
 }
 
-/// 组件级 token（comp：组件固有尺寸）
+/// 组件级尺寸 token（comp：固有尺寸 + 引 sys 的内距 / 圆角；无明暗）
 class TongtuComp {
   TongtuComp._();
 
   static const buttonContainerHeight = 40.0;
   static const buttonIconSize = 18.0;
   static const buttonOutlineWidth = 1.0;
+  static const buttonPaddingHorizontal = 24.0;
+  static const buttonShape = 9999.0;
+}
+
+/// 组件色（comp，浅色；引 sys.color.light）
+class TongtuCompColorsLight {
+  TongtuCompColorsLight._();
+
+  static const buttonFilledContainerColor = Color(0xFF3F51B5);
+  static const buttonFilledLabelColor = Color(0xFFFFFFFF);
+  static const buttonTonalContainerColor = Color(0xFFD7EEF9);
+  static const buttonTonalLabelColor = Color(0xFF0A5B7A);
+  static const buttonOutlinedLabelColor = Color(0xFF3F51B5);
+  static const buttonOutlinedOutlineColor = Color(0xFFC4C6D0);
+  static const buttonTextLabelColor = Color(0xFF3F51B5);
+  static const buttonElevatedContainerColor = Color(0xFFFFFFFF);
+  static const buttonElevatedLabelColor = Color(0xFF3F51B5);
+  static const buttonDisabledContainer = Color(0x1F1A1C2A);
+  static const buttonDisabledLabel = Color(0x611A1C2A);
+  static const buttonDisabledIcon = Color(0x611A1C2A);
+  static const buttonDisabledOutline = Color(0x1F1A1C2A);
+}
+
+/// 组件色（comp，深色；引 sys.color.dark）
+class TongtuCompColorsDark {
+  TongtuCompColorsDark._();
+
+  static const buttonFilledContainerColor = Color(0xFFBBC3FF);
+  static const buttonFilledLabelColor = Color(0xFF1A2270);
+  static const buttonTonalContainerColor = Color(0xFF143C4E);
+  static const buttonTonalLabelColor = Color(0xFFBCE7FB);
+  static const buttonOutlinedLabelColor = Color(0xFFBBC3FF);
+  static const buttonOutlinedOutlineColor = Color(0xFF8E9099);
+  static const buttonTextLabelColor = Color(0xFFBBC3FF);
+  static const buttonElevatedContainerColor = Color(0xFF15161B);
+  static const buttonElevatedLabelColor = Color(0xFFBBC3FF);
+  static const buttonDisabledContainer = Color(0x1FE4E2E9);
+  static const buttonDisabledLabel = Color(0x61E4E2E9);
+  static const buttonDisabledIcon = Color(0x61E4E2E9);
+  static const buttonDisabledOutline = Color(0x1FE4E2E9);
 }

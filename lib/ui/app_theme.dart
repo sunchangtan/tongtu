@@ -84,16 +84,21 @@ class AppTheme {
         onError: TongtuSysColorsDark.onError,
       );
 
-  /// Button 样式层（三层方案 §6）：shape=`radius/full`、padding=`space/xl`、
-  /// 文字=`label/large`、高度 40。样式集中在此，改一处全局生效，组件不写死。
-  static final ButtonStyle _buttonStyle = ButtonStyle(
+  /// Button 共享尺寸样式（comp 单一入口）：圆角 `comp/button/shape`、内距
+  /// `comp/button/padding-horizontal`、高度 `comp/button/container-height`、
+  /// 图标 `comp/button/icon-size` 全取自 `TongtuComp`（不再混读 `TongtuDimens`）；
+  /// 文字走全局 type scale（`label/large`，非 comp，见契约边界）。
+  /// 变体色不在此——filled / tonal 共享 M3 `FilledButtonTheme`，色由组件按
+  /// variant + 明暗从 comp 显式给出（见 `components/button.dart`）；本样式供
+  /// component theme 作尺寸兜底（直接用 M3 widget 时）。
+  static final ButtonStyle _sizeStyle = ButtonStyle(
     shape: WidgetStatePropertyAll<OutlinedBorder>(
       RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(TongtuDimens.radiusFull),
+        borderRadius: BorderRadius.circular(TongtuComp.buttonShape),
       ),
     ),
     padding: const WidgetStatePropertyAll<EdgeInsetsGeometry>(
-      EdgeInsets.symmetric(horizontal: TongtuDimens.spaceXl),
+      EdgeInsets.symmetric(horizontal: TongtuComp.buttonPaddingHorizontal),
     ),
     textStyle: WidgetStatePropertyAll<TextStyle?>(tongtuTextTheme.labelLarge),
     minimumSize: const WidgetStatePropertyAll<Size>(
@@ -107,12 +112,12 @@ class AppTheme {
     colorScheme: scheme,
     useMaterial3: true,
     textTheme: tongtuTextTheme,
-    filledButtonTheme: FilledButtonThemeData(style: _buttonStyle),
-    outlinedButtonTheme: OutlinedButtonThemeData(style: _buttonStyle),
-    textButtonTheme: TextButtonThemeData(style: _buttonStyle),
-    elevatedButtonTheme: ElevatedButtonThemeData(style: _buttonStyle),
+    filledButtonTheme: FilledButtonThemeData(style: _sizeStyle),
+    outlinedButtonTheme: OutlinedButtonThemeData(style: _sizeStyle),
+    textButtonTheme: TextButtonThemeData(style: _sizeStyle),
+    elevatedButtonTheme: ElevatedButtonThemeData(style: _sizeStyle),
     extensions: const <ThemeExtension<dynamic>>[
-      TongtuTokens(buttonMinHeight: 40),
+      TongtuTokens(buttonMinHeight: TongtuComp.buttonContainerHeight),
     ],
   );
 
