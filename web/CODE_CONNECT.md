@@ -27,9 +27,11 @@ npx figma connect parse --config figma.flutter.config.json    # Flutter
 
 ```sh
 cd web
-npx figma connect publish                                      # React
-npx figma connect publish --config figma.flutter.config.json  # Flutter
+npx figma connect publish                                                # React
+npx figma connect publish --config figma.flutter.config.json --label Flutter  # Flutter
 ```
+
+> Flutter 用 `--label Flutter`（html parser 默认标签是「Web Components」，须显式改）。换标签后旧标签残留，先 `unpublish --config figma.flutter.config.json --label "<旧>"` 清除。
 
 发布后，Figma Dev Mode 选中 Button（按 Variant / State）→ 切语言下拉看 React-MUI / Flutter 两端片段。
 
