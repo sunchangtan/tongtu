@@ -80,9 +80,9 @@
 
 ## D. Web（MUI）
 
-### D1. Preview 沙箱起不了 dev server
-- **现象**：Claude Preview 沙箱 `getcwd` 失败，dev server 起不来。
-- **防范**：Web 验证用 `vite build`（命令行），不依赖可视 preview。
+### D1. Web 视觉验证：优先 preview 截图，受限时回退 build
+- **现象**：部分沙箱环境 Claude Preview `getcwd` 失败、dev server 起不来；但常规环境 `preview_start`（`.claude/launch.json` 配 vite dev）可正常启动并 `preview_screenshot` 对照设计稿。
+- **防范**：先试 `preview_start` + 截图（最直接，能逐变体对照 Figma）；若该环境确实起不来，再回退 `vite build`（命令行）+ 代码审查变体齐全。按环境择一，**不预设「一定起不来」**。
 
 ### D2. MUI 无 tonal / elevated 原生 variant
 - **防范**：中性 variant → MUI variant 映射；无原生者（tonal / elevated）用 `sx` 自定义达同等语义。按 comp 单一入口，各 variant 色经 `sx` 从 comp 取（不靠 MUI palette 默认）。
