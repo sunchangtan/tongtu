@@ -25,6 +25,9 @@ import UIKit
       }
       tunnel.load {}
     }
+    // geo 预置包同步就位：确保扩展启动（用户点连接，必在界面显示后）前 BundleMRS.7z 已在容器，
+    // 实现首连零网络必达。未变更时仅 stat 秒回，仅首次/更新拷 4.5MB（界面前完成，远低于启动 watchdog）。
+    GeoBundleInstaller.ensureInstalled()
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }

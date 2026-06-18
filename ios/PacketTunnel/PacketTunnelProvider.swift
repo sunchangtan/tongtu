@@ -62,21 +62,8 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
                 userInfo: [NSLocalizedDescriptionKey: "缺少主 App 注入的控制器端口/secret"]))
             return
         }
-        // 日志落盘目录（App Group 容器内 logs/，扩展自算，无需主 App 传）；确保存在
-        let logsDir = container.appendingPathComponent("logs", isDirectory: true)
-        try? FileManager.default.createDirectory(
-            at: logsDir, withIntermediateDirectories: true)
-        let overrides: [String: Any] = [
-            "external-controller": "127.0.0.1:\(controllerPort)",
-            "secret": controllerSecret,
-            "home-dir": container.path,
-            "log-dir": logsDir.path,
-            "gomemlimit-mib": 30,
-            "gogc": 30,
-            "tun-fd": Int(tunFD)
-        ]
-        let overridesJSON = (try? JSONSerialization.data(withJSONObject: overrides))
-            .flatMap { String(data: $0, encoding: .utf8) } ?? ""
+        let overridesJSON = makeOverridesJSON(
+            container: container, tunFD: tunFD, port: controllerPort, secret: controllerSecret)
 
         // 5. 启动出站接口监听（问题 9）：在内核启动前先注入一次当前接口，再持续随网络变化更新
         interfaceMonitor.start()
@@ -95,6 +82,26 @@ class PacketTunnelProvider: NEPacketTunnelProvider {
         SharedStore.lastStartResult = "✅ 内核已启动 tunFD=\(tunFD) 端口=\(controllerPort) 状态=\(MihomocoreState())"
         startMemoryReporting()
         completionHandler(nil)
+    }
+
+    /// 构建内核覆写项 JSON（控制器端口/secret、home-dir、日志目录、内存防护、tun-fd、geo 转换开关）。
+    private func makeOverridesJSON(container: URL, tunFD: Int32, port: Int, secret: String) -> String {
+        // 日志落盘目录（App Group 容器内 logs/，扩展自算，无需主 App 传）；确保存在
+        let logsDir = container.appendingPathComponent("logs", isDirectory: true)
+        try? FileManager.default.createDirectory(at: logsDir, withIntermediateDirectories: true)
+        let overrides: [String: Any] = [
+            "external-controller": "127.0.0.1:\(port)",
+            "secret": secret,
+            "home-dir": container.path,
+            "log-dir": logsDir.path,
+            "gomemlimit-mib": 30,
+            "gogc": 30,
+            "tun-fd": Int(tunFD),
+            // 把 GEOSITE/GEOIP 转 mrs rule-set，避免整库 geosite.dat 撑爆 NE 50MB（p1-geo-mrs-conversion）
+            "convert-geo-rules": true
+        ]
+        return (try? JSONSerialization.data(withJSONObject: overrides))
+            .flatMap { String(data: $0, encoding: .utf8) } ?? ""
     }
 
     override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {

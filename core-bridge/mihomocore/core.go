@@ -17,9 +17,9 @@ import (
 	"time"
 
 	"github.com/metacubex/mihomo/common/observable"
+	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/config"
 	mihomoConst "github.com/metacubex/mihomo/constant"
-	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/hub"
 	"github.com/metacubex/mihomo/hub/executor"
 	"github.com/metacubex/mihomo/hub/route"
@@ -43,6 +43,7 @@ type coreOverrides struct {
 	GoGC               int    `json:"gogc"`                // GOGC 百分比，0 取默认值
 	TunFD              int    `json:"tun-fd"`              // 外部 TUN 文件描述符（iOS NE 从 packetFlow 取得），>0 时启用 TUN（D3）
 	LogDir             string `json:"log-dir"`             // 日志落盘目录（App Group 容器内），空则不落盘
+	ConvertGeoRules    bool   `json:"convert-geo-rules"`   // 是否把 GEOSITE/GEOIP 转 mrs rule-set（iOS 启用，避免整库 geosite.dat 撑爆 NE 50MB）
 }
 
 // 日志滚动限容常量：硬约束「绝不无限增长」的唯一事实源，生产代码与测试共用，
@@ -198,6 +199,12 @@ func buildRawConfig(configYAML string, ov coreOverrides) (*config.RawConfig, err
 	// 防护守卫：上游 DefaultRawConfig 已默认 memconservative，此处兜底防止空值（D4）
 	if rawCfg.GeodataLoader == "" {
 		rawCfg.GeodataLoader = "memconservative"
+	}
+	// geo 规则转 mrs rule-set（p1-geo-mrs-conversion）：把 GEOSITE/GEOIP 改写为按需 mrs，
+	// 避免 mihomo eager 加载整库 geosite.dat（实测 +16.5MB Go 堆）撑爆 iOS NE 50MB 硬限。
+	// 开关由调用方控制（iOS 启用），便于回滚到原行为。
+	if ov.ConvertGeoRules {
+		rewriteGeoRules(rawCfg)
 	}
 	// TUN fd 注入（D3）：iOS NE 内由系统接管路由，内核仅用传入 fd 收发包。
 	// 实战修复（demo 经验）：

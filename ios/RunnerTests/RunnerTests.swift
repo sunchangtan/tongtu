@@ -64,3 +64,27 @@ final class OnDemandRuleBuilderTests: XCTestCase {
     XCTAssertEqual(second.interfaceTypeMatch, .wiFi)
   }
 }
+
+/// `GeoBundleInstaller.shouldInstall` 纯函数单测：版本感知的 geo 预置包安装判定。
+/// 逻辑亦经独立 `swiftc` 运行验证；此处为入库 XCTest，随 `xcodebuild test` 复跑。
+final class GeoBundleInstallerTests: XCTestCase {
+  func testInstallWhenAbsent() {
+    XCTAssertTrue(GeoBundleInstaller.shouldInstall(
+      installed: false, installedVersion: nil, currentVersion: "1"))
+  }
+
+  func testSkipWhenSameVersion() {
+    XCTAssertFalse(GeoBundleInstaller.shouldInstall(
+      installed: true, installedVersion: "1", currentVersion: "1"))
+  }
+
+  func testReinstallWhenVersionChanged() {
+    XCTAssertTrue(GeoBundleInstaller.shouldInstall(
+      installed: true, installedVersion: "1", currentVersion: "2"))
+  }
+
+  func testReinstallWhenInstalledButNoStamp() {
+    XCTAssertTrue(GeoBundleInstaller.shouldInstall(
+      installed: true, installedVersion: nil, currentVersion: "1"))
+  }
+}

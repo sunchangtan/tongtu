@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0DEDA0DEDA0DEDA0DEDA0002 /* OnDemandRuleBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEDA0DEDA0DEDA0DEDA0001 /* OnDemandRuleBuilder.swift */; };
+		0DEDA0DEDA0DEDA0DEDA0004 /* WiFiSSIDReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEDA0DEDA0DEDA0DEDA0003 /* WiFiSSIDReader.swift */; };
 		13AFDDDDE44EA795F1748A34 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 15BA4CA2734F44273DCCA56E /* Foundation.framework */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
 		16AF06A8734FBFFFBC414E0E /* libresolv.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = ED369D71C44848B5CBF0C648 /* libresolv.tbd */; };
@@ -14,11 +16,11 @@
 		2BBC83B036BE02A6CDAA02C8 /* ProcessMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63191AEB35AAECF1B9E5BB72 /* ProcessMemory.swift */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		354AB62D4E80C6768872F41B /* PacketTunnel.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 8375DB8CC588E1993B77C5BA /* PacketTunnel.appex */; };
+		39906F9C2AFB1883788CA881 /* GeoBundleInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1065310417732109EAFBE649 /* GeoBundleInstaller.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		6F42EABC2DC3031A2E57071E /* BundleMRS.7z in Resources */ = {isa = PBXBuildFile; fileRef = B4D4E6A37E8363FF2B56F663 /* BundleMRS.7z */; };
 		6FD1148FC61311E3E0C3C70B /* InterfaceMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA5C9B2853BDEA3631981053 /* InterfaceMonitor.swift */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
-		0DEDA0DEDA0DEDA0DEDA0002 /* OnDemandRuleBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEDA0DEDA0DEDA0DEDA0001 /* OnDemandRuleBuilder.swift */; };
-		0DEDA0DEDA0DEDA0DEDA0004 /* WiFiSSIDReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEDA0DEDA0DEDA0DEDA0003 /* WiFiSSIDReader.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
@@ -72,6 +74,9 @@
 
 /* Begin PBXFileReference section */
 		065BAD9A5F1ABE58E38C1BB5 /* PacketTunnelProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PacketTunnelProvider.swift; sourceTree = "<group>"; };
+		0DEDA0DEDA0DEDA0DEDA0001 /* OnDemandRuleBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnDemandRuleBuilder.swift; sourceTree = "<group>"; };
+		0DEDA0DEDA0DEDA0DEDA0003 /* WiFiSSIDReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WiFiSSIDReader.swift; sourceTree = "<group>"; };
+		1065310417732109EAFBE649 /* GeoBundleInstaller.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GeoBundleInstaller.swift; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
 		15BA4CA2734F44273DCCA56E /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
@@ -83,8 +88,6 @@
 		63191AEB35AAECF1B9E5BB72 /* ProcessMemory.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProcessMemory.swift; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		0DEDA0DEDA0DEDA0DEDA0001 /* OnDemandRuleBuilder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnDemandRuleBuilder.swift; sourceTree = "<group>"; };
-		0DEDA0DEDA0DEDA0DEDA0003 /* WiFiSSIDReader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WiFiSSIDReader.swift; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
 		8375DB8CC588E1993B77C5BA /* PacketTunnel.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PacketTunnel.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -95,6 +98,7 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B4D4E6A37E8363FF2B56F663 /* BundleMRS.7z */ = {isa = PBXFileReference; includeInIndex = 1; path = BundleMRS.7z; sourceTree = "<group>"; };
 		E8EBE4D228DBB193E5F449B5 /* MihomoCore.xcframework */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = wrapper.xcframework; name = MihomoCore.xcframework; path = ../build/MihomoCore.xcframework; sourceTree = "<group>"; };
 		ED369D71C44848B5CBF0C648 /* libresolv.tbd */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libresolv.tbd; path = usr/lib/libresolv.tbd; sourceTree = SDKROOT; };
 		FA5C9B2853BDEA3631981053 /* InterfaceMonitor.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = InterfaceMonitor.swift; sourceTree = "<group>"; };
@@ -143,6 +147,15 @@
 				331C807B294A618700263BE5 /* RunnerTests.swift */,
 			);
 			path = RunnerTests;
+			sourceTree = "<group>";
+		};
+		4260B4FCD097E7E6DD3100EB /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B4D4E6A37E8363FF2B56F663 /* BundleMRS.7z */,
+			);
+			name = Resources;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		62F225E364B88CE6F49F0170 /* Frameworks */ = {
@@ -219,6 +232,8 @@
 				0DEDA0DEDA0DEDA0DEDA0001 /* OnDemandRuleBuilder.swift */,
 				0DEDA0DEDA0DEDA0DEDA0003 /* WiFiSSIDReader.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
+				1065310417732109EAFBE649 /* GeoBundleInstaller.swift */,
+				4260B4FCD097E7E6DD3100EB /* Resources */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -363,6 +378,7 @@
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+				6F42EABC2DC3031A2E57071E /* BundleMRS.7z in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -420,6 +436,7 @@
 				0DEDA0DEDA0DEDA0DEDA0004 /* WiFiSSIDReader.swift in Sources */,
 				1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */,
 				AEE922682795387571C6FD6C /* SharedStore.swift in Sources */,
+				39906F9C2AFB1883788CA881 /* GeoBundleInstaller.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
