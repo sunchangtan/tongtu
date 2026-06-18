@@ -87,6 +87,25 @@
 ### D2. MUI 无 tonal / elevated 原生 variant
 - **防范**：中性 variant → MUI variant 映射；无原生者（tonal / elevated）用 `sx` 自定义达同等语义。按 comp 单一入口，各 variant 色经 `sx` 从 comp 取（不靠 MUI palette 默认）。
 
+### D3. Code Connect：parser 只在 config，命令行无 `--parser`
+- **现象**：`figma connect publish --parser html` 报 `unknown option '--parser'`。
+- **根因**：parser（`react` / `html`）只能在 config 文件配（`codeConnect.parser`），命令行没有 `--parser` 选项。
+- **防范**：多端用多份 config——React `figma.config.json`（parser `react`）、Flutter `figma.flutter.config.json`（parser `html`）；publish / parse 用 `--config <file>` 切换。
+
+### D4. Code Connect：html template 占位符不接受表达式
+- **现象**：Flutter html template 里 `${props.disabled ? 'null' : '() {}'}` 报 `Expected a call expression … got ConditionalExpression`。
+- **根因**：html template 的 `${…}` 占位符只接受 prop **值引用**，不接受三元 / 运算等表达式。
+- **防范**：分支 / 可选逻辑全部用 `figma.enum` 的 value mapping 表达——把整值（含注释、整行）映射进 enum，占位符只引用 prop。例：State→onPressed（`'() {}'` / `'null, // 禁用'`）、Icon→leadingIcon（整行 / 空串）。
+
+### D5. Code Connect：Flutter 标签 + React include
+- **现象**：① Flutter 发布后 Dev Mode 标签是「Web Components」而非「Flutter」；② React 发布报 `Import for <组件> could not be resolved` warning。
+- **根因**：① html parser 默认 label「Web Components」；② `include` 只匹配 `*.figma.tsx`（Code Connect 文件），未含组件源，import 解析不全。
+- **防范**：① Flutter 发布加 `--label Flutter`；换标签后旧标签会残留，先 `unpublish --config <html> --label "<旧>"` 清除。② React `include` 扩到含组件源（如 `src/**/*.tsx`，不只 `*.figma.tsx`）。
+
+### D6. Code Connect：Flutter 片段须符合 dart format
+- **现象**：Flutter html template 是手写字符串拼接（缩进、trailing comma、inline 注释位置易跑偏），Dev Mode 直接展示给开发者复制。
+- **防范**：发布前把各组合渲染片段写入临时 `.dart` 文件跑 `fvm dart format`——**`0 changed` 即达标**（2 空格缩进、参数 trailing comma、注释位置合规）；也可 `figma connect preview --config <html>` 看实际渲染。Button 四组合（enabled/disabled × 无图标/前置图标）已校验通过。
+
 ---
 
 ## E. 流程
