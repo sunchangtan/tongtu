@@ -13,11 +13,12 @@ figma.connect(
         text: 'text',
         elevated: 'elevated',
       }),
-      disabled: figma.enum('State', { enabled: false, disabled: true }),
+      // State → onPressed 值直接经 enum 映射（html template 占位符不接受三元表达式）
+      onPressed: figma.enum('State', { enabled: '() {}', disabled: 'null' }),
     },
     example: (props) => html`TongtuButton(
   variant: TongtuButtonVariant.${props.variant},
-  onPressed: ${props.disabled ? 'null' : '() {}'},
+  onPressed: ${props.onPressed},
   label: 'Button',
 )`,
   },
