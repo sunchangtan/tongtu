@@ -106,6 +106,11 @@
 - **现象**：Flutter html template 是手写字符串拼接（缩进、trailing comma、inline 注释位置易跑偏），Dev Mode 直接展示给开发者复制。
 - **防范**：发布前把各组合渲染片段写入临时 `.dart` 文件跑 `fvm dart format`——**`0 changed` 即达标**（2 空格缩进、参数 trailing comma、注释位置合规）；也可 `figma connect preview --config <html>` 看实际渲染。Button 四组合（enabled/disabled × 无图标/前置图标）已校验通过。
 
+### D7. Code Connect：html template 无 source（View connection 跳不动），用 links 弥补
+- **现象**：Flutter（html parser）在 Dev Mode 的「View connection」跳不动；React 正常。parse 看 React `source` 有值、Flutter `source` 为空。
+- **根因**：`figma.connect` 的输入 options（`FigmaConnectMeta`）**没有 `source` 字段**——source 由 CLI 从组件 `import` 自动推断；html template 第一参数是 URL 字符串、无组件 import，CLI 推断不出，source 永远空。改配置无解。
+- **防范**：用 options 的 `links: [{ name, url }]` 显式加一个跳到组件源码的链接（如 Flutter → `lib/ui/components/button.dart` 的 GitHub blob URL），在 Dev Mode 与片段一起显示、可点。React 的 source 仍自动（前提：仓库有 remote + 已 push + 再 publish）。
+
 ---
 
 ## E. 流程

@@ -5,6 +5,14 @@ import figma, { html } from '@figma/code-connect/html';
 figma.connect(
   'https://www.figma.com/design/7Lt4B6C58u9HoTCvUKNUGR/Tongtu-Brand?node-id=132-52',
   {
+    // Flutter html template 无组件 import → CLI 推断不出 source（View connection 跳不了）；
+    // 用 links 显式给一个跳到 Flutter 组件源码的链接，弥补 View connection。
+    links: [
+      {
+        name: 'Flutter 组件源码',
+        url: 'https://github.com/sunchangtan/tongtu/blob/main/lib/ui/components/button.dart',
+      },
+    ],
     props: {
       variant: figma.enum('Variant', {
         filled: 'filled',
