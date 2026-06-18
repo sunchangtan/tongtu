@@ -106,6 +106,113 @@ void main() {
       api.dispose();
     });
 
+    test('getConfigs 解析内核运行配置（实证格式）并附 Bearer', () async {
+      final MockClient client = MockClient((http.Request req) async {
+        expect(req.url.path, '/configs');
+        expect(req.method, 'GET');
+        expect(req.headers['Authorization'], 'Bearer s3cr3t');
+        return http.Response(
+          jsonEncode(<String, dynamic>{
+            'mode': 'global',
+            'log-level': 'debug',
+            'ipv6': true,
+            'unified-delay': false,
+            'sniffing': false,
+          }),
+          200,
+        );
+      });
+      final ClashApi api = ClashApi(endpoint, client: client);
+      final KernelConfig cfg = await api.getConfigs();
+      expect(cfg.mode, 'global');
+      expect(cfg.logLevel, 'debug');
+      expect(cfg.ipv6, isTrue);
+      expect(cfg.unifiedDelay, isFalse);
+      api.dispose();
+    });
+
+    test('patchConfigs 发 PATCH 仅改动字段（204 不抛）', () async {
+      String? method;
+      String? body;
+      final MockClient client = MockClient((http.Request req) async {
+        method = req.method;
+        body = req.body;
+        expect(req.url.path, '/configs');
+        expect(req.headers['Authorization'], 'Bearer s3cr3t');
+        return http.Response('', 204);
+      });
+      final ClashApi api = ClashApi(endpoint, client: client);
+      await api.patchConfigs(<String, dynamic>{'mode': 'direct'});
+      expect(method, 'PATCH');
+      expect((jsonDecode(body!) as Map<String, dynamic>)['mode'], 'direct');
+      api.dispose();
+    });
+
+    test('updateGeo 发 POST /configs/geo', () async {
+      String? method;
+      final MockClient client = MockClient((http.Request req) async {
+        method = req.method;
+        expect(req.url.path, '/configs/geo');
+        return http.Response('', 204);
+      });
+      final ClashApi api = ClashApi(endpoint, client: client);
+      await api.updateGeo();
+      expect(method, 'POST');
+      api.dispose();
+    });
+
+    test('flushFakeIP / flushDNS 发 POST /cache/*/flush', () async {
+      final List<String> paths = <String>[];
+      final MockClient client = MockClient((http.Request req) async {
+        paths.add(req.url.path);
+        expect(req.method, 'POST');
+        return http.Response('', 204);
+      });
+      final ClashApi api = ClashApi(endpoint, client: client);
+      await api.flushFakeIP();
+      await api.flushDNS();
+      expect(paths, <String>['/cache/fakeip/flush', '/cache/dns/flush']);
+      api.dispose();
+    });
+
+    test('patchConfigs 失败抛 ClashApiException', () async {
+      final MockClient client = MockClient(
+        (http.Request req) async => http.Response('', 400),
+      );
+      final ClashApi api = ClashApi(endpoint, client: client);
+      await expectLater(
+        api.patchConfigs(<String, dynamic>{'mode': 'rule'}),
+        throwsA(isA<ClashApiException>()),
+      );
+      api.dispose();
+    });
+
+    test('updateGeo / flush 失败抛 ClashApiException', () async {
+      final MockClient client = MockClient(
+        (http.Request req) async => http.Response('', 500),
+      );
+      final ClashApi api = ClashApi(endpoint, client: client);
+      await expectLater(api.updateGeo(), throwsA(isA<ClashApiException>()));
+      await expectLater(api.flushFakeIP(), throwsA(isA<ClashApiException>()));
+      await expectLater(api.flushDNS(), throwsA(isA<ClashApiException>()));
+      api.dispose();
+    });
+
+    test('getConfigs 缺字段用默认值、bool 字段异常类型不抛', () async {
+      final MockClient client = MockClient(
+        // 仅给异常类型 ipv6（数字），其余字段缺失
+        (http.Request req) async =>
+            http.Response(jsonEncode(<String, dynamic>{'ipv6': 1}), 200),
+      );
+      final ClashApi api = ClashApi(endpoint, client: client);
+      final KernelConfig cfg = await api.getConfigs();
+      expect(cfg.mode, 'rule'); // 缺字段默认
+      expect(cfg.logLevel, 'info');
+      expect(cfg.ipv6, isFalse); // 数字 1 宽松判定为 false，不抛 TypeError
+      expect(cfg.unifiedDelay, isFalse);
+      api.dispose();
+    });
+
     test('鉴权失败抛 ClashApiException', () async {
       final MockClient client = MockClient((http.Request req) async {
         return http.Response('', 401);

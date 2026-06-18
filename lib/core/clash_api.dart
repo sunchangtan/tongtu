@@ -121,6 +121,31 @@ class RuleItem {
   final String proxy;
 }
 
+/// 内核运行配置（GET /configs 可读子集；内核设置运行参数热改用）。
+class KernelConfig {
+  const KernelConfig({
+    required this.mode,
+    required this.logLevel,
+    required this.ipv6,
+    required this.unifiedDelay,
+  });
+
+  factory KernelConfig.fromJson(Map<String, dynamic> json) {
+    return KernelConfig(
+      mode: json['mode'] as String? ?? 'rule',
+      logLevel: json['log-level'] as String? ?? 'info',
+      // 宽松判定：内核异常返回非 bool（如数字/字符串）时退化为 false，不抛 TypeError
+      ipv6: json['ipv6'] == true,
+      unifiedDelay: json['unified-delay'] == true,
+    );
+  }
+
+  final String mode; // rule / global / direct
+  final String logLevel; // info / warning / error / debug / silent
+  final bool ipv6;
+  final bool unifiedDelay; // 只读（PATCH 不支持）
+}
+
 /// clash-api 调用异常。
 class ClashApiException implements Exception {
   ClashApiException(this.message);
@@ -244,6 +269,57 @@ class ClashApi {
     return rules
         .map((dynamic r) => RuleItem.fromJson(r as Map<String, dynamic>))
         .toList();
+  }
+
+  /// 读取内核运行配置（GET /configs），回填运行参数当前值。
+  Future<KernelConfig> getConfigs() async {
+    final http.Response resp = await _client.get(
+      _rest('/configs'),
+      headers: _headers,
+    );
+    if (resp.statusCode != 200) {
+      throw ClashApiException('查询内核配置失败：HTTP ${resp.statusCode}');
+    }
+    return KernelConfig.fromJson(jsonDecode(resp.body) as Map<String, dynamic>);
+  }
+
+  /// 热改内核运行参数（PATCH /configs，仅传改动字段，立即生效，内核返回 204）。
+  Future<void> patchConfigs(Map<String, dynamic> fields) async {
+    final http.Response resp = await _client.patch(
+      _rest('/configs'),
+      headers: _headers,
+      body: jsonEncode(fields),
+    );
+    if (resp.statusCode != 204 && resp.statusCode != 200) {
+      throw ClashApiException('修改内核配置失败：HTTP ${resp.statusCode}');
+    }
+  }
+
+  /// 触发更新 GEO 数据库（POST /configs/geo）。
+  Future<void> updateGeo() async {
+    final http.Response resp = await _client.post(
+      _rest('/configs/geo'),
+      headers: _headers,
+    );
+    if (resp.statusCode != 204 && resp.statusCode != 200) {
+      throw ClashApiException('更新 GEO 失败：HTTP ${resp.statusCode}');
+    }
+  }
+
+  /// 清 fake-ip 缓存（POST /cache/fakeip/flush）。
+  Future<void> flushFakeIP() => _flushCache('fakeip');
+
+  /// 清 DNS 缓存（POST /cache/dns/flush）。
+  Future<void> flushDNS() => _flushCache('dns');
+
+  Future<void> _flushCache(String kind) async {
+    final http.Response resp = await _client.post(
+      _rest('/cache/$kind/flush'),
+      headers: _headers,
+    );
+    if (resp.statusCode != 204 && resp.statusCode != 200) {
+      throw ClashApiException('清理缓存失败：HTTP ${resp.statusCode}');
+    }
   }
 
   /// 实时流量速率（WebSocket）。

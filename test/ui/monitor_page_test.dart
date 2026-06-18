@@ -67,6 +67,26 @@ class _FakeApi implements ClashApi {
   }) async => 0;
 
   @override
+  Future<KernelConfig> getConfigs() async => const KernelConfig(
+    mode: 'rule',
+    logLevel: 'info',
+    ipv6: false,
+    unifiedDelay: false,
+  );
+
+  @override
+  Future<void> patchConfigs(Map<String, dynamic> fields) async {}
+
+  @override
+  Future<void> updateGeo() async {}
+
+  @override
+  Future<void> flushFakeIP() async {}
+
+  @override
+  Future<void> flushDNS() async {}
+
+  @override
   void dispose() => _logCtrl.close();
 }
 
