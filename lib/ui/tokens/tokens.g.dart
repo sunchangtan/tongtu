@@ -25,6 +25,10 @@ class TongtuSysColorsLight {
   static const outline = Color(0xFFC4C6D0);
   static const error = Color(0xFFBA1A1A);
   static const onError = Color(0xFFFFFFFF);
+  static const disabledContainer = Color(0x1F1A1C2A);
+  static const disabledContent = Color(0x611A1C2A);
+  static const disabledIcon = Color(0x611A1C2A);
+  static const disabledBorder = Color(0x1F1A1C2A);
 }
 
 /// 深色语义色（sys.color.dark + ref）
@@ -48,6 +52,10 @@ class TongtuSysColorsDark {
   static const outline = Color(0xFF8E9099);
   static const error = Color(0xFFFFB4AB);
   static const onError = Color(0xFF690005);
+  static const disabledContainer = Color(0x1FE4E2E9);
+  static const disabledContent = Color(0x61E4E2E9);
+  static const disabledIcon = Color(0x61E4E2E9);
+  static const disabledBorder = Color(0x1FE4E2E9);
 }
 
 /// UI 维度（sys/ui：间距 / 圆角 / 字号；无明暗）

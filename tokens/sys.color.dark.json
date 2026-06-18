@@ -68,6 +68,22 @@
       "on-error": {
         "$type": "color",
         "$value": "{ref.error.20}"
+      },
+      "disabled-container": {
+        "$type": "color",
+        "$value": "#e4e2e91f"
+      },
+      "disabled-content": {
+        "$type": "color",
+        "$value": "#e4e2e961"
+      },
+      "disabled-icon": {
+        "$type": "color",
+        "$value": "{sys.color.disabled-content}"
+      },
+      "disabled-border": {
+        "$type": "color",
+        "$value": "{sys.color.disabled-container}"
       }
     }
   }

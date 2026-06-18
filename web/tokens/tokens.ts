@@ -17,6 +17,10 @@ export const colorsLight = {
   outline: '#c4c6d0',
   error: '#ba1a1a',
   onError: '#ffffff',
+  disabledContainer: '#1a1c2a1f',
+  disabledContent: '#1a1c2a61',
+  disabledIcon: '#1a1c2a61',
+  disabledBorder: '#1a1c2a1f',
 } as const;
 
 export const colorsDark = {
@@ -37,6 +41,10 @@ export const colorsDark = {
   outline: '#8e9099',
   error: '#ffb4ab',
   onError: '#690005',
+  disabledContainer: '#e4e2e91f',
+  disabledContent: '#e4e2e961',
+  disabledIcon: '#e4e2e961',
+  disabledBorder: '#e4e2e91f',
 } as const;
 
 export const dims = {

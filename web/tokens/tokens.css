@@ -17,6 +17,10 @@
   --sys-color-outline: #c4c6d0;
   --sys-color-error: #ba1a1a;
   --sys-color-on-error: #ffffff;
+  --sys-color-disabled-container: #1a1c2a1f;
+  --sys-color-disabled-content: #1a1c2a61;
+  --sys-color-disabled-icon: #1a1c2a61;
+  --sys-color-disabled-border: #1a1c2a1f;
   --sys-ui-space-none: 0px;
   --sys-ui-space-xs: 4px;
   --sys-ui-space-sm: 8px;
@@ -61,4 +65,8 @@
   --sys-color-outline: #8e9099;
   --sys-color-error: #ffb4ab;
   --sys-color-on-error: #690005;
+  --sys-color-disabled-container: #e4e2e91f;
+  --sys-color-disabled-content: #e4e2e961;
+  --sys-color-disabled-icon: #e4e2e961;
+  --sys-color-disabled-border: #e4e2e91f;
 }
