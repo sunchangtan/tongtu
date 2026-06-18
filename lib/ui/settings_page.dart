@@ -5,6 +5,7 @@ import '../core/core_controller.dart';
 import '../core/theme_controller.dart';
 import 'config_viewer_page.dart';
 import 'log_viewer_page.dart';
+import 'ondemand_page.dart';
 import 'rules_page.dart';
 
 /// 设置页（底部第 4 tab）：外观主题 / 配置查看 / 分流规则 / 关于。
@@ -47,6 +48,18 @@ class SettingsPage extends StatelessWidget {
               ),
             );
           },
+        ),
+        _header('网络'),
+        ListTile(
+          leading: const Icon(Icons.network_check),
+          title: const Text('按需连接'),
+          subtitle: const Text('按网络条件自动启停隧道'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (BuildContext _) => OnDemandPage(),
+            ),
+          ),
         ),
         _header('配置与规则'),
         ListTile(

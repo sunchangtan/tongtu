@@ -5,6 +5,7 @@ import UIKit
 @main
 @objc class AppDelegate: FlutterAppDelegate {
   private let tunnel = TunnelController()
+  private let ssidReader = WiFiSSIDReader()
   private var stateSink: FlutterEventSink?
 
   override func application(
@@ -31,23 +32,14 @@ import UIKit
   private func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "start":
-      guard let args = call.arguments as? [String: Any],
-            let config = args["config"] as? String,
-            let port = args["port"] as? Int,
-            let secret = args["secret"] as? String else {
-        result(FlutterError(code: "bad_args", message: "缺少 config/port/secret", details: nil))
-        return
-      }
-      tunnel.start(configYAML: config, port: port, secret: secret) { error in
-        if let error = error {
-          result(FlutterError(code: "start_failed", message: error.localizedDescription, details: nil))
-        } else {
-          result(nil)
-        }
-      }
+      handleStart(call, result: result)
     case "stop":
       tunnel.stop()
       result(nil)
+    case "updateOnDemand":
+      handleUpdateOnDemand(call, result: result)
+    case "currentSSID":
+      handleCurrentSSID(result)
     case "memory":
       result(tunnel.memorySnapshot())
     case "lastResult":
@@ -59,6 +51,60 @@ import UIKit
       result(container?.appendingPathComponent("logs", isDirectory: true).path)
     default:
       result(FlutterMethodNotImplemented)
+    }
+  }
+
+  private func handleStart(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    guard let args = call.arguments as? [String: Any],
+          let config = args["config"] as? String,
+          let port = args["port"] as? Int,
+          let secret = args["secret"] as? String else {
+      result(FlutterError(code: "bad_args", message: "缺少 config/port/secret", details: nil))
+      return
+    }
+    tunnel.start(configYAML: config, port: port, secret: secret) { error in
+      if let error = error {
+        result(FlutterError(code: "start_failed", message: error.localizedDescription, details: nil))
+      } else {
+        result(nil)
+      }
+    }
+  }
+
+  private func handleUpdateOnDemand(
+    _ call: FlutterMethodCall,
+    result: @escaping FlutterResult
+  ) {
+    let config = OnDemandConfig.fromChannel(call.arguments as? [String: Any])
+    tunnel.applyOnDemand(config) { error in
+      if let error = error {
+        result(
+          FlutterError(
+            code: "ondemand_failed",
+            message: error.localizedDescription,
+            details: nil
+          )
+        )
+      } else {
+        result(nil)
+      }
+    }
+  }
+
+  private func handleCurrentSSID(_ result: @escaping FlutterResult) {
+    ssidReader.current { res in
+      switch res {
+      case .success(let ssid):
+        result(ssid)
+      case .failure(let failure):
+        result(
+          FlutterError(
+            code: failure.rawValue,
+            message: "无法读取当前 Wi-Fi 名称",
+            details: nil
+          )
+        )
+      }
     }
   }
 }
@@ -125,6 +171,22 @@ final class TunnelController {
 
   func stop() {
     manager?.connection.stopVPNTunnel()
+  }
+
+  /// 写入按需连接规则并持久化（即时生效，无需重启隧道）。
+  /// manager 不存在则创建并保留既有 protocolConfiguration；按需开启时启用 VPN 配置。
+  /// 注：on-demand 自动连接复用上次 start 持久化的 providerConfiguration（端口/secret）
+  /// 与 App Group 中的 configYAML，故首次使用前需至少手动连接一次（真机验证）。
+  func applyOnDemand(_ config: OnDemandConfig, completion: @escaping (Error?) -> Void) {
+    let mgr = manager ?? makeManager()
+    manager = mgr
+    mgr.onDemandRules = OnDemandRuleBuilder.build(config)
+    mgr.isOnDemandEnabled = config.enabled
+    if config.enabled {
+      // 按需连接生效要求 VPN 配置处于启用态。
+      mgr.isEnabled = true
+    }
+    mgr.saveToPreferences(completionHandler: completion)
   }
 
   /// 读取扩展经 App Group 上报的内存指标；无数据（未运行）返回 nil。

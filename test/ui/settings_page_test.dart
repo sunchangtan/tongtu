@@ -60,4 +60,22 @@ void main() {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     expect(prefs.getString('theme_mode'), 'dark');
   });
+
+  testWidgets('提供按需连接入口并可进入子页', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: SettingsPage(controller: _FakeController())),
+      ),
+    );
+    await tester.pump();
+    expect(find.text('按需连接'), findsOneWidget);
+
+    await tester.tap(find.text('按需连接'));
+    await tester.pump();
+    await tester.runAsync(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 300));
+    });
+    await tester.pumpAndSettle();
+    expect(find.byType(SwitchListTile), findsOneWidget);
+  });
 }
