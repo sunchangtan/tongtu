@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'safe_selection_toolbar.dart';
+
 /// 通用只读文本查看页：加载文本 → 关键词搜索过滤 → SelectionArea 列表展示。
 /// 标题、文本加载器、附加操作（刷新/导出/清空等）由调用方注入，供日志、订阅配置等复用，
 /// 避免多处复制「读文本+搜索+复制」的相同逻辑。
@@ -106,6 +108,7 @@ class _TextViewerPageState extends State<TextViewerPage> {
             child: showEmpty
                 ? Center(child: Text(widget.emptyHint!))
                 : SelectionArea(
+                    contextMenuBuilder: safeSelectionContextMenu,
                     child: ListView.builder(
                       itemCount: lines.length,
                       itemBuilder: (BuildContext context, int i) {

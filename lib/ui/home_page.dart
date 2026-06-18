@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../config/subscription.dart';
 import '../core/core_controller.dart';
 import '../util/format.dart';
+import 'safe_selection_toolbar.dart';
 
 /// 连接页：获取配置（拉取订阅验证）、连接/断开、隧道状态与内存指标显示。
 /// CoreController 由 HomeShell 持有并注入（多页共享同一实例）。
@@ -225,6 +226,7 @@ class _HomePageState extends State<HomePage> {
     // SelectionArea 统一托管文本选择：错误提示等可选中复制，点击空白处自动取消选择，
     // 子控件（按钮/输入框）点击照常，避免单独用 SelectableText 时的选择手势粘连问题。
     return SelectionArea(
+      contextMenuBuilder: safeSelectionContextMenu,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

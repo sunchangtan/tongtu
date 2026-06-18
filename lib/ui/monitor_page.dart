@@ -6,6 +6,7 @@ import '../core/clash_api.dart';
 import '../core/core_controller.dart';
 import '../util/format.dart';
 import 'log_viewer_page.dart';
+import 'safe_selection_toolbar.dart';
 
 /// 监控页：实时流量速率（WS）+ 活动连接（REST 轮询）+ 日志流（WS）。
 class MonitorPage extends StatefulWidget {
@@ -243,6 +244,7 @@ class _MonitorPageState extends State<MonitorPage> {
         ),
         Expanded(
           child: SelectionArea(
+            contextMenuBuilder: safeSelectionContextMenu,
             child: ListView.builder(
               itemCount: logs.length,
               itemBuilder: (BuildContext context, int i) {

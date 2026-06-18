@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/clash_api.dart';
 import '../core/core_controller.dart';
+import 'safe_selection_toolbar.dart';
 
 /// 分流规则查看页：内核运行时经 clash-api 取当前生效规则，列表 + 搜索 + 空态。
 class RulesPage extends StatefulWidget {
@@ -136,6 +137,7 @@ class _RulesPageState extends State<RulesPage> {
           child: rules.isEmpty && !_loading
               ? const Center(child: Text('暂无规则'))
               : SelectionArea(
+                  contextMenuBuilder: safeSelectionContextMenu,
                   child: ListView.builder(
                     itemCount: rules.length,
                     itemBuilder: (BuildContext context, int i) {
