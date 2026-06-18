@@ -64,3 +64,13 @@
 - **提交前**：跑通质量门禁（见 `CLAUDE.md` §质量门禁）+ 自问「宣称完成」一栏。
 - **review 时**：把六类陷阱当作审查维度逐一过；对作者的「假设」主动证伪。
 - **复盘时**：新发现的同类教训追加到本文件，保持其为「活的」经验库。
+
+## 组件开发专项
+
+本文管**通用**代码质量。组件库（Figma / Flutter / Web 三端）开发另有专项三件套：
+
+- `component-dev-pitfalls.md` —— 组件开发**特有**的坑（Figma 变量 / M3 框架 / 管线）。
+- `component-dev-guide.md` —— 组件开发**流程 SOP**（设计先行，每阶段卡点）。
+- `component-gate.md` + `tools/component-gate/run.sh` —— 组件**完成门禁**（自动 + Figma 审计 + 人工清单）。
+
+组件「长什么样」的契约见 `docs/design/component-contract.md`。
