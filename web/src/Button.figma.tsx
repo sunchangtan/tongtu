@@ -16,9 +16,11 @@ figma.connect(
         elevated: 'elevated',
       }),
       disabled: figma.enum('State', { enabled: false, disabled: true }),
+      // Icon 维度 → startIcon（leading 显示前置图标，none 不传；圆点占位呼应设计稿）
+      startIcon: figma.enum('Icon', { leading: <span>●</span>, none: undefined }),
     },
-    example: ({ variant, disabled }) => (
-      <TongtuButton variant={variant} disabled={disabled}>
+    example: ({ variant, disabled, startIcon }) => (
+      <TongtuButton variant={variant} disabled={disabled} startIcon={startIcon}>
         Button
       </TongtuButton>
     ),

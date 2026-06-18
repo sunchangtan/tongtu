@@ -15,10 +15,15 @@ figma.connect(
       }),
       // State → onPressed 值直接经 enum 映射（html template 占位符不接受三元表达式）
       onPressed: figma.enum('State', { enabled: '() {}', disabled: 'null' }),
+      // Icon 维度 → leadingIcon 整行（leading 显示前置图标行，none 为空；同样规避三元）
+      leadingIcon: figma.enum('Icon', {
+        leading: '\n  leadingIcon: const Icon(Icons.circle),',
+        none: '',
+      }),
     },
     example: (props) => html`TongtuButton(
   variant: TongtuButtonVariant.${props.variant},
-  onPressed: ${props.onPressed},
+  onPressed: ${props.onPressed},${props.leadingIcon}
   label: 'Button',
 )`,
   },
