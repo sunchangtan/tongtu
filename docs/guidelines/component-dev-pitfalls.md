@@ -111,6 +111,16 @@
 - **根因**：`figma.connect` 的输入 options（`FigmaConnectMeta`）**没有 `source` 字段**——source 由 CLI 从组件 `import` 自动推断；html template 第一参数是 URL 字符串、无组件 import，CLI 推断不出，source 永远空。改配置无解。
 - **防范**：用 options 的 `links: [{ name, url }]` 显式加一个跳到组件源码的链接（如 Flutter → `lib/ui/components/button.dart` 的 GitHub blob URL），在 Dev Mode 与片段一起显示、可点。React 的 source 仍自动（前提：仓库有 remote + 已 push + 再 publish）。
 
+### D8. Code Connect：重新 publish 后客户端缓存顽固（显示旧/空），勿误判服务端
+- **现象**：改路径 / 重新 publish 后，Figma Dev Mode 显示「No results found」、片段空、点 source 跳旧路径 404——看似 publish 没生效，极易被带去改服务端 / 反复 republish。
+- **根因**：Code Connect 数据**客户端独立缓存**，重新 publish 不自动刷新已打开的客户端；服务端早已更新，客户端仍用旧缓存。三个视图易混：①「Code Connect › Components」全屏管理列表（按 library 组件聚合，可能空，≠ 没连）；② Inspect 选中组件的 Code 区（真正给开发看片段的地方）；③ source 跳转——指**组件实现** `Button.tsx`，**不是** Code Connect 映射文件 `Button.figma.tsx`（CLI 从 `import { TongtuButton } from './Button'` 推断组件定义位置）。
+- **防范**：① 先用 MCP 直接读**服务端**真相、把「服务端绑定」与「客户端缓存」分层——`get_code_connect_map`（看 source/snippet/label，Flutter 需传 `codeConnectLabel`）、`get_design_context`（看 Dev Mode 实际会渲染的片段）；服务端对了就别在代码侧瞎改（systematic-debugging：勿症状修复）。② 刷客户端：**浏览器版打开同文件**最快（绕桌面缓存 + 即时验证），或 `Cmd+Q` 彻底重启桌面 app（非 `Cmd+R`）；刷后**重新点选组件**才会重新拉。已实证：monorepo 移路径后刷新客户端，片段 / 新路径 source 即恢复正常。
+
+### D9. Code Connect 两条独立路径（CLI vs Figma UI）；判断成功只看 Inspect
+- **现象**：CLI publish 成功、Inspect 选中组件有片段，但 Dev Mode「Code Connect › Components」面板恒「No results found」，反复怀疑没连上 / 误判 monorepo 拆分弄坏了。
+- **根因**：Code Connect 有两条**互不相干**的路径——① **CLI**（`figma connect publish`，代码侧 `.figma.*` 绑节点；**会在 Inspect 显示片段**；不需 library）；② **Code Connect UI**（Figma 内从「Library → Connect components to code」图形化映射；**只列 published library 组件**；官方明示「UI 连接的组件**不**在 Inspect 显示片段」）。那个「Components」全屏面板是 **UI 路径**入口，故只列 published library 组件，CLI 连接的本就不在此列——空属正常，与 monorepo 拆分无关。
+- **防范**：判断 Code Connect 成败**永远看 Inspect 选中组件的 Code 区**（有片段 + 顶部 source 条即成功）；「从 Figma 跳仓库源码」就是 Inspect Code 区顶部那条 source（指**组件实现**文件 `Button.tsx`，非 `.figma.*` 映射文件），不在「Components」列表里找。要让组件进「Components」UI 面板才需发布 team library（付费），与 CLI 路径功能无关。来源：Figma 官方 `code-connect-ui-setup` 文档（"Requires a Figma library file with published design components" / "Components connected using Code Connect UI do not display code snippets in the Inspect panel"）。
+
 ---
 
 ## E. 流程
