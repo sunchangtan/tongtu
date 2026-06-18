@@ -1,8 +1,8 @@
 ## 1. SVG 源 + 图标清单
 
-- [ ] 1.1 选定图标集：Flutter 现用 28 个 Material → Lucide 等价映射；补 ~30-50 常用 UI 图标（导航 / 操作 / 状态），共 ~60-80
-- [ ] 1.2 备齐 `tools/icons/source/*.svg`（Lucide 原始 SVG）
-- [ ] 1.3 写 `tools/icons/icons.json` 清单（`{name, category, lucide, material, codepoint}`，codepoint 固定）
+- [x] 1.1 选定图标集：Flutter 现用 28 个 Material → Lucide 等价映射；补 40 常用 UI 图标（导航 / 操作 / 状态 / 网络 / 设置），共 68
+- [x] 1.2 备齐 `tools/icons/source/*.svg`（Lucide 原始 SVG，68 个，lucide-static v1.21.0）
+- [x] 1.3 写 `tools/icons/icons.json` 清单（`{name, category, lucide, material, codepoint}`，codepoint e001–e044 固定）
 
 ## 2. build pipeline 骨架
 

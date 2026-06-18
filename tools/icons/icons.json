@@ -1,0 +1,478 @@
+[
+  {
+    "name": "chevron-right",
+    "category": "nav",
+    "lucide": "chevron-right",
+    "material": "chevron_right",
+    "codepoint": "e001"
+  },
+  {
+    "name": "search",
+    "category": "action",
+    "lucide": "search",
+    "material": "search",
+    "codepoint": "e002"
+  },
+  {
+    "name": "refresh-cw",
+    "category": "action",
+    "lucide": "refresh-cw",
+    "material": "refresh",
+    "codepoint": "e003"
+  },
+  {
+    "name": "share",
+    "category": "action",
+    "lucide": "share",
+    "material": "ios_share",
+    "codepoint": "e004"
+  },
+  {
+    "name": "trash-2",
+    "category": "action",
+    "lucide": "trash-2",
+    "material": "delete_outline",
+    "codepoint": "e005"
+  },
+  {
+    "name": "newspaper",
+    "category": "content",
+    "lucide": "newspaper",
+    "material": "article_outlined",
+    "codepoint": "e006"
+  },
+  {
+    "name": "wifi",
+    "category": "network",
+    "lucide": "wifi",
+    "material": "wifi_find",
+    "codepoint": "e007"
+  },
+  {
+    "name": "settings",
+    "category": "settings",
+    "lucide": "settings",
+    "material": "settings_outlined",
+    "codepoint": "e008"
+  },
+  {
+    "name": "list-checks",
+    "category": "content",
+    "lucide": "list-checks",
+    "material": "rule_outlined",
+    "codepoint": "e009"
+  },
+  {
+    "name": "circle",
+    "category": "status",
+    "lucide": "circle",
+    "material": "radio_button_unchecked",
+    "codepoint": "e00a"
+  },
+  {
+    "name": "circle-dot",
+    "category": "status",
+    "lucide": "circle-dot",
+    "material": "radio_button_checked",
+    "codepoint": "e00b"
+  },
+  {
+    "name": "power",
+    "category": "control",
+    "lucide": "power",
+    "material": "power_settings_new",
+    "codepoint": "e00c"
+  },
+  {
+    "name": "play",
+    "category": "control",
+    "lucide": "play",
+    "material": "play_arrow",
+    "codepoint": "e00d"
+  },
+  {
+    "name": "pause",
+    "category": "control",
+    "lucide": "pause",
+    "material": "pause",
+    "codepoint": "e00e"
+  },
+  {
+    "name": "network",
+    "category": "network",
+    "lucide": "network",
+    "material": "network_check",
+    "codepoint": "e00f"
+  },
+  {
+    "name": "activity",
+    "category": "status",
+    "lucide": "activity",
+    "material": "monitor_heart_outlined",
+    "codepoint": "e010"
+  },
+  {
+    "name": "cpu",
+    "category": "system",
+    "lucide": "cpu",
+    "material": "memory",
+    "codepoint": "e011"
+  },
+  {
+    "name": "sun",
+    "category": "theme",
+    "lucide": "sun",
+    "material": "light_mode",
+    "codepoint": "e012"
+  },
+  {
+    "name": "moon",
+    "category": "theme",
+    "lucide": "moon",
+    "material": "dark_mode",
+    "codepoint": "e013"
+  },
+  {
+    "name": "sun-moon",
+    "category": "theme",
+    "lucide": "sun-moon",
+    "material": "brightness_auto",
+    "codepoint": "e014"
+  },
+  {
+    "name": "info",
+    "category": "status",
+    "lucide": "info",
+    "material": "info_outline",
+    "codepoint": "e015"
+  },
+  {
+    "name": "circle-alert",
+    "category": "status",
+    "lucide": "circle-alert",
+    "material": "error_outline",
+    "codepoint": "e016"
+  },
+  {
+    "name": "circle-check",
+    "category": "status",
+    "lucide": "circle-check",
+    "material": "check_circle_outline",
+    "codepoint": "e017"
+  },
+  {
+    "name": "server",
+    "category": "network",
+    "lucide": "server",
+    "material": "dns_outlined",
+    "codepoint": "e018"
+  },
+  {
+    "name": "file-text",
+    "category": "content",
+    "lucide": "file-text",
+    "material": "description_outlined",
+    "codepoint": "e019"
+  },
+  {
+    "name": "cloud-download",
+    "category": "action",
+    "lucide": "cloud-download",
+    "material": "cloud_download_outlined",
+    "codepoint": "e01a"
+  },
+  {
+    "name": "scale",
+    "category": "network",
+    "lucide": "scale",
+    "material": "balance",
+    "codepoint": "e01b"
+  },
+  {
+    "name": "plus",
+    "category": "action",
+    "lucide": "plus",
+    "material": "add",
+    "codepoint": "e01c"
+  },
+  {
+    "name": "chevron-left",
+    "category": "nav",
+    "lucide": "chevron-left",
+    "material": null,
+    "codepoint": "e01d"
+  },
+  {
+    "name": "chevron-down",
+    "category": "nav",
+    "lucide": "chevron-down",
+    "material": null,
+    "codepoint": "e01e"
+  },
+  {
+    "name": "chevron-up",
+    "category": "nav",
+    "lucide": "chevron-up",
+    "material": null,
+    "codepoint": "e01f"
+  },
+  {
+    "name": "arrow-left",
+    "category": "nav",
+    "lucide": "arrow-left",
+    "material": null,
+    "codepoint": "e020"
+  },
+  {
+    "name": "arrow-right",
+    "category": "nav",
+    "lucide": "arrow-right",
+    "material": null,
+    "codepoint": "e021"
+  },
+  {
+    "name": "menu",
+    "category": "nav",
+    "lucide": "menu",
+    "material": null,
+    "codepoint": "e022"
+  },
+  {
+    "name": "x",
+    "category": "nav",
+    "lucide": "x",
+    "material": null,
+    "codepoint": "e023"
+  },
+  {
+    "name": "ellipsis-vertical",
+    "category": "nav",
+    "lucide": "ellipsis-vertical",
+    "material": null,
+    "codepoint": "e024"
+  },
+  {
+    "name": "external-link",
+    "category": "nav",
+    "lucide": "external-link",
+    "material": null,
+    "codepoint": "e025"
+  },
+  {
+    "name": "house",
+    "category": "nav",
+    "lucide": "house",
+    "material": null,
+    "codepoint": "e026"
+  },
+  {
+    "name": "pencil",
+    "category": "action",
+    "lucide": "pencil",
+    "material": null,
+    "codepoint": "e027"
+  },
+  {
+    "name": "copy",
+    "category": "action",
+    "lucide": "copy",
+    "material": null,
+    "codepoint": "e028"
+  },
+  {
+    "name": "check",
+    "category": "action",
+    "lucide": "check",
+    "material": null,
+    "codepoint": "e029"
+  },
+  {
+    "name": "download",
+    "category": "action",
+    "lucide": "download",
+    "material": null,
+    "codepoint": "e02a"
+  },
+  {
+    "name": "upload",
+    "category": "action",
+    "lucide": "upload",
+    "material": null,
+    "codepoint": "e02b"
+  },
+  {
+    "name": "filter",
+    "category": "action",
+    "lucide": "filter",
+    "material": null,
+    "codepoint": "e02c"
+  },
+  {
+    "name": "save",
+    "category": "action",
+    "lucide": "save",
+    "material": null,
+    "codepoint": "e02d"
+  },
+  {
+    "name": "circle-plus",
+    "category": "action",
+    "lucide": "circle-plus",
+    "material": null,
+    "codepoint": "e02e"
+  },
+  {
+    "name": "triangle-alert",
+    "category": "status",
+    "lucide": "triangle-alert",
+    "material": null,
+    "codepoint": "e02f"
+  },
+  {
+    "name": "circle-x",
+    "category": "status",
+    "lucide": "circle-x",
+    "material": null,
+    "codepoint": "e030"
+  },
+  {
+    "name": "loader",
+    "category": "status",
+    "lucide": "loader",
+    "material": null,
+    "codepoint": "e031"
+  },
+  {
+    "name": "eye",
+    "category": "status",
+    "lucide": "eye",
+    "material": null,
+    "codepoint": "e032"
+  },
+  {
+    "name": "eye-off",
+    "category": "status",
+    "lucide": "eye-off",
+    "material": null,
+    "codepoint": "e033"
+  },
+  {
+    "name": "lock",
+    "category": "status",
+    "lucide": "lock",
+    "material": null,
+    "codepoint": "e034"
+  },
+  {
+    "name": "star",
+    "category": "status",
+    "lucide": "star",
+    "material": null,
+    "codepoint": "e035"
+  },
+  {
+    "name": "bell",
+    "category": "status",
+    "lucide": "bell",
+    "material": null,
+    "codepoint": "e036"
+  },
+  {
+    "name": "circle-help",
+    "category": "status",
+    "lucide": "circle-help",
+    "material": null,
+    "codepoint": "e037"
+  },
+  {
+    "name": "globe",
+    "category": "network",
+    "lucide": "globe",
+    "material": null,
+    "codepoint": "e038"
+  },
+  {
+    "name": "shield",
+    "category": "network",
+    "lucide": "shield",
+    "material": null,
+    "codepoint": "e039"
+  },
+  {
+    "name": "shield-check",
+    "category": "network",
+    "lucide": "shield-check",
+    "material": null,
+    "codepoint": "e03a"
+  },
+  {
+    "name": "zap",
+    "category": "network",
+    "lucide": "zap",
+    "material": null,
+    "codepoint": "e03b"
+  },
+  {
+    "name": "wifi-off",
+    "category": "network",
+    "lucide": "wifi-off",
+    "material": null,
+    "codepoint": "e03c"
+  },
+  {
+    "name": "signal",
+    "category": "network",
+    "lucide": "signal",
+    "material": null,
+    "codepoint": "e03d"
+  },
+  {
+    "name": "router",
+    "category": "network",
+    "lucide": "router",
+    "material": null,
+    "codepoint": "e03e"
+  },
+  {
+    "name": "link",
+    "category": "network",
+    "lucide": "link",
+    "material": null,
+    "codepoint": "e03f"
+  },
+  {
+    "name": "database",
+    "category": "network",
+    "lucide": "database",
+    "material": null,
+    "codepoint": "e040"
+  },
+  {
+    "name": "gauge",
+    "category": "network",
+    "lucide": "gauge",
+    "material": null,
+    "codepoint": "e041"
+  },
+  {
+    "name": "sliders-horizontal",
+    "category": "settings",
+    "lucide": "sliders-horizontal",
+    "material": null,
+    "codepoint": "e042"
+  },
+  {
+    "name": "palette",
+    "category": "settings",
+    "lucide": "palette",
+    "material": null,
+    "codepoint": "e043"
+  },
+  {
+    "name": "languages",
+    "category": "settings",
+    "lucide": "languages",
+    "material": null,
+    "codepoint": "e044"
+  }
+]
