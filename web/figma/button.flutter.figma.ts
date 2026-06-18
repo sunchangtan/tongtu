@@ -13,8 +13,12 @@ figma.connect(
         text: 'text',
         elevated: 'elevated',
       }),
-      // State → onPressed 值直接经 enum 映射（html template 占位符不接受三元表达式）
-      onPressed: figma.enum('State', { enabled: '() {}', disabled: 'null' }),
+      // State → onPressed（含尾逗号）：enabled 给 callback、disabled 为 null + 注释明示
+      //（Flutter 惯例：onPressed 为 null 即禁用，组件无 disabled 参数）。占位符不接受三元，故整值经 enum 映射
+      onPressed: figma.enum('State', {
+        enabled: '() {},',
+        disabled: 'null, // 禁用（onPressed 为 null 即禁用）',
+      }),
       // Icon 维度 → leadingIcon 整行（leading 显示前置图标行，none 为空；同样规避三元）
       leadingIcon: figma.enum('Icon', {
         leading: '\n  leadingIcon: const Icon(Icons.circle),',
@@ -23,7 +27,7 @@ figma.connect(
     },
     example: (props) => html`TongtuButton(
   variant: TongtuButtonVariant.${props.variant},
-  onPressed: ${props.onPressed},${props.leadingIcon}
+  onPressed: ${props.onPressed}${props.leadingIcon}
   label: 'Button',
 )`,
   },
