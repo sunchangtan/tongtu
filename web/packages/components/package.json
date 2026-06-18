@@ -1,0 +1,32 @@
+{
+  "name": "@tongtu/components",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "通途 Web 组件库（React + MUI，消费跨栈 token）",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "lint": "tsc --noEmit",
+    "cc:parse": "figma connect parse",
+    "cc:parse:flutter": "figma connect parse --config figma.flutter.config.json",
+    "cc:publish": "figma connect publish",
+    "cc:publish:flutter": "figma connect publish --config figma.flutter.config.json --label Flutter"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.13.3",
+    "@emotion/styled": "^11.13.0",
+    "@mui/material": "^6.1.6",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@figma/code-connect": "^1.4.8",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.6.3"
+  }
+}

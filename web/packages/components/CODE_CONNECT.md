@@ -15,10 +15,12 @@
 
 > 注：`parser` 只能在 config 里配，**命令行没有 `--parser` 选项**；多 parser 用多份 config + `--config` 切换。
 
+> monorepo 下 Code Connect 全部归本包（`web/packages/components`）。命令在本包目录跑；或在 `web/` 根用 pnpm 脚本（`pnpm cc:parse` / `cc:parse:flutter` / `cc:publish` / `cc:publish:flutter`，已 `--filter @tongtu/components` 转发）。
+
 ## 校验（本地，不上传）
 
 ```sh
-cd web
+cd web/packages/components
 npx figma connect parse                                       # React
 npx figma connect parse --config figma.flutter.config.json    # Flutter
 ```
@@ -26,7 +28,7 @@ npx figma connect parse --config figma.flutter.config.json    # Flutter
 ## 发布
 
 ```sh
-cd web
+cd web/packages/components
 npx figma connect publish                                                # React
 npx figma connect publish --config figma.flutter.config.json --label Flutter  # Flutter
 ```

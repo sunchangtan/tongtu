@@ -1,28 +1,15 @@
 {
-  "name": "tongtu-web-components",
-  "private": true,
+  "name": "tongtu-web",
   "version": "1.0.0",
-  "type": "module",
-  "description": "通途 Web 组件库（React + MUI，消费跨栈 token）",
+  "private": true,
+  "description": "通途 Web monorepo（pnpm workspaces：组件库 packages/components + 测试 app apps/playground）",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "lint": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.13.3",
-    "@emotion/styled": "^11.13.0",
-    "@mui/material": "^6.1.6",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
-  },
-  "devDependencies": {
-    "@figma/code-connect": "^1.4.8",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
-    "@vitejs/plugin-react": "^4.3.3",
-    "typescript": "^5.6.3",
-    "vite": "^5.4.10"
+    "dev": "pnpm --filter @tongtu/playground dev",
+    "build": "pnpm --filter @tongtu/playground build",
+    "lint": "pnpm -r lint",
+    "cc:parse": "pnpm --filter @tongtu/components cc:parse",
+    "cc:parse:flutter": "pnpm --filter @tongtu/components cc:parse:flutter",
+    "cc:publish": "pnpm --filter @tongtu/components cc:publish",
+    "cc:publish:flutter": "pnpm --filter @tongtu/components cc:publish:flutter"
   }
 }

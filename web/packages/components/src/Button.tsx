@@ -1,7 +1,7 @@
 import MuiButton from '@mui/material/Button';
 import type { ReactNode } from 'react';
 import type { SxProps, Theme } from '@mui/material/styles';
-import { compColorsLight as c } from '../tokens/tokens';
+import { compColorsLight as c } from './tokens/tokens';
 
 /// 通途 Button 变体（中性命名，与 Figma/Flutter 同一契约）。见 docs/design/component-contract.md。
 export type TongtuButtonVariant = 'filled' | 'tonal' | 'outlined' | 'text' | 'elevated';

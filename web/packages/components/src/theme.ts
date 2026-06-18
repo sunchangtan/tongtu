@@ -1,5 +1,5 @@
 import { createTheme } from '@mui/material/styles';
-import { colorsLight, comp } from '../tokens/tokens';
+import { colorsLight, comp } from './tokens/tokens';
 
 // 通途 MUI 主题：palette 取自 sys 全局 token；Button 尺寸取自 comp（与 Flutter/CSS 同源）。
 // 变体色不在此——按 comp 单一入口，由 Button 组件按 variant 从 comp 显式取（见 Button.tsx）。

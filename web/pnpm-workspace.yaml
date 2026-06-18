@@ -1,0 +1,5 @@
+# 通途 Web monorepo workspace 定义（pnpm）。
+# packages/* = 可复用库（组件库）；apps/* = 应用（组件库测试 / 展示 app）。
+packages:
+  - 'packages/*'
+  - 'apps/*'

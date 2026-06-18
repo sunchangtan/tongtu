@@ -50,9 +50,9 @@ const darkTokens = await resolveTokens('sys.color.dark.json');
 const typoTokens = await resolveTypography();
 
 const dartPath = path.join(ROOT, 'lib/ui/tokens/tokens.g.dart');
-const cssPath = path.join(ROOT, 'web/tokens/tokens.css');
+const cssPath = path.join(ROOT, 'web/packages/components/src/tokens/tokens.css');
 const typoDartPath = path.join(ROOT, 'lib/ui/tokens/typography.g.dart');
-const typoCssPath = path.join(ROOT, 'web/tokens/typography.css');
+const typoCssPath = path.join(ROOT, 'web/packages/components/src/tokens/typography.css');
 
 await fs.mkdir(path.dirname(dartPath), { recursive: true });
 await fs.mkdir(path.dirname(cssPath), { recursive: true });
@@ -60,7 +60,10 @@ await fs.writeFile(dartPath, toDart({ lightTokens, darkTokens }));
 await fs.writeFile(cssPath, toCss({ lightTokens, darkTokens }));
 await fs.writeFile(typoDartPath, toFlutterTypography(typoTokens));
 await fs.writeFile(typoCssPath, toCssTypography(typoTokens));
-await fs.writeFile(path.join(ROOT, 'web/tokens/tokens.ts'), toTs({ lightTokens, darkTokens }));
+await fs.writeFile(
+  path.join(ROOT, 'web/packages/components/src/tokens/tokens.ts'),
+  toTs({ lightTokens, darkTokens }),
+);
 
 // 用 dart format 规范化生成的 Flutter 文件（typography 的 TextStyle 行较长，需换行）
 try {
@@ -74,4 +77,4 @@ const nDim = lightTokens.filter((t) => t.path[1] === 'ui').length;
 const nTypo = typoTokens.filter((t) => t.path[0] === 'type').length;
 console.log(`✓ 颜色 ${nColor}×明暗 / 维度 ${nDim} → tokens.g.dart + tokens.css`);
 console.log(`✓ typography ${nTypo} 档 → typography.g.dart + typography.css`);
-console.log('✓ web JS token → web/tokens/tokens.ts');
+console.log('✓ web JS token → web/packages/components/src/tokens/tokens.ts');

@@ -3,9 +3,8 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { ThemeProvider } from '@mui/material/styles';
-import { tongtuTheme } from './theme';
-import { TongtuButton, type TongtuButtonVariant } from './Button';
-import { comp } from '../tokens/tokens';
+// 组件 / 主题 / token 全部经组件库包入口取（workspace 依赖 @tongtu/components），不再相对路径深引。
+import { tongtuTheme, TongtuButton, type TongtuButtonVariant, comp } from '@tongtu/components';
 
 const VARIANTS: TongtuButtonVariant[] = ['filled', 'tonal', 'outlined', 'text', 'elevated'];
 
