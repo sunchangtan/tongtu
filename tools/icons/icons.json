@@ -474,5 +474,26 @@
     "lucide": "languages",
     "material": null,
     "codepoint": "e044"
+  },
+  {
+    "name": "cloud",
+    "category": "network",
+    "lucide": "cloud",
+    "material": "cloud_outlined",
+    "codepoint": "e045"
+  },
+  {
+    "name": "cloud-off",
+    "category": "network",
+    "lucide": "cloud-off",
+    "material": "cloud_off_outlined",
+    "codepoint": "e046"
+  },
+  {
+    "name": "eraser",
+    "category": "action",
+    "lucide": "eraser",
+    "material": "cleaning_services_outlined",
+    "codepoint": "e047"
   }
 ]

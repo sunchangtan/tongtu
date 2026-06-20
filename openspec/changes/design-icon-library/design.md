@@ -64,9 +64,9 @@ web/packages/icons/     # @tongtu/icons（生成 React 组件）
 ## Migration Plan
 
 1. 选定图标集（28 映射 + 扩展），写 `icons.json` + 备齐 `source/*.svg`。
-2. `build.mjs` 骨架（读清单 + SVG，规范化）。
-3. Flutter：生成 font + IconData，注册 pubspec，替换 28 处，验证。
-4. Web：生成 `@tongtu/icons`，playground 展示，验证。
-5. Figma：导入建 Icons 组件库。
+2. **Figma 图标库（设计先行）**：导入 SVG 建「Icons」组件库，对齐 `component-dev-guide.md` 的 Figma → Flutter → Web 流程。
+3. `build.mjs` 骨架（读清单 + SVG，规范化 + stroke→outline）。
+4. Flutter：生成 font + IconData，注册 pubspec，替换 28 处，验证。
+5. Web：生成 `@tongtu/icons`，playground 展示，验证。
 
 **回滚**：图标库为新增；Flutter 替换可 git 还原回 `Icons.*`。

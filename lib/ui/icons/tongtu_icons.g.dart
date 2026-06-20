@@ -1,0 +1,81 @@
+// GENERATED — DO NOT EDIT. 由 tools/icons/build.mjs 生成（Lucide 子集字体，与 Web / Figma 同源）。
+import 'package:flutter/widgets.dart';
+
+/// 通途图标（Lucide 子集 IconFont）。用法：`Icon(TongtuIcons.search)`。
+/// 字体注册见 pubspec.yaml（family: TongtuIcons，asset: lib/ui/icons/TongtuIcons.ttf）。
+class TongtuIcons {
+  TongtuIcons._();
+  static const _family = 'TongtuIcons';
+
+  static const IconData chevronRight = IconData(0xe06f, fontFamily: _family);
+  static const IconData search = IconData(0xe151, fontFamily: _family);
+  static const IconData refreshCw = IconData(0xe145, fontFamily: _family);
+  static const IconData share = IconData(0xe155, fontFamily: _family);
+  static const IconData trash2 = IconData(0xe18e, fontFamily: _family);
+  static const IconData newspaper = IconData(0xe348, fontFamily: _family);
+  static const IconData wifi = IconData(0xe1ae, fontFamily: _family);
+  static const IconData settings = IconData(0xe154, fontFamily: _family);
+  static const IconData listChecks = IconData(0xe1d0, fontFamily: _family);
+  static const IconData circle = IconData(0xe076, fontFamily: _family);
+  static const IconData circleDot = IconData(0xe345, fontFamily: _family);
+  static const IconData power = IconData(0xe140, fontFamily: _family);
+  static const IconData play = IconData(0xe13c, fontFamily: _family);
+  static const IconData pause = IconData(0xe12e, fontFamily: _family);
+  static const IconData network = IconData(0xe125, fontFamily: _family);
+  static const IconData activity = IconData(0xe038, fontFamily: _family);
+  static const IconData cpu = IconData(0xe0a9, fontFamily: _family);
+  static const IconData sun = IconData(0xe178, fontFamily: _family);
+  static const IconData moon = IconData(0xe11e, fontFamily: _family);
+  static const IconData sunMoon = IconData(0xe2b2, fontFamily: _family);
+  static const IconData info = IconData(0xe0f9, fontFamily: _family);
+  static const IconData circleAlert = IconData(0xe077, fontFamily: _family);
+  static const IconData circleCheck = IconData(0xe226, fontFamily: _family);
+  static const IconData server = IconData(0xe153, fontFamily: _family);
+  static const IconData fileText = IconData(0xe0cc, fontFamily: _family);
+  static const IconData cloudDownload = IconData(0xe089, fontFamily: _family);
+  static const IconData scale = IconData(0xe212, fontFamily: _family);
+  static const IconData plus = IconData(0xe13d, fontFamily: _family);
+  static const IconData chevronLeft = IconData(0xe06e, fontFamily: _family);
+  static const IconData chevronDown = IconData(0xe06d, fontFamily: _family);
+  static const IconData chevronUp = IconData(0xe070, fontFamily: _family);
+  static const IconData arrowLeft = IconData(0xe048, fontFamily: _family);
+  static const IconData arrowRight = IconData(0xe049, fontFamily: _family);
+  static const IconData menu = IconData(0xe115, fontFamily: _family);
+  static const IconData x = IconData(0xe1b2, fontFamily: _family);
+  static const IconData ellipsisVertical = IconData(0xe0b7, fontFamily: _family);
+  static const IconData externalLink = IconData(0xe0b9, fontFamily: _family);
+  static const IconData house = IconData(0xe0f5, fontFamily: _family);
+  static const IconData pencil = IconData(0xe1f9, fontFamily: _family);
+  static const IconData copy = IconData(0xe09e, fontFamily: _family);
+  static const IconData check = IconData(0xe06c, fontFamily: _family);
+  static const IconData download = IconData(0xe0b2, fontFamily: _family);
+  static const IconData upload = IconData(0xe19e, fontFamily: _family);
+  static const IconData filter = IconData(0xe0dc, fontFamily: _family);
+  static const IconData save = IconData(0xe14d, fontFamily: _family);
+  static const IconData circlePlus = IconData(0xe081, fontFamily: _family);
+  static const IconData triangleAlert = IconData(0xe193, fontFamily: _family);
+  static const IconData circleX = IconData(0xe084, fontFamily: _family);
+  static const IconData loader = IconData(0xe109, fontFamily: _family);
+  static const IconData eye = IconData(0xe0ba, fontFamily: _family);
+  static const IconData eyeOff = IconData(0xe0bb, fontFamily: _family);
+  static const IconData lock = IconData(0xe10b, fontFamily: _family);
+  static const IconData star = IconData(0xe176, fontFamily: _family);
+  static const IconData bell = IconData(0xe059, fontFamily: _family);
+  static const IconData circleHelp = IconData(0xe082, fontFamily: _family);
+  static const IconData globe = IconData(0xe0e8, fontFamily: _family);
+  static const IconData shield = IconData(0xe158, fontFamily: _family);
+  static const IconData shieldCheck = IconData(0xe1ff, fontFamily: _family);
+  static const IconData zap = IconData(0xe1b4, fontFamily: _family);
+  static const IconData wifiOff = IconData(0xe1af, fontFamily: _family);
+  static const IconData signal = IconData(0xe25f, fontFamily: _family);
+  static const IconData router = IconData(0xe3bf, fontFamily: _family);
+  static const IconData link = IconData(0xe102, fontFamily: _family);
+  static const IconData database = IconData(0xe0ad, fontFamily: _family);
+  static const IconData gauge = IconData(0xe1bf, fontFamily: _family);
+  static const IconData slidersHorizontal = IconData(0xe29a, fontFamily: _family);
+  static const IconData palette = IconData(0xe1dd, fontFamily: _family);
+  static const IconData languages = IconData(0xe0fe, fontFamily: _family);
+  static const IconData cloud = IconData(0xe088, fontFamily: _family);
+  static const IconData cloudOff = IconData(0xe08d, fontFamily: _family);
+  static const IconData eraser = IconData(0xe28f, fontFamily: _family);
+}

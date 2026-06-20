@@ -17,8 +17,9 @@
 
 ## 4. Flutter IconFont
 
-- [ ] 4.1 Lucide 描边 SVG → outline（stroke→fill）→ `TongtuIcons.ttf`（svgtofont / fantasticon）+ `lib/ui/icons/tongtu_icons.g.dart`（`TongtuIcons` IconData，codepoint 同清单）
-- [ ] 4.2 `pubspec.yaml` 注册字体；28 处 `Icons.*` → `TongtuIcons.*`（按映射表）
+- [x] 4.1 子集化 Lucide 官方 `lucide.ttf`（已 outline）→ `TongtuIcons.ttf`（25KB / 71 图标，fonttools）+ `lib/ui/icons/tongtu_icons.g.dart`（`TongtuIcons` IconData，Lucide codepoint）；补 cloud / cloud-off / eraser 覆盖全部用法
+- [x] 4.2 `pubspec.yaml` 注册字体（family TongtuIcons）
+- [ ] 4.2b 替换 47 处 `Icons.*` → `TongtuIcons.*`（映射表已备）——散在用户未提交文件，由用户替换
 - [ ] 4.3 验证：`fvm flutter analyze` 0 警告、`fvm flutter test` 全量编译；模拟器抽样图标渲染无误
 
 ## 5. Web @tongtu/icons 包 + 归档

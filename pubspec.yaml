@@ -24,3 +24,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: TongtuIcons
+      fonts:
+        - asset: lib/ui/icons/TongtuIcons.ttf
