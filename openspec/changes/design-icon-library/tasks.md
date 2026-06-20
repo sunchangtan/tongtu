@@ -4,23 +4,25 @@
 - [x] 1.2 备齐 `tools/icons/source/*.svg`（Lucide 原始 SVG，68 个，lucide-static v1.21.0）
 - [x] 1.3 写 `tools/icons/icons.json` 清单（`{name, category, lucide, material, codepoint}`，codepoint e001–e044 固定）
 
-## 2. build pipeline 骨架
+## 2. Figma 图标库（设计先行）
 
-- [ ] 2.1 `tools/icons/build.mjs`：读 `icons.json` + `source/*.svg`，规范化（24×24 / viewBox / stroke）
-- [ ] 2.2 三端输出框架（Flutter / Web / Figma-ready）+ README 用法说明
+- [x] 2.1 `use_figma` 把 68 个 SVG 建成 `Icons/<name>` component（Assets 面板按 `/` 自动归 Icons 文件夹），白底 + 墨色描边，wrap 网格排进 Components page 的 Icons 区
+- [x] 2.2 截图验证 stroke 线宽 / 风格统一；page 组织理顺为主流「一个 Components page + slash 命名」（Tongtu Brand / Foundations / Components 三 page）；master 改名 `Logo/Mark`，logo instance 跨 page 引用验证完好
+- [ ] 2.3（可选后续）图标 stroke 由 hex 墨色改绑 `sys` 墨色变量（随明暗）
 
-## 3. Flutter IconFont
+## 3. build pipeline 骨架
 
-- [ ] 3.1 SVG → `TongtuIcons.ttf`（svgtofont / fantasticon）+ `lib/ui/icons/tongtu_icons.g.dart`（`TongtuIcons` IconData，codepoint 同清单）
-- [ ] 3.2 `pubspec.yaml` 注册字体；28 处 `Icons.*` → `TongtuIcons.*`（按映射表）
-- [ ] 3.3 验证：`fvm flutter analyze` 0 警告、`fvm flutter test` 全量编译；模拟器抽样图标渲染无误
+- [x] 3.1 `tools/icons/build.mjs`：读 `icons.json` + `source/*.svg`，提取 inner → Web `icons-data.ts`
+- [x] 3.2 Web 输出已实现（`@tongtu/icons`）；Flutter 输出在 `build.mjs` 留 TODO（见阶段 4，含 stroke→outline）
 
-## 4. Web @tongtu/icons 包
+## 4. Flutter IconFont
 
-- [ ] 4.1 建 `web/packages/icons`（`@tongtu/icons`）workspace 包；`build.mjs` 生成 React 图标组件
-- [ ] 4.2 playground 加图标总览页（网格展示全部图标 + 名）；`pnpm install` / `build` 验证
+- [ ] 4.1 Lucide 描边 SVG → outline（stroke→fill）→ `TongtuIcons.ttf`（svgtofont / fantasticon）+ `lib/ui/icons/tongtu_icons.g.dart`（`TongtuIcons` IconData，codepoint 同清单）
+- [ ] 4.2 `pubspec.yaml` 注册字体；28 处 `Icons.*` → `TongtuIcons.*`（按映射表）
+- [ ] 4.3 验证：`fvm flutter analyze` 0 警告、`fvm flutter test` 全量编译；模拟器抽样图标渲染无误
 
-## 5. Figma Icons 库 + 归档
+## 5. Web @tongtu/icons 包 + 归档
 
-- [ ] 5.1 `use_figma` 导入 SVG 建「Icons」component set（`Icons/<name>`），归「Components」区
-- [ ] 5.2 `openspec validate design-icon-library --strict`；`openspec archive`
+- [x] 5.1 建 `web/packages/icons`（`@tongtu/icons`）workspace 包：`Icon` 组件（SVG-based）+ `iconsData`；`build.mjs` 生成 `icons-data.ts`
+- [x] 5.2 playground 图标总览页（68 图标网格 + 名）；pnpm 类型检查 + preview 渲染验证通过
+- [ ] 5.3 `openspec validate design-icon-library --strict`；`openspec archive`

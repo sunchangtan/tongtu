@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import { ThemeProvider } from '@mui/material/styles';
 // 组件 / 主题 / token 全部经组件库包入口取（workspace 依赖 @tongtu/components），不再相对路径深引。
 import { tongtuTheme, TongtuButton, type TongtuButtonVariant, comp } from '@tongtu/components';
+import { Icon, iconsData, type IconName } from '@tongtu/icons';
 
 const VARIANTS: TongtuButtonVariant[] = ['filled', 'tonal', 'outlined', 'text', 'elevated'];
 
@@ -77,6 +78,38 @@ export default function App() {
             </Box>
           ))}
         </Stack>
+
+        <Typography variant="h5" gutterBottom sx={{ mt: 6 }}>
+          通途图标库 · Icons
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          {Object.keys(iconsData).length} 个 Lucide 图标（与 Flutter / Figma 同源，描边随 currentColor）。
+        </Typography>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(92px, 1fr))',
+            gap: 1.5,
+          }}
+        >
+          {(Object.keys(iconsData) as IconName[]).map((name) => (
+            <Stack
+              key={name}
+              spacing={1}
+              alignItems="center"
+              sx={{ p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 2 }}
+            >
+              <Icon name={name} size={24} />
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ fontSize: 11, textAlign: 'center', lineHeight: 1.3, wordBreak: 'break-word' }}
+              >
+                {name}
+              </Typography>
+            </Stack>
+          ))}
+        </Box>
       </Box>
     </ThemeProvider>
   );
