@@ -29,7 +29,7 @@
 - 手法：Swift `swiftlint --strict`（warning 即失败）；Dart analyzer 关键项升 error；Go `go vet` + golangci-lint 零问题。
 - 例外须显式：确属误报且改不动的，行级 suppress + 中文理由（同「补丁显式可见」哲学），不靠自觉。
 - 反模式禁止：不得为消警告而劣化代码（吞 error、乱标 `@available`、塞无意义类型转换）；消除动作须让代码更对，而非更哑。
-- 经验 checklist（强制对照）：编码与 review 时对照 `docs/guidelines/code-review-checklist.md`——核心「未经验证的假设是 bug 之源」（把假设显式化+验证化，实验>推理>直觉）；含六类常见陷阱与速查表，复盘时持续追加保持为活的经验库。
+- 经验 checklist（强制对照）：编码与 review 时对照 `docs/guidelines/code-review-checklist.md`——核心「未经验证的假设是 bug 之源」（把假设显式化+验证化，实验>推理>直觉）；含七类常见陷阱与速查表，复盘时持续追加保持为活的经验库。
 
 ## architecture.md 维护协议
 
