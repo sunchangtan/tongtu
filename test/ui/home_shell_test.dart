@@ -26,25 +26,38 @@ void main() {
 
   setUp(() => SharedPreferences.setMockInitialValues(<String, Object>{}));
 
-  testWidgets('底部三层导航：连接 / 设置 / 内核设置', (WidgetTester tester) async {
+  testWidgets('底部三层导航：连接 / 订阅 / 设置', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(home: HomeShell(controller: _FakeController())),
     );
     await tester.pump();
     expect(find.byType(NavigationBar), findsOneWidget);
-    // 设置 / 内核设置为唯一文案，验证底部 tab 存在
+    expect(find.text('连接'), findsWidgets);
+    expect(find.text('订阅'), findsWidgets);
     expect(find.text('设置'), findsWidgets);
-    expect(find.text('内核设置'), findsWidgets);
+    // 内核设置不再是底部 tab（降为设置二级入口）
+    expect(find.widgetWithText(NavigationDestination, '内核设置'), findsNothing);
   });
 
-  testWidgets('切到内核设置 tab', (WidgetTester tester) async {
+  testWidgets('切到订阅 tab 可达', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(home: HomeShell(controller: _FakeController())),
     );
     await tester.pump();
-    await tester.tap(find.text('内核设置'));
+    await tester.tap(find.text('订阅'));
     await tester.pumpAndSettle();
-    // 切换成功：内核设置页内容（运行参数组）可见（页面已无 AppBar 标题）
-    expect(find.text('运行参数'), findsOneWidget);
+    // 订阅页空态提示可见
+    expect(find.textContaining('还没有订阅'), findsOneWidget);
+  });
+
+  testWidgets('切到设置 tab 可达', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: HomeShell(controller: _FakeController())),
+    );
+    await tester.pump();
+    await tester.tap(find.text('设置'));
+    await tester.pumpAndSettle();
+    expect(find.text('外观'), findsOneWidget);
+    expect(find.text('内核设置'), findsOneWidget); // 设置页内的二级入口
   });
 }

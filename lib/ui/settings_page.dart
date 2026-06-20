@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
 
+import '../config/run_params_store.dart';
 import '../core/app_info.dart';
+import '../core/core_controller.dart';
 import '../core/theme_controller.dart';
+import 'kernel_settings_page.dart';
 import 'ondemand_page.dart';
 
-/// 设置页（应用层，底部第 2 tab）：外观主题 / 按需连接 / 关于（app 版本·许可）。
-/// 无 AppBar 标题（底部导航已标识当前页）；内核相关项已移至内核设置页。
+/// 设置页（应用层，底部第 3 tab）：外观主题 / 按需连接 / 内核设置（二级入口）/ 关于。
+/// 无 AppBar 标题（底部导航已标识当前页）；内核运行参数·维护·配置规则在内核设置二级页。
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({
+    super.key,
+    required this.controller,
+    required this.runParams,
+  });
+
+  final CoreController controller;
+  final RunParamsStore runParams;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +65,21 @@ class SettingsPage extends StatelessWidget {
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (BuildContext _) => OnDemandPage(),
+                ),
+              ),
+            ),
+            _header('内核'),
+            ListTile(
+              leading: const Icon(Icons.tune),
+              title: const Text('内核设置'),
+              subtitle: const Text('运行参数 / 维护 / 配置规则 / 内核信息'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (BuildContext _) => KernelSettingsPage(
+                    controller: controller,
+                    runParams: runParams,
+                  ),
                 ),
               ),
             ),

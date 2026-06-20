@@ -1,14 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../config/run_params_store.dart';
 import '../core/clash_api.dart';
 import '../core/core_controller.dart';
 
 /// 节点页：展示 select 代理组节点、切换、延迟测试（长按）。
 /// CoreController 由 HomeShell 注入；连接后用 currentEndpoint 构造 ClashApi。
+/// 延迟测试 URL/超时取自 [runParams] 偏好（未注入则用默认）。
 class NodesPage extends StatefulWidget {
-  const NodesPage({super.key, required this.controller, this.apiFactory});
+  const NodesPage({
+    super.key,
+    required this.controller,
+    this.runParams,
+    this.apiFactory,
+  });
 
   final CoreController controller;
+
+  /// 运行参数偏好（提供延迟测试 URL/超时）；未注入时用默认值。
+  final RunParamsStore? runParams;
 
   /// 测试注入点：由 endpoint 构造 ClashApi（默认 ClashApi.new）。
   final ClashApi Function(ControllerEndpoint)? apiFactory;
@@ -99,7 +109,12 @@ class _NodesPageState extends State<NodesPage> {
       return;
     }
     try {
-      final int delay = await api.testDelay(name);
+      final RunParams p = widget.runParams?.params ?? const RunParams();
+      final int delay = await api.testDelay(
+        name,
+        url: p.delayTestUrl,
+        timeout: p.delayTestTimeoutMs,
+      );
       if (mounted) {
         setState(() => _delays[name] = delay);
       }

@@ -43,11 +43,15 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // 连接页（默认 tab）内容
-    expect(find.text('订阅链接'), findsOneWidget);
-    expect(find.text('获取配置'), findsOneWidget);
-    // 底部导航三 tab
+    // 连接页（默认 tab）：运行模式 + 连接/节点/监控 子 tab
+    expect(find.text('运行模式'), findsOneWidget);
     expect(find.text('节点'), findsWidgets);
     expect(find.text('监控'), findsWidgets);
+    // 订阅 UI 已移出连接页
+    expect(find.text('订阅链接'), findsNothing);
+    expect(find.text('获取配置'), findsNothing);
+    // 底部导航：订阅 / 设置 tab
+    expect(find.text('订阅'), findsWidgets);
+    expect(find.text('设置'), findsWidgets);
   });
 }
