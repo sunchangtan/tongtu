@@ -133,7 +133,7 @@ void main() {
     expect(store2.currentId, 'id1');
   });
 
-  test('迁移：旧单订阅 → 列表首项并设为当前', () async {
+  test('不迁移旧单订阅（开发期不兼容旧数据）', () async {
     SharedPreferences.setMockInitialValues(<String, Object>{
       'subscription_url': 'https://old.com',
     });
@@ -142,23 +142,8 @@ void main() {
     ).writeAsString('proxies:\n  - old\n');
     final SubscriptionsStore store = makeStore();
     await store.load();
-    expect(store.subscriptions.length, 1);
-    expect(store.subscriptions.first.url, 'https://old.com');
-    expect(store.currentId, store.subscriptions.first.id);
-    expect(await store.currentContent(), contains('old'));
-  });
-
-  test('迁移幂等：再次 load 不重复', () async {
-    SharedPreferences.setMockInitialValues(<String, Object>{
-      'subscription_url': 'https://old.com',
-    });
-    await File(
-      '${tmp.path}/subscription.yaml',
-    ).writeAsString('proxies:\n  - old\n');
-    final SubscriptionsStore store = makeStore();
-    await store.load();
-    await store.load();
-    expect(store.subscriptions.length, 1);
+    expect(store.subscriptions, isEmpty); // 旧数据被忽略，不迁移
+    expect(store.currentId, isNull);
   });
 
   test('空态：load 无数据', () async {

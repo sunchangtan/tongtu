@@ -26,8 +26,8 @@
 - `Subscription { String id; String name; String url; SubscriptionInfo? info; }`（info=流量/到期，可空）。
 - `SubscriptionsStore`：`List<Subscription>` + `currentId`，序列化为 JSON 存 shared_prefs（key `subscriptions`/`subscription_current`）；每订阅完整配置正文落盘 `configs/<id>.yaml`。
 - id 生成：`DateTime.now().microsecondsSinceEpoch` 字符串（测试可注入 id 生成器保证确定性）。
-- API：`load()` / `add(name,url)`（fetch 校验后入库）/ `remove(id)` / `setCurrent(id)` / `update(id)`（重拉 content+info）/ `current()` / `currentContent()`（连接用）。
-- **迁移**：首次 `load()` 检测旧 `subscription_url`（+ 旧落盘 content）存在且新 `subscriptions` 为空 → 生成一条 `Subscription`（name 默认订阅 host 或「订阅 1」，url=旧 url，content 迁移到 `configs/<id>.yaml`）入库设为 current，清理旧 key。一次性、幂等。
+- API：`load()` / `add(name,url)`（fetch 校验后入库）/ `remove(id)` / `setCurrent(id)` / `update(id)`（重拉 content+info）/ `currentContent()`（连接用）。
+- **不做旧数据迁移**：开发期项目，无真实旧用户，不兼容旧单订阅（`subscription_url` + `subscription.yaml`）；`subscription.dart` 瘦身为无状态拉取/校验（`fetch`/`isValidUrl`），删除其单订阅持久化。
 
 ### 决策 3：订阅 tab（SubscriptionsPage）
 - 订阅卡列表：名称 / 流量·到期（info）/ 当前选中标记 / 更新按钮 / 删除。
@@ -51,18 +51,16 @@
 - 连接：连接页「连接」→ `currentContent()` 读当前订阅正文 → `controller.start`。无 current 则禁用。
 - 切换：订阅 tab 点卡 → `setCurrent` → 已连接提示重连。
 - 运行模式：连接页 `RunModeSelector` 连接中 `getConfigs` 回填 + 改 `patchConfigs`。
-- 迁移：app 启动首次 `load` 自动迁移旧单订阅。
 
 ## 5. Risks / Trade-offs
 
-- **[迁移丢数据]** 旧单订阅 url/content 迁移失败致用户丢配置 → Mitigation：迁移幂等 + 失败保留旧 key 不删；单测覆盖「有旧数据→迁移为首项」。
 - **[落盘文件清理]** 删订阅需删对应 `configs/<id>.yaml`，否则残留 → Mitigation：remove 同步删文件；测试验证。
 - **[连接用 current 与订阅 tab 不同步]** 切换 current 后连接页按钮状态 → Mitigation：连接页监听/读取 current；切换提示重连。
 - **[大改回归]** 多文件重构（Store+4 页）→ Mitigation：Store 与各页独立单测；分组 TDD；保留既有连接/节点/监控逻辑不动。
 
 ## 6. 测试
 
-- **SubscriptionsStore 单测**：add/remove/setCurrent/update/current、JSON 往返、content 落盘 per id、删除清文件、**迁移**（旧单订阅→首项 current）、空态。
+- **SubscriptionsStore 单测**：add/remove/setCurrent/update/currentContent、JSON 往返、content 落盘 per id、删除清文件、不迁移旧数据、空态。
 - **SubscriptionsPage widget**：列表渲染、添加（mock fetch）、切换选中、删除、更新、空态。
 - **连接页 widget**：无 current 禁用+提示、有 current 可连接、RunModeSelector 连接中回填+改。
 - **内核设置降级**：设置页含「内核设置」入口、KernelSettingsPage 无运行模式、有 AppBar。
@@ -71,4 +69,3 @@
 ## 7. Open Questions
 
 - 订阅名称默认值：host（如 `10.0.8.4`）vs「订阅 N」——倾向 host（可辨识），实施时定。
-- 旧落盘 content 文件路径与新 `configs/<id>.yaml` 的迁移搬运细节——实施首步确认现有落盘路径后定。

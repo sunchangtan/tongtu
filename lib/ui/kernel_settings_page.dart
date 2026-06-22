@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../config/run_params_store.dart';
+import '../config/subscriptions_store.dart';
 import '../core/app_info.dart';
 import '../core/clash_api.dart';
 import '../core/core_controller.dart';
@@ -22,11 +23,13 @@ class KernelSettingsPage extends StatefulWidget {
     super.key,
     required this.controller,
     required this.runParams,
+    required this.store,
     this.apiFactory,
   });
 
   final CoreController controller;
   final RunParamsStore runParams;
+  final SubscriptionsStore store; // 提供「查看订阅配置」的当前正文
 
   /// 测试注入点：由 endpoint 构造 ClashApi（默认 ClashApi.new），仅维护动作用。
   final ClashApi Function(ControllerEndpoint)? apiFactory;
@@ -283,7 +286,8 @@ class _KernelSettingsPageState extends State<KernelSettingsPage> {
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (BuildContext _) => const ConfigViewerPage(),
+                    builder: (BuildContext _) =>
+                        ConfigViewerPage(loader: widget.store.currentContent),
                   ),
                 ),
               ),

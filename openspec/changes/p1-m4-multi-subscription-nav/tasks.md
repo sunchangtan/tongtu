@@ -6,7 +6,7 @@
 
 - [x] 1.1 先写 `test/config/subscriptions_store_test.dart`：add/remove/setCurrent/update/current/currentContent、JSON 往返、content 按 id 落盘、删除清落盘文件、空态
 - [x] 1.2 `lib/config/subscriptions_store.dart`：`Subscription{id,name,url,info}` + `SubscriptionsStore`（list + currentId 持久化 shared_prefs JSON；content 落盘 `configs/<id>.yaml`；id 生成可注入）；复用现有 `fetch`/`SubscriptionInfo`/`_validateClashConfig`（从 subscription.dart 提取或复用）
-- [x] 1.3 迁移：首次 `load` 把旧单订阅（`subscription_url` + 旧落盘 content）迁为列表首项设当前、清旧 key、幂等；单测覆盖「有旧数据→首项 current」「已迁移不重复」
+- [x] 1.3 ~~迁移旧单订阅~~ **已移除（开发期不兼容旧数据）**：删除 `_migrateLegacySingle` 与 `subscription.dart` 单订阅持久化（save/load/saveContent/loadContent）；`config_viewer_page` 改读多订阅当前正文（`currentContent`）；单测覆盖「旧数据被忽略不迁移」
 
 ## 2. 订阅 tab（TDD）
 
@@ -39,6 +39,5 @@
 ## 7. 真机验证与归档（gate）
 
 - [ ] 7.1 真机：多订阅 添加/切换/删除/更新；连接使用当前订阅；切换提示重连
-- [ ] 7.2 真机：运行模式在连接页热改生效；内核设置二级页（日志级别/IPv6/维护）正常
-- [ ] 7.3 真机：升级后旧单订阅迁移保留（不丢配置）
-- [ ] 7.4 实施完成且真机通过后，按 archive 顺序（`p1-m3-kernel-settings` 之后）`openspec archive p1-m4-multi-subscription-nav`
+- [ ] 7.2 真机：运行模式在连接页热改生效；内核设置二级页（日志级别/IPv6/维护）正常；查看订阅配置显示当前订阅正文
+- [ ] 7.3 实施完成且真机通过后，按 archive 顺序（`p1-m3-kernel-settings` 之后）`openspec archive p1-m4-multi-subscription-nav`

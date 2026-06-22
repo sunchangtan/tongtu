@@ -73,7 +73,11 @@ class _HomeShellState extends State<HomeShell> {
             runParams: _runParams,
           ),
           SubscriptionsPage(store: _store, controller: _controller),
-          SettingsPage(controller: _controller, runParams: _runParams),
+          SettingsPage(
+            controller: _controller,
+            runParams: _runParams,
+            store: _store,
+          ),
         ],
       ),
       bottomNavigationBar: NavigationBar(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../config/run_params_store.dart';
+import '../config/subscriptions_store.dart';
 import '../core/app_info.dart';
 import '../core/core_controller.dart';
 import '../core/theme_controller.dart';
@@ -14,10 +15,12 @@ class SettingsPage extends StatelessWidget {
     super.key,
     required this.controller,
     required this.runParams,
+    required this.store,
   });
 
   final CoreController controller;
   final RunParamsStore runParams;
+  final SubscriptionsStore store;
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +82,7 @@ class SettingsPage extends StatelessWidget {
                   builder: (BuildContext _) => KernelSettingsPage(
                     controller: controller,
                     runParams: runParams,
+                    store: store,
                   ),
                 ),
               ),

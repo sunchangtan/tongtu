@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tongtu/config/run_params_store.dart';
+import 'package:tongtu/config/subscriptions_store.dart';
 import 'package:tongtu/core/clash_api.dart';
 import 'package:tongtu/core/core_controller.dart';
 import 'package:tongtu/ui/kernel_settings_page.dart';
@@ -48,7 +49,11 @@ void main() {
     await rp.load();
     await _pump(
       tester,
-      KernelSettingsPage(controller: _FakeController(), runParams: rp),
+      KernelSettingsPage(
+        controller: _FakeController(),
+        runParams: rp,
+        store: SubscriptionsStore(),
+      ),
     );
     await tester.pump();
     expect(find.widgetWithText(AppBar, '内核设置'), findsOneWidget);
@@ -59,7 +64,11 @@ void main() {
     await rp.load();
     await _pump(
       tester,
-      KernelSettingsPage(controller: _FakeController(), runParams: rp),
+      KernelSettingsPage(
+        controller: _FakeController(),
+        runParams: rp,
+        store: SubscriptionsStore(),
+      ),
     );
     await tester.pump();
 
@@ -88,7 +97,11 @@ void main() {
     await rp.load();
     await _pump(
       tester,
-      KernelSettingsPage(controller: _FakeController(), runParams: rp),
+      KernelSettingsPage(
+        controller: _FakeController(),
+        runParams: rp,
+        store: SubscriptionsStore(),
+      ),
     );
     await tester.pump();
 
@@ -120,6 +133,7 @@ void main() {
           currentEndpoint: _ep,
         ),
         runParams: rp,
+        store: SubscriptionsStore(),
         apiFactory: (ControllerEndpoint ep) => ClashApi(ep, client: client),
       ),
     );

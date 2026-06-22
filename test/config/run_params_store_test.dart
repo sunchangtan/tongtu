@@ -60,9 +60,7 @@ void main() {
   test('种子化：从配置 sniffer.enable 读嗅探偏好', () async {
     final RunParamsStore store = RunParamsStore();
     await store.load();
-    await store.seedFromConfig(
-      'sniffer:\n  enable: true\nproxies: []\n',
-    );
+    await store.seedFromConfig('sniffer:\n  enable: true\nproxies: []\n');
     expect(store.params.sniff, isTrue);
   });
 

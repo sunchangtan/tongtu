@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tongtu/config/run_params_store.dart';
+import 'package:tongtu/config/subscriptions_store.dart';
 import 'package:tongtu/core/core_controller.dart';
 import 'package:tongtu/core/theme_controller.dart';
 import 'package:tongtu/ui/settings_page.dart';
@@ -35,6 +36,7 @@ void main() {
     home: SettingsPage(
       controller: _FakeController(),
       runParams: RunParamsStore(),
+      store: SubscriptionsStore(),
     ),
   );
 

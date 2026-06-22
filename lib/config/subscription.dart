@@ -1,8 +1,4 @@
-import 'dart:io';
-
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:yaml/yaml.dart';
 
 /// 订阅拉取结果（流量/到期来自 subscription-userinfo 响应头，字节 / Unix 秒）。
@@ -41,17 +37,9 @@ class SubscriptionInfo {
   }
 }
 
-/// 订阅管理（M1 最小：单订阅，链接持久化于 SharedPreferences，完整配置正文落文件）。
+/// 订阅拉取与校验（无状态）：HTTP 拉取订阅、校验为合法 clash 配置、解析流量·到期。
+/// 持久化与多订阅管理由 `SubscriptionsStore` 负责（本类不落盘）。
 class SubscriptionStore {
-  /// [configDir] 为配置正文落盘目录的提供者（测试可注入临时目录）；默认 app 支持目录。
-  SubscriptionStore({Future<Directory> Function()? configDir})
-    : _configDir = configDir ?? getApplicationSupportDirectory;
-
-  final Future<Directory> Function() _configDir;
-
-  static const String _key = 'subscription_url';
-  static const String _contentSourceKey = 'subscription_content_url';
-
   /// 校验为合法 clash 配置：能解析为 YAML 映射且含**非空** proxies 或 proxy-providers。
   /// 用真 YAML 解析（而非子串匹配），杜绝注释/HTML 错误页里出现字样的误判，并能识别
   /// `proxies: []` 空列表；返回 null 表示合法，否则返回中文原因。连接时内核 Start 仍会终校验兜底。
@@ -81,46 +69,6 @@ class SubscriptionStore {
     return uri != null &&
         (uri.isScheme('http') || uri.isScheme('https')) &&
         uri.host.isNotEmpty;
-  }
-
-  /// 保存订阅链接；非 http/https 链接抛 FormatException（中文消息）。
-  Future<void> save(String url) async {
-    if (!isValidUrl(url)) {
-      throw const FormatException('订阅链接无效：必须是 http/https 链接');
-    }
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, url.trim());
-  }
-
-  /// 读取已保存的订阅链接（无则返回 null）。
-  Future<String?> load() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_key);
-  }
-
-  Future<File> _contentFile() async {
-    final Directory dir = await _configDir();
-    return File('${dir.path}/subscription.yaml');
-  }
-
-  /// 保存订阅完整配置正文（落文件）与其来源 url（存 prefs，供连接前一致性校验）。
-  Future<void> saveContent(String content, String sourceUrl) async {
-    final File f = await _contentFile();
-    await f.writeAsString(content);
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_contentSourceKey, sourceUrl.trim());
-  }
-
-  /// 读取已保存的订阅完整配置正文（无则返回 null）。
-  Future<String?> loadContent() async {
-    final File f = await _contentFile();
-    return f.existsSync() ? await f.readAsString() : null;
-  }
-
-  /// 读取已保存正文的来源 url（无则返回 null）。
-  Future<String?> loadContentSourceUrl() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_contentSourceKey);
   }
 
   /// 获取配置：HTTP 拉取订阅，校验为合法 clash 配置并返回完整正文（作为内核主配置），

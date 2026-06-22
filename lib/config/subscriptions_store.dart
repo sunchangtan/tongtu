@@ -97,11 +97,6 @@ class SubscriptionsStore extends ChangeNotifier {
   static const String _subsKey = 'subscriptions';
   static const String _currentKey = 'subscription_current';
 
-  // 旧单订阅迁移来源（与 SubscriptionStore 保持一致）。
-  static const String _legacyUrlKey = 'subscription_url';
-  static const String _legacyContentSourceKey = 'subscription_content_url';
-  static const String _legacyContentFile = 'subscription.yaml';
-
   List<Subscription> _subscriptions = <Subscription>[];
   String? _currentId;
 
@@ -112,15 +107,11 @@ class SubscriptionsStore extends ChangeNotifier {
   /// 当前选中订阅 id（无则 null）。
   String? get currentId => _currentId;
 
-  /// 加载持久化的订阅列表与当前选中；列表为空时尝试迁移旧单订阅（幂等）。
-  /// 完成后通知监听者，供 HomeShell 异步 load 后各页刷新。
+  /// 加载持久化的订阅列表与当前选中。完成后通知监听者，供 HomeShell 异步 load 后各页刷新。
   Future<void> load() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     _subscriptions = _decodeList(prefs.getString(_subsKey));
     _currentId = prefs.getString(_currentKey);
-    if (_subscriptions.isEmpty) {
-      await _migrateLegacySingle(prefs);
-    }
     notifyListeners();
   }
 
@@ -249,37 +240,5 @@ class SubscriptionsStore extends ChangeNotifier {
     } else {
       await prefs.remove(_currentKey);
     }
-  }
-
-  /// 迁移旧单订阅（`subscription_url` + 旧落盘 `subscription.yaml`）为列表首项并设为当前；
-  /// 清旧 key 后即幂等（再次 load 时列表非空且旧 key 已清，不重复迁移）。
-  Future<void> _migrateLegacySingle(SharedPreferences prefs) async {
-    final String? oldUrl = prefs.getString(_legacyUrlKey);
-    if (oldUrl == null || oldUrl.isEmpty) {
-      return;
-    }
-    final String id = _idGen();
-    _subscriptions = <Subscription>[
-      Subscription(id: id, name: _deriveName(oldUrl), url: oldUrl),
-    ];
-    _currentId = id;
-
-    final Directory dir = await _configDir();
-    final File legacy = File('${dir.path}/$_legacyContentFile');
-    if (legacy.existsSync()) {
-      await _writeContent(id, await legacy.readAsString());
-    }
-
-    // 先持久化新列表，成功后再清旧 key：若 _persist 抛错则旧 key 仍在，
-    // 下次 load 重试迁移而非丢数据（符合「失败保留旧 key 不删」容灾）。
-    await _persist();
-    await prefs.remove(_legacyUrlKey);
-    await prefs.remove(_legacyContentSourceKey);
-  }
-
-  /// 从 url 主机名派生默认订阅名（无主机名时回退）。
-  String _deriveName(String url) {
-    final String host = Uri.tryParse(url)?.host ?? '';
-    return host.isNotEmpty ? host : '已迁移订阅';
   }
 }
