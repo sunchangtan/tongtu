@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:tongtu/ui/icons/tongtu_icons.g.dart';
 
 import 'text_viewer_page.dart';
 
@@ -22,7 +23,7 @@ class ConfigViewerPage extends StatelessWidget {
       actionsBuilder: (Future<void> Function() reload, String fullText) =>
           <Widget>[
             IconButton(
-              icon: const Icon(Icons.ios_share),
+              icon: const Icon(TongtuIcons.share),
               tooltip: '导出',
               onPressed: fullText.isEmpty
                   ? null

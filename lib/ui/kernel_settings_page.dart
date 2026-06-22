@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:tongtu/ui/icons/tongtu_icons.g.dart';
 
 import 'package:flutter/material.dart';
 
@@ -234,26 +235,26 @@ class _KernelSettingsPageState extends State<KernelSettingsPage> {
                 enabled: _p.allowLan,
                 title: const Text('混合端口'),
                 subtitle: Text('${_p.mixedPort}'),
-                trailing: const Icon(Icons.edit_outlined),
+                trailing: const Icon(TongtuIcons.pencil),
                 onTap: _p.allowLan ? _editMixedPort : null,
               ),
               _header('延迟测试'),
               ListTile(
                 title: const Text('延迟测试 URL'),
                 subtitle: Text(_p.delayTestUrl),
-                trailing: const Icon(Icons.edit_outlined),
+                trailing: const Icon(TongtuIcons.pencil),
                 onTap: _editDelayUrl,
               ),
               ListTile(
                 title: const Text('延迟测试超时'),
                 subtitle: Text('${_p.delayTestTimeoutMs} ms'),
-                trailing: const Icon(Icons.edit_outlined),
+                trailing: const Icon(TongtuIcons.pencil),
                 onTap: _editDelayTimeout,
               ),
               _header('维护（连接中可用）'),
               ListTile(
                 enabled: _connected,
-                leading: const Icon(Icons.public),
+                leading: const Icon(TongtuIcons.globe),
                 title: const Text('更新 GEO 数据库'),
                 onTap: _connected
                     ? () =>
@@ -262,7 +263,7 @@ class _KernelSettingsPageState extends State<KernelSettingsPage> {
               ),
               ListTile(
                 enabled: _connected,
-                leading: const Icon(Icons.cleaning_services_outlined),
+                leading: const Icon(TongtuIcons.eraser),
                 title: const Text('清 fake-ip 缓存'),
                 onTap: _connected
                     ? () => _maintain(
@@ -273,7 +274,7 @@ class _KernelSettingsPageState extends State<KernelSettingsPage> {
               ),
               ListTile(
                 enabled: _connected,
-                leading: const Icon(Icons.cleaning_services_outlined),
+                leading: const Icon(TongtuIcons.eraser),
                 title: const Text('清 DNS 缓存'),
                 onTap: _connected
                     ? () => _maintain((ClashApi a) => a.flushDNS(), 'DNS 缓存已清')
@@ -281,9 +282,9 @@ class _KernelSettingsPageState extends State<KernelSettingsPage> {
               ),
               _header('配置与规则'),
               ListTile(
-                leading: const Icon(Icons.description_outlined),
+                leading: const Icon(TongtuIcons.fileText),
                 title: const Text('查看订阅配置'),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(TongtuIcons.chevronRight),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (BuildContext _) =>
@@ -292,9 +293,9 @@ class _KernelSettingsPageState extends State<KernelSettingsPage> {
                 ),
               ),
               ListTile(
-                leading: const Icon(Icons.rule_outlined),
+                leading: const Icon(TongtuIcons.listChecks),
                 title: const Text('分流规则'),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(TongtuIcons.chevronRight),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (BuildContext _) =>
@@ -304,14 +305,14 @@ class _KernelSettingsPageState extends State<KernelSettingsPage> {
               ),
               _header('内核信息'),
               const ListTile(
-                leading: Icon(Icons.memory),
+                leading: Icon(TongtuIcons.cpu),
                 title: Text('内核版本'),
                 subtitle: Text('mihomo $kMihomoVersion'),
               ),
               ListTile(
-                leading: const Icon(Icons.article_outlined),
+                leading: const Icon(TongtuIcons.newspaper),
                 title: const Text('日志'),
-                trailing: const Icon(Icons.chevron_right),
+                trailing: const Icon(TongtuIcons.chevronRight),
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (BuildContext _) => const LogViewerPage(),

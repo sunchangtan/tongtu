@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tongtu/ui/icons/tongtu_icons.g.dart';
 
 import '../config/run_params_store.dart';
 import '../config/subscriptions_store.dart';
@@ -44,14 +45,16 @@ class _HomeShellState extends State<HomeShell> {
     _init();
   }
 
-  /// 加载订阅与运行参数偏好；首次从当前订阅配置种子化运行参数（升级不回归）。
+  /// 加载订阅与运行参数偏好；首次从当前订阅配置种子化运行参数（升级不回归）；
+  /// 启动时对到期订阅做自动更新（尽力、失败不阻塞）。
   Future<void> _init() async {
-    await _store.load(); // 含旧单订阅迁移
+    await _store.load();
     await _runParams.load();
     final String? content = await _store.currentContent();
     if (content != null && content.isNotEmpty) {
       await _runParams.seedFromConfig(content); // 幂等：已持久化则 no-op
     }
+    await _store.runDueAutoUpdates(DateTime.now().millisecondsSinceEpoch);
   }
 
   @override
@@ -84,15 +87,9 @@ class _HomeShellState extends State<HomeShell> {
         selectedIndex: _index,
         onDestinationSelected: (int i) => setState(() => _index = i),
         destinations: const <NavigationDestination>[
-          NavigationDestination(
-            icon: Icon(Icons.power_settings_new),
-            label: '连接',
-          ),
-          NavigationDestination(icon: Icon(Icons.cloud_outlined), label: '订阅'),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            label: '设置',
-          ),
+          NavigationDestination(icon: Icon(TongtuIcons.power), label: '连接'),
+          NavigationDestination(icon: Icon(TongtuIcons.cloud), label: '订阅'),
+          NavigationDestination(icon: Icon(TongtuIcons.settings), label: '设置'),
         ],
       ),
     );

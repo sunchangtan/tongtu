@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tongtu/ui/icons/tongtu_icons.g.dart';
 
 import '../config/run_params_store.dart';
 import '../core/clash_api.dart';
@@ -158,9 +159,7 @@ class _NodesPageState extends State<NodesPage> {
           ListTile(
             title: Text(node),
             leading: Icon(
-              node == group.now
-                  ? Icons.radio_button_checked
-                  : Icons.radio_button_unchecked,
+              node == group.now ? TongtuIcons.circleDot : TongtuIcons.circle,
             ),
             trailing: _delayLabel(node),
             onTap: () => _select(group.name, node),

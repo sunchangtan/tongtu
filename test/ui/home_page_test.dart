@@ -37,7 +37,7 @@ void main() {
   late Directory tmp;
   late int idCounter;
 
-  Future<SubscriptionInfo> okFetcher(String url) async =>
+  Future<SubscriptionInfo> okFetcher(String url, String? ua) async =>
       const SubscriptionInfo(
         ok: true,
         content: 'proxies:\n  - name: x\n',

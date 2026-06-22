@@ -15,22 +15,46 @@ class Subscription {
     required this.name,
     required this.url,
     this.info,
+    this.userAgent,
+    this.updateIntervalMinutes = 0,
+    this.lastUpdatedMs = 0,
   });
 
   final String id;
   final String name;
+
+  /// 订阅链接；直接粘贴内容导入的订阅为空（不参与自动更新）。
   final String url;
 
   /// 最近一次拉取的流量·到期等元信息（不含正文）；未拉取过为 null。
   final SubscriptionInfo? info;
 
+  /// 拉取该订阅用的 User-Agent（null→默认 clash.meta）。
+  final String? userAgent;
+
+  /// 自动更新间隔（分钟，0=关闭）。
+  final int updateIntervalMinutes;
+
+  /// 上次更新时间（epoch ms，0=从未）。
+  final int lastUpdatedMs;
+
   /// 仅覆盖给定字段（id/url 不变），其余沿用原值。
-  Subscription copyWith({String? name, SubscriptionInfo? info}) {
+  Subscription copyWith({
+    String? name,
+    SubscriptionInfo? info,
+    String? userAgent,
+    int? updateIntervalMinutes,
+    int? lastUpdatedMs,
+  }) {
     return Subscription(
       id: id,
       name: name ?? this.name,
       url: url,
       info: info ?? this.info,
+      userAgent: userAgent ?? this.userAgent,
+      updateIntervalMinutes:
+          updateIntervalMinutes ?? this.updateIntervalMinutes,
+      lastUpdatedMs: lastUpdatedMs ?? this.lastUpdatedMs,
     );
   }
 
@@ -39,6 +63,9 @@ class Subscription {
     'name': name,
     'url': url,
     if (info != null) 'info': _infoToJson(info!),
+    if (userAgent != null) 'userAgent': userAgent,
+    'updateIntervalMinutes': updateIntervalMinutes,
+    'lastUpdatedMs': lastUpdatedMs,
   };
 
   factory Subscription.fromJson(Map<String, dynamic> json) => Subscription(
@@ -48,6 +75,9 @@ class Subscription {
     info: json['info'] is Map
         ? _infoFromJson((json['info'] as Map).cast<String, dynamic>())
         : null,
+    userAgent: json['userAgent'] as String?,
+    updateIntervalMinutes: json['updateIntervalMinutes'] as int? ?? 0,
+    lastUpdatedMs: json['lastUpdatedMs'] as int? ?? 0,
   );
 }
 
@@ -84,15 +114,22 @@ class SubscriptionsStore extends ChangeNotifier {
   SubscriptionsStore({
     Future<Directory> Function()? configDir,
     String Function()? idGen,
-    Future<SubscriptionInfo> Function(String url)? fetcher,
+    Future<SubscriptionInfo> Function(String url, String? userAgent)? fetcher,
+    int Function()? nowMs,
   }) : _configDir = configDir ?? getApplicationSupportDirectory,
        _idGen =
            idGen ?? (() => DateTime.now().microsecondsSinceEpoch.toString()),
-       _fetcher = fetcher ?? ((String url) => SubscriptionStore().fetch(url));
+       _fetcher =
+           fetcher ??
+           ((String url, String? ua) =>
+               SubscriptionStore().fetch(url, userAgent: ua)),
+       _now = nowMs ?? (() => DateTime.now().millisecondsSinceEpoch);
 
   final Future<Directory> Function() _configDir;
   final String Function() _idGen;
-  final Future<SubscriptionInfo> Function(String url) _fetcher;
+  final Future<SubscriptionInfo> Function(String url, String? userAgent)
+  _fetcher;
+  final int Function() _now;
 
   static const String _subsKey = 'subscriptions';
   static const String _currentKey = 'subscription_current';
@@ -115,17 +152,30 @@ class SubscriptionsStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// 添加订阅：先经 [fetcher] 拉取并校验，校验失败（ok=false）不入库、原样返回；
-  /// 成功则入库、落盘正文、列表空时自动设为当前，并持久化。
-  Future<SubscriptionInfo> add(String name, String url) async {
-    final SubscriptionInfo info = await _fetcher(url);
+  /// 添加订阅（URL）：先经 [fetcher]（带 [userAgent]）拉取并校验，校验失败（ok=false）不入库、
+  /// 原样返回；成功则入库（记 UA / 更新间隔 / 本次更新时间）、落盘正文、列表空时自动设为当前。
+  Future<SubscriptionInfo> add(
+    String name,
+    String url, {
+    String? userAgent,
+    int intervalMinutes = 0,
+  }) async {
+    final SubscriptionInfo info = await _fetcher(url, userAgent);
     if (!info.ok) {
       return info; // 校验失败不入库
     }
     final String id = _idGen();
     _subscriptions = <Subscription>[
       ..._subscriptions,
-      Subscription(id: id, name: name, url: url, info: info),
+      Subscription(
+        id: id,
+        name: name,
+        url: url,
+        info: info,
+        userAgent: userAgent,
+        updateIntervalMinutes: intervalMinutes,
+        lastUpdatedMs: _now(),
+      ),
     ];
     if (info.content != null) {
       await _writeContent(id, info.content!);
@@ -134,6 +184,58 @@ class SubscriptionsStore extends ChangeNotifier {
     await _persist();
     notifyListeners();
     return info;
+  }
+
+  /// 添加订阅（直接内容）：本地校验原始 clash 配置（不走 HTTP），合法则入库落盘；
+  /// url 为空（不参与自动更新）。
+  Future<SubscriptionInfo> addContent(String name, String content) async {
+    final SubscriptionInfo info = SubscriptionStore.validateContent(content);
+    if (!info.ok) {
+      return info;
+    }
+    final String id = _idGen();
+    _subscriptions = <Subscription>[
+      ..._subscriptions,
+      Subscription(
+        id: id,
+        name: name,
+        url: '',
+        info: info,
+        lastUpdatedMs: _now(),
+      ),
+    ];
+    await _writeContent(id, content);
+    _currentId ??= id;
+    await _persist();
+    notifyListeners();
+    return info;
+  }
+
+  /// 到期需自动更新的订阅 id：间隔 > 0、有 url、且距上次更新 ≥ 间隔。
+  List<String> dueForAutoUpdate(int nowMs) {
+    return _subscriptions
+        .where(
+          (Subscription s) =>
+              s.updateIntervalMinutes > 0 &&
+              s.url.isNotEmpty &&
+              nowMs - s.lastUpdatedMs >= s.updateIntervalMinutes * 60000,
+        )
+        .map((Subscription s) => s.id)
+        .toList();
+  }
+
+  /// 对所有到期订阅逐个重拉（串行、失败跳过），返回尝试更新的条数。
+  /// 供 HomeShell 启动时调用；失败不抛、不阻塞。
+  Future<int> runDueAutoUpdates(int nowMs) async {
+    final List<String> due = dueForAutoUpdate(nowMs);
+    for (final String id in due) {
+      try {
+        await update(id);
+      } on Exception {
+        // 单条更新失败跳过，不影响其余与启动
+      }
+    }
+    return due.length;
   }
 
   /// 删除订阅：移除其落盘正文；若删的是当前选中，则转移到列表首项（空则清空）。
@@ -171,11 +273,17 @@ class SubscriptionsStore extends ChangeNotifier {
     if (idx < 0) {
       return const SubscriptionInfo(ok: false, message: '订阅不存在');
     }
-    final SubscriptionInfo info = await _fetcher(_subscriptions[idx].url);
+    final SubscriptionInfo info = await _fetcher(
+      _subscriptions[idx].url,
+      _subscriptions[idx].userAgent,
+    );
     if (!info.ok) {
       return info; // 拉取失败保留原配置
     }
-    _subscriptions[idx] = _subscriptions[idx].copyWith(info: info);
+    _subscriptions[idx] = _subscriptions[idx].copyWith(
+      info: info,
+      lastUpdatedMs: _now(),
+    );
     if (info.content != null) {
       await _writeContent(id, info.content!);
     }

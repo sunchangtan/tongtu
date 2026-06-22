@@ -71,9 +71,23 @@ class SubscriptionStore {
         uri.host.isNotEmpty;
   }
 
+  /// 校验原始 clash 配置内容（不走 HTTP，供「直接粘贴内容」导入）。
+  /// 合法返回 ok=true + 原文；否则 ok=false + 中文原因。
+  static SubscriptionInfo validateContent(String content) {
+    final String? reason = _validateClashConfig(content);
+    if (reason != null) {
+      return SubscriptionInfo(ok: false, message: '内容非合法配置：$reason');
+    }
+    return SubscriptionInfo(ok: true, content: content, message: '本地配置');
+  }
+
   /// 获取配置：HTTP 拉取订阅，校验为合法 clash 配置并返回完整正文（作为内核主配置），
-  /// 同时解析 subscription-userinfo 流量/到期信息。
-  Future<SubscriptionInfo> fetch(String url, {http.Client? client}) async {
+  /// 同时解析 subscription-userinfo 流量/到期信息。[userAgent] 默认 `clash.meta`。
+  Future<SubscriptionInfo> fetch(
+    String url, {
+    http.Client? client,
+    String? userAgent,
+  }) async {
     final String trimmed = url.trim();
     if (!isValidUrl(trimmed)) {
       return const SubscriptionInfo(
@@ -86,7 +100,7 @@ class SubscriptionStore {
       final http.Response resp = await httpClient
           .get(
             Uri.parse(trimmed),
-            headers: <String, String>{'User-Agent': 'clash.meta'},
+            headers: <String, String>{'User-Agent': userAgent ?? 'clash.meta'},
           )
           .timeout(const Duration(seconds: 15));
       if (resp.statusCode != 200) {

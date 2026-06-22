@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tongtu/ui/icons/tongtu_icons.g.dart';
 
 import '../config/run_params_store.dart';
 import '../config/subscriptions_store.dart';
@@ -39,17 +40,17 @@ class SettingsPage extends StatelessWidget {
                       ButtonSegment<ThemeMode>(
                         value: ThemeMode.system,
                         label: Text('系统'),
-                        icon: Icon(Icons.brightness_auto),
+                        icon: Icon(TongtuIcons.sunMoon),
                       ),
                       ButtonSegment<ThemeMode>(
                         value: ThemeMode.light,
                         label: Text('亮'),
-                        icon: Icon(Icons.light_mode),
+                        icon: Icon(TongtuIcons.sun),
                       ),
                       ButtonSegment<ThemeMode>(
                         value: ThemeMode.dark,
                         label: Text('暗'),
-                        icon: Icon(Icons.dark_mode),
+                        icon: Icon(TongtuIcons.moon),
                       ),
                     ],
                     selected: <ThemeMode>{mode},
@@ -61,10 +62,10 @@ class SettingsPage extends StatelessWidget {
             ),
             _header('网络'),
             ListTile(
-              leading: const Icon(Icons.network_check),
+              leading: const Icon(TongtuIcons.network),
               title: const Text('按需连接'),
               subtitle: const Text('按网络条件自动启停隧道'),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const Icon(TongtuIcons.chevronRight),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (BuildContext _) => OnDemandPage(),
@@ -73,10 +74,10 @@ class SettingsPage extends StatelessWidget {
             ),
             _header('内核'),
             ListTile(
-              leading: const Icon(Icons.tune),
+              leading: const Icon(TongtuIcons.slidersHorizontal),
               title: const Text('内核设置'),
               subtitle: const Text('运行参数 / 维护 / 配置规则 / 内核信息'),
-              trailing: const Icon(Icons.chevron_right),
+              trailing: const Icon(TongtuIcons.chevronRight),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (BuildContext _) => KernelSettingsPage(
@@ -89,12 +90,12 @@ class SettingsPage extends StatelessWidget {
             ),
             _header('关于'),
             const ListTile(
-              leading: Icon(Icons.info_outline),
+              leading: Icon(TongtuIcons.info),
               title: Text('应用版本'),
               subtitle: Text(kAppVersion),
             ),
             const ListTile(
-              leading: Icon(Icons.balance),
+              leading: Icon(TongtuIcons.scale),
               title: Text('开源许可'),
               subtitle: Text('GPL-3.0'),
             ),

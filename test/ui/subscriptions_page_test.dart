@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:tongtu/ui/icons/tongtu_icons.g.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,7 +34,7 @@ void main() {
   late Directory tmp;
   late int idCounter;
 
-  Future<SubscriptionInfo> okFetcher(String url) async =>
+  Future<SubscriptionInfo> okFetcher(String url, String? ua) async =>
       const SubscriptionInfo(
         ok: true,
         content: 'proxies:\n  - name: x\n',
@@ -42,7 +43,7 @@ void main() {
       );
 
   SubscriptionsStore makeStore({
-    Future<SubscriptionInfo> Function(String)? fetcher,
+    Future<SubscriptionInfo> Function(String, String?)? fetcher,
   }) {
     idCounter = 0;
     return SubscriptionsStore(
@@ -114,42 +115,14 @@ void main() {
     expect(find.byType(ListTile), findsNothing);
   });
 
-  testWidgets('添加：FAB 弹窗 + 校验入库', (WidgetTester tester) async {
+  testWidgets('点 FAB 打开添加订阅页', (WidgetTester tester) async {
     final SubscriptionsStore store = makeStore();
     await tester.runAsync(() => store.load());
     await pumpPage(tester, store);
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
-    // 弹窗两个输入框：名称(0) / 订阅链接(1)
-    await tester.enterText(find.byType(TextField).at(0), '我的订阅');
-    await tester.enterText(find.byType(TextField).at(1), 'https://a.com');
-    await tester.tap(find.text('添加'));
-    await tester.pump();
-    await settleIo(tester);
-
-    expect(store.subscriptions.length, 1);
-    expect(store.subscriptions.first.url, 'https://a.com');
-    expect(find.text('我的订阅'), findsOneWidget);
-  });
-
-  testWidgets('添加校验失败：弹窗显示错误且不入库', (WidgetTester tester) async {
-    final SubscriptionsStore store = makeStore(
-      fetcher: (String url) async =>
-          const SubscriptionInfo(ok: false, message: '订阅内容非合法配置'),
-    );
-    await tester.runAsync(() => store.load());
-    await pumpPage(tester, store);
-
-    await tester.tap(find.byType(FloatingActionButton));
-    await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField).at(1), 'https://bad.com');
-    await tester.tap(find.text('添加'));
-    await tester.pump();
-    await settleIo(tester);
-
-    expect(store.subscriptions, isEmpty);
-    expect(find.textContaining('非合法配置'), findsOneWidget); // 弹窗内错误
+    expect(find.widgetWithText(AppBar, '添加订阅'), findsOneWidget);
   });
 
   testWidgets('切换当前：点非当前卡', (WidgetTester tester) async {
@@ -192,7 +165,7 @@ void main() {
     await pumpPage(tester, store);
 
     // 首卡（订阅A=当前）的删除按钮
-    await tester.tap(find.byIcon(Icons.delete_outline).first);
+    await tester.tap(find.byIcon(TongtuIcons.trash2).first);
     await tester.pumpAndSettle(); // 确认弹窗
     await tester.tap(find.text('删除'));
     await tester.pump();
@@ -207,7 +180,7 @@ void main() {
   testWidgets('更新：重拉刷新 info', (WidgetTester tester) async {
     int calls = 0;
     final SubscriptionsStore store = makeStore(
-      fetcher: (String url) async {
+      fetcher: (String url, String? ua) async {
         calls++;
         return SubscriptionInfo(
           ok: true,
@@ -222,7 +195,7 @@ void main() {
     });
     await pumpPage(tester, store);
 
-    await tester.tap(find.byIcon(Icons.refresh));
+    await tester.tap(find.byIcon(TongtuIcons.refreshCw));
     await tester.pump();
     await settleIo(tester);
 

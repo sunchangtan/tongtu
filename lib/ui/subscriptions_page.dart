@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:tongtu/ui/icons/tongtu_icons.g.dart';
 
 import '../config/subscription.dart';
 import '../config/subscriptions_store.dart';
 import '../core/core_controller.dart';
 import '../util/format.dart';
+import 'add_subscription_page.dart';
 
 /// 订阅 tab（底部第 2 tab）：多订阅卡列表（名称 / 流量·到期 / 当前标记 / 更新 / 删除）+
-/// 右下 FAB 添加（url + 名称，经 fetch 校验入库）+ 切换当前（已连接提示重连）+ 空态。
+/// 右下 FAB 添加（push 全屏添加页，对齐 clashmi）+ 切换当前（已连接提示重连）+ 空态。
 ///
 /// [store] 由 HomeShell 持有并注入（与连接页共享同一实例，[ChangeNotifier] 驱动跨页同步）；
 /// [controller] 仅用于切换时判断是否已连接以提示重连。
@@ -42,7 +44,7 @@ class SubscriptionsPage extends StatelessWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _add(context),
         tooltip: '添加订阅',
-        child: const Icon(Icons.add),
+        child: const Icon(TongtuIcons.plus),
       ),
     );
   }
@@ -53,7 +55,7 @@ class SubscriptionsPage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Icon(
-            Icons.cloud_off_outlined,
+            TongtuIcons.cloudOff,
             size: 48,
             color: Theme.of(context).disabledColor,
           ),
@@ -72,7 +74,7 @@ class SubscriptionsPage extends StatelessWidget {
       child: ListTile(
         onTap: () => _switch(context, sub.id),
         leading: Icon(
-          isCurrent ? Icons.check_circle : Icons.radio_button_unchecked,
+          isCurrent ? TongtuIcons.circleCheck : TongtuIcons.circle,
           color: isCurrent ? accent : Theme.of(context).disabledColor,
         ),
         title: Row(
@@ -89,12 +91,12 @@ class SubscriptionsPage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             IconButton(
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(TongtuIcons.refreshCw),
               tooltip: '更新',
               onPressed: () => _update(context, sub.id),
             ),
             IconButton(
-              icon: const Icon(Icons.delete_outline),
+              icon: const Icon(TongtuIcons.trash2),
               tooltip: '删除',
               onPressed: () => _delete(context, sub),
             ),
@@ -147,9 +149,10 @@ class SubscriptionsPage extends StatelessWidget {
   }
 
   Future<void> _add(BuildContext context) async {
-    await showDialog<bool>(
-      context: context,
-      builder: (BuildContext _) => _AddSubscriptionDialog(store: store),
+    await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (BuildContext _) => AddSubscriptionPage(store: store),
+      ),
     );
   }
 
@@ -194,106 +197,5 @@ class SubscriptionsPage extends StatelessWidget {
     final String month = date.month.toString().padLeft(2, '0');
     final String day = date.day.toString().padLeft(2, '0');
     return '${date.year}-$month-$day';
-  }
-}
-
-/// 添加订阅弹窗：名称（可选，默认 url 主机名）+ 订阅链接，经 [SubscriptionsStore.add]
-/// fetch 校验；成功关闭弹窗，失败在弹窗内显示原因。
-class _AddSubscriptionDialog extends StatefulWidget {
-  const _AddSubscriptionDialog({required this.store});
-
-  final SubscriptionsStore store;
-
-  @override
-  State<_AddSubscriptionDialog> createState() => _AddSubscriptionDialogState();
-}
-
-class _AddSubscriptionDialogState extends State<_AddSubscriptionDialog> {
-  final TextEditingController _nameCtrl = TextEditingController();
-  final TextEditingController _urlCtrl = TextEditingController();
-  bool _busy = false;
-  String? _error;
-
-  @override
-  void dispose() {
-    _nameCtrl.dispose();
-    _urlCtrl.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    final String url = _urlCtrl.text.trim();
-    if (!SubscriptionStore.isValidUrl(url)) {
-      setState(() => _error = '订阅链接无效：必须是 http/https 链接');
-      return;
-    }
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    final String name = _nameCtrl.text.trim().isEmpty
-        ? (Uri.tryParse(url)?.host ?? '订阅')
-        : _nameCtrl.text.trim();
-    final SubscriptionInfo info = await widget.store.add(name, url);
-    if (!mounted) {
-      return;
-    }
-    if (info.ok) {
-      Navigator.of(context).pop(true);
-    } else {
-      setState(() {
-        _busy = false;
-        _error = info.message ?? '添加失败';
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('添加订阅'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          TextField(
-            controller: _nameCtrl,
-            decoration: const InputDecoration(
-              labelText: '名称（可选）',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _urlCtrl,
-            keyboardType: TextInputType.url,
-            decoration: const InputDecoration(
-              labelText: '订阅链接',
-              hintText: 'https://...',
-              border: OutlineInputBorder(),
-            ),
-          ),
-          if (_error != null) ...<Widget>[
-            const SizedBox(height: 12),
-            Text(_error!, style: const TextStyle(color: Colors.red)),
-          ],
-        ],
-      ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: _busy ? null : () => Navigator.of(context).pop(false),
-          child: const Text('取消'),
-        ),
-        FilledButton(
-          onPressed: _busy ? null : _submit,
-          child: _busy
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('添加'),
-        ),
-      ],
-    );
   }
 }

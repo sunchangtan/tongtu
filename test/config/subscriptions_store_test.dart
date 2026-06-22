@@ -11,8 +11,8 @@ void main() {
   late Directory tmp;
   late int idCounter;
 
-  // 默认 fetcher：返回合法配置 + 流量信息
-  Future<SubscriptionInfo> okFetcher(String url) async =>
+  // 默认 fetcher：返回合法配置 + 流量信息（签名含 userAgent）
+  Future<SubscriptionInfo> okFetcher(String url, String? ua) async =>
       const SubscriptionInfo(
         ok: true,
         content: 'proxies:\n  - name: x\n',
@@ -21,13 +21,15 @@ void main() {
       );
 
   SubscriptionsStore makeStore({
-    Future<SubscriptionInfo> Function(String)? fetcher,
+    Future<SubscriptionInfo> Function(String, String?)? fetcher,
+    int Function()? nowGetter,
   }) {
     idCounter = 0;
     return SubscriptionsStore(
       configDir: () async => tmp,
       idGen: () => 'id${++idCounter}',
       fetcher: fetcher ?? okFetcher,
+      nowMs: nowGetter,
     );
   }
 
@@ -56,7 +58,7 @@ void main() {
 
   test('add 校验失败不入库', () async {
     final SubscriptionsStore store = makeStore(
-      fetcher: (String url) async =>
+      fetcher: (String url, String? ua) async =>
           const SubscriptionInfo(ok: false, message: '非法'),
     );
     await store.load();
@@ -103,7 +105,7 @@ void main() {
   test('update 重拉刷新 info', () async {
     int calls = 0;
     final SubscriptionsStore store = makeStore(
-      fetcher: (String url) async {
+      fetcher: (String url, String? ua) async {
         calls++;
         return SubscriptionInfo(
           ok: true,
@@ -165,5 +167,113 @@ void main() {
     await store.update('id1'); // 4
     await store.remove('id1'); // 5
     expect(n, 5); // 每次成功变更各通知一次
+  });
+
+  test('add 透传 userAgent + 落库 interval/lastUpdated + 持久化往返', () async {
+    String? seenUa;
+    final SubscriptionsStore store = makeStore(
+      fetcher: (String url, String? ua) async {
+        seenUa = ua;
+        return const SubscriptionInfo(ok: true, content: 'proxies:\n  - x\n');
+      },
+      nowGetter: () => 5000,
+    );
+    await store.load();
+    await store.add(
+      'A',
+      'https://a.com',
+      userAgent: 'myUA',
+      intervalMinutes: 360,
+    );
+    expect(seenUa, 'myUA'); // fetcher 收到 UA
+    expect(store.subscriptions.first.userAgent, 'myUA');
+    expect(store.subscriptions.first.updateIntervalMinutes, 360);
+    expect(store.subscriptions.first.lastUpdatedMs, 5000);
+
+    // 持久化往返：新字段读回
+    final SubscriptionsStore store2 = SubscriptionsStore(
+      configDir: () async => tmp,
+      idGen: () => 'idX',
+      fetcher: okFetcher,
+    );
+    await store2.load();
+    expect(store2.subscriptions.first.userAgent, 'myUA');
+    expect(store2.subscriptions.first.updateIntervalMinutes, 360);
+  });
+
+  test('addContent：合法内容入库（url 空、不 fetch）', () async {
+    final SubscriptionsStore store = makeStore(
+      fetcher: (String url, String? ua) async => fail('addContent 不应发起 fetch'),
+    );
+    await store.load();
+    final SubscriptionInfo info = await store.addContent(
+      '本地',
+      'proxies:\n  - name: x\n',
+    );
+    expect(info.ok, isTrue);
+    expect(store.subscriptions.length, 1);
+    expect(store.subscriptions.first.url, ''); // 内容订阅无 url
+    expect(store.currentId, 'id1');
+    expect(await store.currentContent(), contains('proxies'));
+  });
+
+  test('addContent：非法内容不入库', () async {
+    final SubscriptionsStore store = makeStore();
+    await store.load();
+    final SubscriptionInfo info = await store.addContent(
+      '坏',
+      '<html>nope</html>',
+    );
+    expect(info.ok, isFalse);
+    expect(store.subscriptions, isEmpty);
+  });
+
+  test('update：用存储 UA 重拉并置 lastUpdated', () async {
+    String? seenUa;
+    int now = 1000;
+    final SubscriptionsStore store = makeStore(
+      fetcher: (String url, String? ua) async {
+        seenUa = ua;
+        return const SubscriptionInfo(ok: true, content: 'proxies:\n  - x\n');
+      },
+      nowGetter: () => now,
+    );
+    await store.load();
+    await store.add('A', 'https://a.com', userAgent: 'UA1'); // lastUpdated=1000
+    now = 9999;
+    await store.update('id1');
+    expect(seenUa, 'UA1'); // 重拉用存储 UA
+    expect(store.subscriptions.first.lastUpdatedMs, 9999);
+  });
+
+  test('dueForAutoUpdate：到期/未到期/关闭/无 url', () async {
+    final int now = 1000000;
+    final SubscriptionsStore store = makeStore(nowGetter: () => now);
+    await store.load();
+    await store.add('A', 'https://a.com', intervalMinutes: 10); // id1
+    await store.add('B', 'https://b.com'); // id2 间隔 0=关
+    await store.addContent('C', 'proxies:\n  - x\n'); // id3 无 url
+    expect(store.dueForAutoUpdate(now), isEmpty); // 刚加未到期
+    expect(store.dueForAutoUpdate(now + 11 * 60000), <String>['id1']); // 仅 A 到期
+  });
+
+  test('runDueAutoUpdates：更新到期订阅、刷新 lastUpdated', () async {
+    int now = 1000000;
+    int calls = 0;
+    final SubscriptionsStore store = makeStore(
+      fetcher: (String url, String? ua) async {
+        calls++;
+        return const SubscriptionInfo(ok: true, content: 'proxies:\n  - x\n');
+      },
+      nowGetter: () => now,
+    );
+    await store.load();
+    await store.add('A', 'https://a.com', intervalMinutes: 10); // calls=1
+    await store.add('B', 'https://b.com'); // calls=2，间隔 0 不到期
+    now += 11 * 60000; // A 到期
+    final int n = await store.runDueAutoUpdates(now);
+    expect(n, 1); // 仅 A
+    expect(calls, 3); // A 被重拉
+    expect(store.subscriptions.first.lastUpdatedMs, now); // 刷新
   });
 }

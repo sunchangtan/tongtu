@@ -105,5 +105,49 @@ void main() {
       );
       expect(info.ok, isTrue);
     });
+
+    test('自定义 userAgent 发出对应 UA 头', () async {
+      String? sentUa;
+      final MockClient client = MockClient((http.Request req) async {
+        sentUa = req.headers['User-Agent'] ?? req.headers['user-agent'];
+        return http.Response('proxies:\n  - name: x\n', 200);
+      });
+      await SubscriptionStore().fetch(
+        'https://example.com/sub',
+        client: client,
+        userAgent: 'tongtu/1.0',
+      );
+      expect(sentUa, 'tongtu/1.0');
+    });
+
+    test('默认 UA = clash.meta', () async {
+      String? sentUa;
+      final MockClient client = MockClient((http.Request req) async {
+        sentUa = req.headers['User-Agent'] ?? req.headers['user-agent'];
+        return http.Response('proxies:\n  - name: x\n', 200);
+      });
+      await SubscriptionStore().fetch(
+        'https://example.com/sub',
+        client: client,
+      );
+      expect(sentUa, 'clash.meta');
+    });
+  });
+
+  group('SubscriptionStore.validateContent', () {
+    test('合法内容返回 ok + content', () {
+      final SubscriptionInfo info = SubscriptionStore.validateContent(
+        'proxies:\n  - name: x\n',
+      );
+      expect(info.ok, isTrue);
+      expect(info.content, contains('proxies'));
+    });
+
+    test('非法内容返回 ok=false', () {
+      final SubscriptionInfo info = SubscriptionStore.validateContent(
+        '<html>nope</html>',
+      );
+      expect(info.ok, isFalse);
+    });
   });
 }

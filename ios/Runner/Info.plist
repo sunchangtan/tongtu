@@ -53,5 +53,7 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>通途用于读取当前 Wi-Fi 名称（SSID），以便将其加入按需连接的信任网络列表。</string>
+	<key>NSCameraUsageDescription</key>
+	<string>通途用于扫描订阅二维码以导入配置。</string>
 </dict>
 </plist>
