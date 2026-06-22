@@ -495,5 +495,19 @@
     "lucide": "eraser",
     "material": "cleaning_services_outlined",
     "codepoint": "e047"
+  },
+  {
+    "name": "clipboard",
+    "category": "action",
+    "lucide": "clipboard",
+    "material": "content_paste",
+    "codepoint": "e048"
+  },
+  {
+    "name": "qr-code",
+    "category": "action",
+    "lucide": "qr-code",
+    "material": "qr_code_scanner",
+    "codepoint": "e049"
   }
 ]

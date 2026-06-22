@@ -78,4 +78,6 @@ class TongtuIcons {
   static const IconData cloud = IconData(0xe088, fontFamily: _family);
   static const IconData cloudOff = IconData(0xe08d, fontFamily: _family);
   static const IconData eraser = IconData(0xe28f, fontFamily: _family);
+  static const IconData clipboard = IconData(0xe085, fontFamily: _family);
+  static const IconData qrCode = IconData(0xe1df, fontFamily: _family);
 }
