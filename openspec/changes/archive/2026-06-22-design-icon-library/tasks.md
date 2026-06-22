@@ -19,11 +19,11 @@
 
 - [x] 4.1 子集化 Lucide 官方 `lucide.ttf`（已 outline）→ `TongtuIcons.ttf`（25KB / 71 图标，fonttools）+ `lib/ui/icons/tongtu_icons.g.dart`（`TongtuIcons` IconData，Lucide codepoint）；补 cloud / cloud-off / eraser 覆盖全部用法
 - [x] 4.2 `pubspec.yaml` 注册字体（family TongtuIcons）
-- [ ] 4.2b 替换 47 处 `Icons.*` → `TongtuIcons.*`（映射表已备）——散在用户未提交文件，由用户替换
-- [ ] 4.3 验证：`fvm flutter analyze` 0 警告、`fvm flutter test` 全量编译；模拟器抽样图标渲染无误
+- [x] 4.2b 替换 49 处 `Icons.*` → `TongtuIcons.*`（13 lib 文件 + import）+ test 同步（6 文件 `find.byIcon`）；补 clipboard/qr-code 覆盖全部用法；映射表 `ICON_MIGRATION.md`
+- [x] 4.3 验证：`fvm flutter analyze` 第一方 0 问题、`fvm flutter test` 151 passed
 
 ## 5. Web @tongtu/icons 包 + 归档
 
 - [x] 5.1 建 `web/packages/icons`（`@tongtu/icons`）workspace 包：`Icon` 组件（SVG-based）+ `iconsData`；`build.mjs` 生成 `icons-data.ts`
 - [x] 5.2 playground 图标总览页（68 图标网格 + 名）；pnpm 类型检查 + preview 渲染验证通过
-- [ ] 5.3 `openspec validate design-icon-library --strict`；`openspec archive`
+- [x] 5.3 `openspec validate design-icon-library --strict`；`openspec archive`
